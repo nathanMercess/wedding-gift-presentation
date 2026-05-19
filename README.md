@@ -24,6 +24,25 @@ npm run build
 
 Os arquivos gerados ficam em `dist/wedding-gift-presentation/browser/`.
 
+## Como subir com Docker
+
+### Opção 1: Docker (build + run)
+
+```bash
+docker build -t wedding-gift-presentation .
+docker run --rm -p 8080:80 wedding-gift-presentation
+```
+
+Acesse: http://localhost:8080
+
+### Opção 2: Docker Compose
+
+```bash
+docker compose up --build
+```
+
+Acesse: http://localhost:8080
+
 ---
 
 ## Estrutura do projeto
