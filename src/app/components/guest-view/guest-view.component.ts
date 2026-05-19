@@ -36,10 +36,11 @@ export class GuestViewComponent implements OnInit {
 
   quickCategories = [
     { id: 'todos', label: 'Todos' },
-    { id: 'cozinha', label: 'Cozinha' },
-    { id: 'eletro', label: 'Eletros' },
-    { id: 'quarto', label: 'Quarto' },
-    { id: 'banho', label: 'Banho' },
+    { id: 'Cozinha', label: 'Cozinha' },
+    { id: 'Casa', label: 'Casa' },
+    { id: 'Eletrodomésticos', label: 'Eletrodomésticos' },
+    { id: 'Mesa', label: 'Mesa' },
+    { id: 'Quarto', label: 'Quarto' },
   ];
 
   constructor(private giftService: GiftService, private coupleService: CoupleService) {}
@@ -72,13 +73,22 @@ export class GuestViewComponent implements OnInit {
   }
 
   get categoriesWithCount() {
-    return [
-      { id: 'todos', label: 'Todos', count: this.allGifts.length },
-      { id: 'cozinha', label: 'Cozinha', count: this.allGifts.filter(g => g.category === 'cozinha').length },
-      { id: 'eletro', label: 'Eletrodomésticos', count: this.allGifts.filter(g => g.category === 'eletro').length },
-      { id: 'quarto', label: 'Quarto', count: this.allGifts.filter(g => g.category === 'quarto').length },
-      { id: 'banho', label: 'Banho', count: this.allGifts.filter(g => g.category === 'banho').length },
-    ];
+    return this.quickCategories.map(category => ({
+      ...category,
+      count: category.id === 'todos'
+        ? this.allGifts.length
+        : this.allGifts.filter(g => this.getCategoryKey(g.category) === this.getCategoryKey(category.id)).length,
+    }));
+  }
+
+  private normalizeText(value: string): string {
+    return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  }
+
+  private getCategoryKey(category: string): string {
+    const normalized = this.normalizeText(category);
+    if (normalized === 'eletro' || normalized === 'eletrodomestico' || normalized === 'eletrodomesticos') return 'eletrodomesticos';
+    return normalized;
   }
 
   sortOptions = [
@@ -90,8 +100,10 @@ export class GuestViewComponent implements OnInit {
   get filteredGifts(): Gift[] {
     return this.allGifts
       .filter(g => {
-        const matchCat = this.selectedCategory === 'todos' || g.category === this.selectedCategory;
-        const matchSearch = !this.searchTerm || g.name.toLowerCase().includes(this.searchTerm.toLowerCase());
+        const selectedCategoryKey = this.getCategoryKey(this.selectedCategory);
+        const normalizedSearch = this.normalizeText(this.searchTerm);
+        const matchCat = selectedCategoryKey === 'todos' || this.getCategoryKey(g.category) === selectedCategoryKey;
+        const matchSearch = !normalizedSearch || this.normalizeText(g.name).includes(normalizedSearch);
         return matchCat && matchSearch;
       })
       .sort((a, b) => {
