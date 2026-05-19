@@ -1,10 +1,13 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonComponent } from '../button/button.component';
 import { GiftCardComponent } from '../gift-card/gift-card.component';
 import { GiftDetailsModalComponent } from '../gift-details-modal/gift-details-modal.component';
-import { Gift, MOCK_GIFTS } from '../../models/gift.model';
+import { Gift } from '../../models/gift.model';
+import { Couple } from '../../models/couple.model';
+import { GiftService } from '../../services/gift.service';
+import { CoupleService } from '../../services/couple.service';
 
 @Component({
   selector: 'app-guest-view',
@@ -13,22 +16,22 @@ import { Gift, MOCK_GIFTS } from '../../models/gift.model';
   templateUrl: './guest-view.component.html',
   styleUrl: './guest-view.component.scss'
 })
-export class GuestViewComponent {
-  @Output() backToLanding = new EventEmitter<void>();
-
+export class GuestViewComponent implements OnInit {
   searchTerm = '';
   selectedCategory = 'todos';
   showFilters = false;
   sortBy = 'name';
   selectedGift: Gift | null = null;
 
-  allGifts = MOCK_GIFTS;
+  allGifts: Gift[] = [];
+  loading = false;
+  error = '';
 
-  couple = {
-    names: 'Ana & Pedro',
-    weddingDate: '15 de Setembro, 2026',
-    photo: 'https://images.unsplash.com/photo-1765350226723-a96ab0705403?w=1080',
-    message: 'Estamos muito felizes em compartilhar este momento especial com você! Sua presença é o nosso maior presente, mas se desejar nos presentear, preparamos esta lista com muito carinho.'
+  couple: Couple = {
+    names: '',
+    weddingDate: '',
+    photo: '',
+    message: ''
   };
 
   quickCategories = [
@@ -38,6 +41,35 @@ export class GuestViewComponent {
     { id: 'quarto', label: 'Quarto' },
     { id: 'banho', label: 'Banho' },
   ];
+
+  constructor(private giftService: GiftService, private coupleService: CoupleService) {}
+
+  ngOnInit(): void {
+    this.loadCouple();
+    this.loadGifts();
+  }
+
+  loadCouple(): void {
+    this.coupleService.getCouple().subscribe({
+      next: couple => this.couple = couple,
+      error: () => {}
+    });
+  }
+
+  loadGifts(): void {
+    this.loading = true;
+    this.error = '';
+    this.giftService.getGifts().subscribe({
+      next: gifts => {
+        this.allGifts = gifts;
+        this.loading = false;
+      },
+      error: () => {
+        this.error = 'Não foi possível carregar os presentes.';
+        this.loading = false;
+      }
+    });
+  }
 
   get categoriesWithCount() {
     return [
@@ -73,5 +105,5 @@ export class GuestViewComponent {
   get completedGifts(): number { return this.allGifts.filter(g => g.raised >= g.total).length; }
   get totalRaised(): number { return this.allGifts.reduce((s, g) => s + g.raised, 0); }
   get totalGoal(): number { return this.allGifts.reduce((s, g) => s + g.total, 0); }
-  get progressPercentage(): number { return (this.totalRaised / this.totalGoal) * 100; }
+  get progressPercentage(): number { return this.totalGoal > 0 ? (this.totalRaised / this.totalGoal) * 100 : 0; }
 }

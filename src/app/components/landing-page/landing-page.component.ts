@@ -1,11 +1,13 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ButtonComponent } from '../button/button.component';
 import { GiftCardComponent } from '../gift-card/gift-card.component';
 import { TestimonialComponent } from '../testimonial/testimonial.component';
 import { FeatureCardComponent } from '../feature-card/feature-card.component';
-import { Gift, MOCK_GIFTS } from '../../models/gift.model';
+import { Gift } from '../../models/gift.model';
+import { GiftService } from '../../services/gift.service';
 
 @Component({
   selector: 'app-landing-page',
@@ -14,7 +16,7 @@ import { Gift, MOCK_GIFTS } from '../../models/gift.model';
   templateUrl: './landing-page.component.html',
   styleUrl: './landing-page.component.scss'
 })
-export class LandingPageComponent {
+export class LandingPageComponent implements OnInit {
   @Output() viewGuestList = new EventEmitter<void>();
 
   mobileMenuOpen = false;
@@ -91,10 +93,22 @@ export class LandingPageComponent {
     }
   ];
 
+  previewGifts: Gift[] = [];
+
+  constructor(private giftService: GiftService, private router: Router) {}
+
+  ngOnInit(): void {
+    this.giftService.getGifts().subscribe({
+      next: gifts => this.previewGifts = gifts,
+      error: () => {}
+    });
+  }
+
   get filteredGifts(): Gift[] {
-    return this.selectedCategory === 'todos'
-      ? MOCK_GIFTS.slice(0, 6)
-      : MOCK_GIFTS.filter(g => g.category === this.selectedCategory);
+    const gifts = this.selectedCategory === 'todos'
+      ? this.previewGifts.slice(0, 6)
+      : this.previewGifts.filter(g => g.category === this.selectedCategory);
+    return gifts;
   }
 
   scrollTo(id: string): void {
@@ -103,6 +117,6 @@ export class LandingPageComponent {
   }
 
   onCreateList(): void {
-    console.log('Criar lista para:', this.email);
+    this.router.navigate(['/admin/login']);
   }
 }

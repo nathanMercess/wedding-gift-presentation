@@ -132,17 +132,6 @@
               />
             </div>
             <div class="form-group">
-              <label>Seu e-mail</label>
-              <input
-                type="email"
-                [(ngModel)]="guestEmail"
-                name="guestEmail"
-                placeholder="seuemail@exemplo.com"
-                required
-                class="text-input"
-              />
-            </div>
-            <div class="form-group">
               <label>Mensagem para o casal (opcional)</label>
               <textarea
                 [(ngModel)]="guestMessage"
@@ -171,14 +160,20 @@
             </div>
 
             <!-- Actions -->
+            <div *ngIf="submitSuccess" class="completed-notice" style="margin-bottom:1rem">
+              <p>✅ Contribuição registrada com sucesso! Obrigado, {{ guestName }}!</p>
+            </div>
+            <div *ngIf="submitError" class="completed-notice" style="margin-bottom:1rem;background:#fef2f2;color:#dc2626">
+              <p>{{ submitError }}</p>
+            </div>
             <div class="actions">
               <app-button variant="outline" type="button" (click)="close.emit()">Cancelar</app-button>
               <app-button
                 variant="primary"
                 type="submit"
-                [disabled]="isCompleted || (contributionType === 'partial' && !customAmount)"
+                [disabled]="isCompleted || (contributionType === 'partial' && !customAmount) || submitting || submitSuccess"
               >
-                {{ isCompleted ? 'Presente completo' : 'Continuar para pagamento' }}
+                {{ isCompleted ? 'Presente completo' : submitting ? 'Enviando...' : submitSuccess ? 'Enviado!' : 'Confirmar presente' }}
               </app-button>
             </div>
 

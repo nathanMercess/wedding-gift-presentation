@@ -1,8 +1,9 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Gift } from '../../models/gift.model';
 import { ButtonComponent } from '../button/button.component';
+import { GiftService } from '../../services/gift.service';
 
 @Component({
   selector: 'app-gift-details-modal',
@@ -19,9 +20,14 @@ export class GiftDetailsModalComponent {
   contributionType: 'full' | 'partial' = 'full';
   customAmount: string = '';
   guestName: string = '';
-  guestEmail: string = '';
   guestMessage: string = '';
   quickAmounts = [50, 100, 200, 300];
+
+  submitting = false;
+  submitSuccess = false;
+  submitError = '';
+
+  constructor(private giftService: GiftService) {}
 
   get remaining(): number {
     return this.gift.total - this.gift.raised;
@@ -47,12 +53,25 @@ export class GiftDetailsModalComponent {
   }
 
   onSubmit(): void {
-    console.log({
-      giftId: this.gift.id,
-      amount: this.getContributionAmount(),
+    const amount = this.getContributionAmount();
+    if (!this.guestName || amount <= 0) return;
+
+    this.submitting = true;
+    this.submitError = '';
+    this.giftService.contribute(this.gift.id, {
       guestName: this.guestName,
-      guestEmail: this.guestEmail,
-      message: this.guestMessage,
+      amount,
+      message: this.guestMessage || undefined
+    }).subscribe({
+      next: () => {
+        this.submitSuccess = true;
+        this.submitting = false;
+        this.gift = { ...this.gift, raised: Math.min(this.gift.raised + amount, this.gift.total) };
+      },
+      error: () => {
+        this.submitError = 'Erro ao registrar contribuição. Tente novamente.';
+        this.submitting = false;
+      }
     });
   }
 }
