@@ -1,15 +1,10 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { LandingPageComponent } from './components/landing-page/landing-page.component';
-import { GuestViewComponent } from './components/guest-view/guest-view.component';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, LandingPageComponent, GuestViewComponent],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  imports: [RouterOutlet],
+  template: '<router-outlet></router-outlet>'
 })
-export class AppComponent {
-  currentView: 'landing' | 'guest' = 'guest';
-}
+export class AppComponent {}
