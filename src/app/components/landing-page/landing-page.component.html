@@ -1,0 +1,238 @@
+<div class="lp-root">
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="container nav-inner">
+      <div class="brand">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="brand-icon">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        </svg>
+        <span class="brand-name">ListaPerfeita</span>
+      </div>
+
+      <!-- Desktop Nav -->
+      <div class="desktop-nav">
+        <button class="nav-link" (click)="scrollTo('como-funciona')">Como funciona</button>
+        <button class="nav-link" (click)="scrollTo('presentes')">Presentes</button>
+        <button class="nav-link" (click)="scrollTo('depoimentos')">Depoimentos</button>
+        <button class="nav-link" *ngIf="viewGuestList.observed" (click)="viewGuestList.emit()">Ver como convidado</button>
+      </div>
+
+      <app-button variant="primary" class="desktop-cta" (click)="scrollTo('hero')">Criar minha lista</app-button>
+
+      <!-- Mobile toggle -->
+      <button class="mobile-toggle" (click)="mobileMenuOpen = !mobileMenuOpen">
+        <svg *ngIf="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+        <svg *ngIf="mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Mobile Nav -->
+    <div *ngIf="mobileMenuOpen" class="mobile-nav container">
+      <button class="nav-link" (click)="scrollTo('como-funciona')">Como funciona</button>
+      <button class="nav-link" (click)="scrollTo('presentes')">Presentes</button>
+      <button class="nav-link" (click)="scrollTo('depoimentos')">Depoimentos</button>
+      <app-button variant="primary" style="width:100%" (click)="scrollTo('hero')">Criar minha lista</app-button>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section id="hero" class="hero-section">
+    <div class="container hero-grid">
+      <div class="hero-text">
+        <div>
+          <h1>Presenteie com amor, receba com gratidão</h1>
+          <p class="hero-sub">Monte sua lista de casamento online e deixe seus convidados escolherem o presente perfeito</p>
+        </div>
+        <div class="hero-ctas">
+          <app-button variant="primary" size="lg" (click)="scrollTo('cta-final')">Criar minha lista grátis</app-button>
+          <app-button variant="outline" size="lg" (click)="viewGuestList.emit()">Ver exemplo de lista</app-button>
+        </div>
+        <div class="stars-row">
+          <div class="stars">
+            <svg *ngFor="let i of [0,1,2,3,4]" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="star">
+              <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+            </svg>
+          </div>
+          <span>500+ casais já usaram</span>
+        </div>
+      </div>
+      <div class="hero-image-wrap">
+        <div class="hero-image">
+          <img
+            src="https://images.unsplash.com/photo-1765350226723-a96ab0705403?w=1080"
+            alt="Casal feliz no casamento"
+          />
+        </div>
+        <div class="hero-badge">
+          <div class="badge-row">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span>100% Seguro</span>
+          </div>
+          <p>Pagamento protegido</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Como Funciona -->
+  <section id="como-funciona" class="section bg-secondary">
+    <div class="container">
+      <div class="section-head">
+        <h2>Como funciona</h2>
+        <p>Criar sua lista de casamento é simples e rápido</p>
+      </div>
+      <div class="how-grid">
+        <div class="how-step" *ngFor="let step of howItWorks">
+          <div class="step-icon">
+            <span [innerHTML]="step.icon"></span>
+          </div>
+          <h3>{{ step.title }}</h3>
+          <p>{{ step.text }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Benefícios -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <h2>Por que escolher a ListaPerfeita?</h2>
+      </div>
+      <div class="features-grid">
+        <app-feature-card
+          *ngFor="let f of features"
+          [title]="f.title"
+          [description]="f.description"
+          [iconSvg]="f.iconSvg"
+        ></app-feature-card>
+      </div>
+    </div>
+  </section>
+
+  <!-- Exemplo de Lista -->
+  <section id="presentes" class="section bg-secondary">
+    <div class="container">
+      <div class="section-head">
+        <h2>Exemplo de lista</h2>
+        <p>Veja como sua lista pode ficar</p>
+      </div>
+      <!-- Filtros -->
+      <div class="filters">
+        <button
+          *ngFor="let cat of categories"
+          [class.active]="selectedCategory === cat.id"
+          class="filter-btn"
+          (click)="selectedCategory = cat.id"
+        >{{ cat.label }}</button>
+      </div>
+      <!-- Grid -->
+      <div class="gifts-grid">
+        <app-gift-card
+          *ngFor="let gift of filteredGifts"
+          [image]="gift.image"
+          [name]="gift.name"
+          [price]="gift.price"
+          [raised]="gift.raised"
+          [total]="gift.total"
+        ></app-gift-card>
+      </div>
+    </div>
+  </section>
+
+  <!-- Depoimentos -->
+  <section id="depoimentos" class="section">
+    <div class="container">
+      <div class="section-head">
+        <h2>O que os casais dizem</h2>
+        <p>Histórias reais de quem já usou</p>
+      </div>
+      <div class="testimonials-grid">
+        <app-testimonial
+          *ngFor="let t of testimonials"
+          [image]="t.image"
+          [names]="t.names"
+          [date]="t.date"
+          [text]="t.text"
+          [rating]="5"
+        ></app-testimonial>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Final -->
+  <section id="cta-final" class="section cta-section">
+    <div class="container cta-inner">
+      <h2>Comece agora, é grátis</h2>
+      <p>Crie sua lista de casamento em minutos</p>
+      <form (ngSubmit)="onCreateList()" class="cta-form">
+        <input
+          type="email"
+          [(ngModel)]="email"
+          name="email"
+          placeholder="Seu melhor e-mail"
+          required
+          class="cta-input"
+        />
+        <app-button variant="primary" size="lg" type="submit">Criar minha lista</app-button>
+      </form>
+      <p class="cta-hint">Sem cartão de crédito. Cancele quando quiser.</p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div>
+        <div class="brand footer-brand">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="brand-icon">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+          <span>ListaPerfeita</span>
+        </div>
+        <p class="footer-tagline">A forma mais simples e elegante de criar sua lista de casamento</p>
+      </div>
+      <div>
+        <h4>Links Rápidos</h4>
+        <div class="footer-links">
+          <button (click)="scrollTo('como-funciona')">Como funciona</button>
+          <button (click)="scrollTo('presentes')">Presentes</button>
+          <button (click)="scrollTo('depoimentos')">Depoimentos</button>
+        </div>
+      </div>
+      <div>
+        <h4>Suporte</h4>
+        <div class="footer-links">
+          <a href="#">Central de Ajuda</a>
+          <a href="#">Perguntas Frequentes</a>
+          <a href="#">Contato</a>
+        </div>
+      </div>
+      <div>
+        <h4>Redes Sociais</h4>
+        <div class="social-links">
+          <a href="#" class="social-btn" aria-label="Instagram">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+            </svg>
+          </a>
+          <a href="#" class="social-btn" aria-label="Facebook">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom container">
+      <p>&copy; 2026 ListaPerfeita. Todos os direitos reservados.</p>
+    </div>
+  </footer>
+</div>

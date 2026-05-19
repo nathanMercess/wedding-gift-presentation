@@ -1,0 +1,149 @@
+<div class="gv-root">
+
+  <!-- Header -->
+  <header class="gv-header">
+    <div class="container header-inner">
+      <button class="back-btn" (click)="backToLanding.emit()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+        </svg>
+        <span class="back-label">Voltar</span>
+      </button>
+      <div class="brand">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="brand-icon">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        </svg>
+        <span class="brand-name">ListaPerfeita</span>
+      </div>
+      <div style="width:5rem"></div>
+    </div>
+  </header>
+
+  <!-- Couple Hero -->
+  <section class="couple-section">
+    <div class="container couple-inner">
+      <div class="couple-photo">
+        <img [src]="couple.photo" [alt]="couple.names" />
+      </div>
+      <div class="couple-info">
+        <div>
+          <h1>{{ couple.names }}</h1>
+          <p class="wedding-date">{{ couple.weddingDate }}</p>
+        </div>
+        <p class="couple-message">"{{ couple.message }}"</p>
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-value">{{ completedGifts }}/{{ totalGifts }}</div>
+            <div class="stat-label">Presentes completos</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">{{ progressPercentage.toFixed(0) }}%</div>
+            <div class="stat-label">Do objetivo alcançado</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filters & Search -->
+  <section class="filters-section">
+    <div class="container">
+      <div class="search-row">
+        <div class="search-wrap">
+          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input
+            type="text"
+            placeholder="Buscar presente..."
+            [(ngModel)]="searchTerm"
+            name="search"
+            class="search-input"
+          />
+        </div>
+        <button
+          class="filter-toggle"
+          [class.active]="showFilters"
+          (click)="showFilters = !showFilters"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>
+          </svg>
+          <span class="filter-label">Filtros</span>
+        </button>
+      </div>
+
+      <!-- Filter Panel -->
+      <div *ngIf="showFilters" class="filter-panel">
+        <div>
+          <h3>Categorias</h3>
+          <div class="filter-chips">
+            <button
+              *ngFor="let cat of categoriesWithCount"
+              [class.active]="selectedCategory === cat.id"
+              class="chip"
+              (click)="selectedCategory = cat.id"
+            >{{ cat.label }} ({{ cat.count }})</button>
+          </div>
+        </div>
+        <div>
+          <h3>Ordenar por</h3>
+          <div class="filter-chips">
+            <button
+              *ngFor="let s of sortOptions"
+              [class.active]="sortBy === s.id"
+              class="chip"
+              (click)="sortBy = s.id"
+            >{{ s.label }}</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick filters -->
+      <div class="quick-filters">
+        <button
+          *ngFor="let cat of quickCategories"
+          [class.active]="selectedCategory === cat.id"
+          class="chip"
+          (click)="selectedCategory = cat.id"
+        >{{ cat.label }}</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gift Grid -->
+  <section class="gifts-section">
+    <div class="container">
+      <div *ngIf="filteredGifts.length === 0" class="empty-state">
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <h3>Nenhum presente encontrado</h3>
+        <p>Tente ajustar os filtros ou buscar por outro termo</p>
+      </div>
+
+      <div *ngIf="filteredGifts.length > 0">
+        <p class="results-count">Mostrando {{ filteredGifts.length }} de {{ allGifts.length }} presentes</p>
+        <div class="gifts-grid">
+          <div *ngFor="let gift of filteredGifts" (click)="selectedGift = gift" style="cursor:pointer">
+            <app-gift-card
+              [image]="gift.image"
+              [name]="gift.name"
+              [price]="gift.price"
+              [raised]="gift.raised"
+              [total]="gift.total"
+            ></app-gift-card>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal -->
+  <app-gift-details-modal
+    *ngIf="selectedGift"
+    [gift]="selectedGift"
+    [coupleName]="couple.names"
+    (close)="selectedGift = null"
+  ></app-gift-details-modal>
+</div>
