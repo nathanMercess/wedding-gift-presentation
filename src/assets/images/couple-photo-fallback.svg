@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600" role="img" aria-label="Foto do casal indisponivel">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f7f0ea"/>
+      <stop offset="100%" stop-color="#efe2d6"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="600" fill="url(#g)"/>
+  <circle cx="300" cy="220" r="86" fill="#c79a6d" opacity="0.22"/>
+  <rect x="140" y="340" width="320" height="130" rx="65" fill="#c79a6d" opacity="0.22"/>
+  <text x="300" y="535" text-anchor="middle" fill="#8f6f4c" font-family="Lato, Arial, sans-serif" font-size="24">Adicione assets/images/couple-photo.jpg</text>
+</svg>

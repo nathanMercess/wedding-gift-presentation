@@ -20,6 +20,11 @@ export class GuestViewComponent implements OnInit {
   selectedCategory = 'todos';
   showFilters = false;
   public showQuickFiltersMobile = false;
+  public formattedWeddingDate = '';
+  public readonly localCouplePhoto = 'assets/images/couple-photo.jpg';
+  public readonly fallbackCouplePhoto = 'assets/images/couple-photo-fallback.svg';
+  public displayCouplePhoto = this.localCouplePhoto;
+  private hasTriedApiCouplePhoto = false;
   sortBy = 'name';
   selectedGift: Gift | null = null;
 
@@ -52,9 +57,45 @@ export class GuestViewComponent implements OnInit {
 
   loadCouple(): void {
     this.coupleService.getCouple().subscribe({
-      next: couple => this.couple = couple,
+      next: couple => {
+        this.couple = couple;
+        this.formattedWeddingDate = this.formatWeddingDate(couple.weddingDate);
+        this.hasTriedApiCouplePhoto = false;
+        this.displayCouplePhoto = this.localCouplePhoto;
+      },
       error: () => {}
     });
+  }
+
+  public onCouplePhotoError(): void {
+    const apiPhoto = this.couple.photo?.trim();
+    if (!this.hasTriedApiCouplePhoto && apiPhoto && apiPhoto !== this.displayCouplePhoto) {
+      this.hasTriedApiCouplePhoto = true;
+      this.displayCouplePhoto = apiPhoto;
+      return;
+    }
+
+    this.displayCouplePhoto = this.fallbackCouplePhoto;
+  }
+
+  private formatWeddingDate(rawValue: string): string {
+    const value = rawValue?.trim();
+    if (!value) return '';
+
+    const match = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!match) return value;
+
+    const year = Number(match[1]);
+    const month = Number(match[2]);
+    const day = Number(match[3]);
+    const date = new Date(Date.UTC(year, month - 1, day));
+
+    return new Intl.DateTimeFormat('pt-BR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'UTC',
+    }).format(date);
   }
 
   loadGifts(): void {

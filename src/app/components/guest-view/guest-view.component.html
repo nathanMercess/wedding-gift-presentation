@@ -18,12 +18,12 @@
   <section class="couple-section">
     <div class="container couple-inner">
       <div class="couple-photo">
-        <img [src]="couple.photo" [alt]="couple.names" />
+        <img [src]="displayCouplePhoto" [alt]="couple.names" (error)="onCouplePhotoError()" />
       </div>
       <div class="couple-info">
         <div>
           <h1>{{ couple.names }}</h1>
-          <p class="wedding-date">{{ couple.weddingDate }}</p>
+          <p class="wedding-date">{{ formattedWeddingDate || couple.weddingDate }}</p>
         </div>
         <p class="couple-message">"{{ couple.message }}"</p>
         <div class="stats">
@@ -137,7 +137,7 @@
       <div *ngIf="!loading && !error && filteredGifts.length > 0">
         <p class="results-count">Mostrando {{ filteredGifts.length }} de {{ allGifts.length }} presentes</p>
         <div class="gifts-grid">
-          <div *ngFor="let gift of filteredGifts" (click)="selectedGift = gift" style="cursor:pointer">
+          <div *ngFor="let gift of filteredGifts" class="gift-grid-item" (click)="selectedGift = gift" style="cursor:pointer">
             <app-gift-card
               [image]="gift.image"
               [name]="gift.name"
