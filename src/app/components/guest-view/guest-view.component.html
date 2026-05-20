@@ -1,5 +1,34 @@
 <div class="gv-root">
 
+  <div *ngIf="isApiLoading" class="api-loading-overlay" aria-live="polite" aria-busy="true">
+    <div class="api-loading-shell">
+      <div class="sk-line sk-title"></div>
+
+      <div class="sk-hero">
+        <div class="sk-avatar"></div>
+        <div class="sk-hero-text">
+          <div class="sk-line sk-heading"></div>
+          <div class="sk-line"></div>
+          <div class="sk-line sk-short"></div>
+        </div>
+      </div>
+
+      <div class="sk-toolbar">
+        <div class="sk-input"></div>
+        <div class="sk-icon-btn"></div>
+      </div>
+
+      <div class="sk-grid">
+        <div *ngFor="let item of skeletonItems; trackBy: trackByNumber" class="sk-card">
+          <div class="sk-media"></div>
+          <div class="sk-line"></div>
+          <div class="sk-line sk-short"></div>
+          <div class="sk-pill"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Header -->
   <header class="gv-header">
     <div class="container header-inner">
@@ -56,34 +85,32 @@
             class="search-input"
           />
         </div>
-        <button
-          class="filter-toggle"
-          [class.active]="showFilters"
-          (click)="showFilters = !showFilters; showQuickFiltersMobile = false"
-        >
+
+        <button class="quick-toggle-btn" [class.active]="showQuickControls" (click)="showQuickControls = !showQuickControls" aria-label="Mostrar filtros rapidos">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>
           </svg>
-          <span class="filter-label">Filtros</span>
         </button>
       </div>
 
-      <!-- Filter Panel -->
-      <div *ngIf="showFilters" class="filter-panel">
-        <div>
-          <h3>Categorias</h3>
-          <div class="filter-chips">
+      <div *ngIf="showQuickControls" class="quick-collapse">
+
+        <div class="quick-group categories-group">
+          <p class="quick-text">Categorias</p>
+          <div class="quick-filters">
             <button
-              *ngFor="let cat of categoriesWithCount; trackBy: trackByOptionId"
+              *ngFor="let cat of quickCategories; trackBy: trackByOptionId"
               [class.active]="selectedCategory === cat.id"
               class="chip"
               (click)="selectedCategory = cat.id"
-            >{{ cat.label }} ({{ cat.count }})</button>
+            >{{ cat.label }}</button>
           </div>
+          <p class="quick-scroll-hint">Deslize para ver mais categorias</p>
         </div>
-        <div>
-          <h3>Ordenar por</h3>
-          <div class="filter-chips">
+
+        <div class="quick-group">
+          <p class="quick-text">Ordenar</p>
+          <div class="quick-orders">
             <button
               *ngFor="let s of sortOptions; trackBy: trackByOptionId"
               [class.active]="sortBy === s.id"
@@ -92,26 +119,6 @@
             >{{ s.label }}</button>
           </div>
         </div>
-      </div>
-
-      <button
-        *ngIf="!showFilters"
-        class="mobile-categories-toggle"
-        [class.active]="showQuickFiltersMobile"
-        [attr.aria-expanded]="showQuickFiltersMobile"
-        (click)="showQuickFiltersMobile = !showQuickFiltersMobile"
-      >
-        {{ showQuickFiltersMobile ? 'Ocultar categorias' : 'Mostrar categorias' }}
-      </button>
-
-      <!-- Quick filters -->
-      <div *ngIf="!showFilters" class="quick-filters" [class.expanded]="showQuickFiltersMobile">
-        <button
-          *ngFor="let cat of quickCategories; trackBy: trackByOptionId"
-          [class.active]="selectedCategory === cat.id"
-          class="chip"
-          (click)="selectedCategory = cat.id; showQuickFiltersMobile = false"
-        >{{ cat.label }}</button>
       </div>
     </div>
   </section>

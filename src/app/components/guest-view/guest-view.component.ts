@@ -16,10 +16,9 @@ import { CoupleService } from '../../services/couple.service';
   styleUrl: './guest-view.component.scss'
 })
 export class GuestViewComponent implements OnInit {
-  searchTerm = '';
-  selectedCategory = 'todos';
-  showFilters = false;
-  public showQuickFiltersMobile = false;
+  public searchTerm = '';
+  public selectedCategory = 'todos';
+  public showQuickControls = false;
   public formattedWeddingDate = '';
   public readonly localCouplePhoto = 'assets/images/couple-photo.jpg';
   public readonly fallbackCouplePhoto = 'assets/images/couple-photo-fallback.svg';
@@ -28,21 +27,23 @@ export class GuestViewComponent implements OnInit {
   private filteredGiftsCache: Gift[] = [];
   private filteredGiftsCacheKey = '';
   private filteredGiftsCacheSource: Gift[] | null = null;
-  sortBy = 'name';
-  selectedGift: Gift | null = null;
+  public sortBy = 'name';
+  public selectedGift: Gift | null = null;
 
-  allGifts: Gift[] = [];
-  loading = false;
-  error = '';
+  public allGifts: Gift[] = [];
+  public loading = false;
+  public loadingCouple = false;
+  public error = '';
+  public skeletonItems: number[] = [1, 2, 3, 4, 5, 6];
 
-  couple: Couple = {
+  public couple: Couple = {
     names: '',
     weddingDate: '',
     photo: '',
     message: ''
   };
 
-  quickCategories = [
+  public quickCategories = [
     { id: 'todos', label: 'Todos' },
     { id: 'Cozinha', label: 'Cozinha' },
     { id: 'Casa', label: 'Casa' },
@@ -51,22 +52,26 @@ export class GuestViewComponent implements OnInit {
     { id: 'Quarto', label: 'Quarto' },
   ];
 
-  constructor(private giftService: GiftService, private coupleService: CoupleService) {}
+  public constructor(private giftService: GiftService, private coupleService: CoupleService) {}
 
-  ngOnInit(): void {
+  public ngOnInit(): void {
     this.loadCouple();
     this.loadGifts();
   }
 
-  loadCouple(): void {
+  public loadCouple(): void {
+    this.loadingCouple = true;
     this.coupleService.getCouple().subscribe({
       next: couple => {
         this.couple = couple;
         this.formattedWeddingDate = this.formatWeddingDate(couple.weddingDate);
         this.hasTriedApiCouplePhoto = false;
         this.displayCouplePhoto = this.localCouplePhoto;
+        this.loadingCouple = false;
       },
-      error: () => {}
+      error: () => {
+        this.loadingCouple = false;
+      }
     });
   }
 
@@ -101,7 +106,7 @@ export class GuestViewComponent implements OnInit {
     }).format(date);
   }
 
-  loadGifts(): void {
+  public loadGifts(): void {
     this.loading = true;
     this.error = '';
     this.giftService.getGifts().subscribe({
@@ -117,13 +122,8 @@ export class GuestViewComponent implements OnInit {
     });
   }
 
-  get categoriesWithCount() {
-    return this.quickCategories.map(category => ({
-      ...category,
-      count: category.id === 'todos'
-        ? this.allGifts.length
-        : this.allGifts.filter(g => this.getCategoryKey(g.category) === this.getCategoryKey(category.id)).length,
-    }));
+  public get isApiLoading(): boolean {
+    return this.loading || this.loadingCouple;
   }
 
   private normalizeText(value: string): string {
@@ -136,7 +136,7 @@ export class GuestViewComponent implements OnInit {
     return normalized;
   }
 
-  sortOptions = [
+  public sortOptions = [
     { id: 'name', label: 'Nome (A-Z)' },
     { id: 'price-asc', label: 'Menor preço' },
     { id: 'price-desc', label: 'Maior preço' },
@@ -174,6 +174,10 @@ export class GuestViewComponent implements OnInit {
 
   public trackByOptionId(_: number, option: { id: string }): string {
     return option.id;
+  }
+
+  public trackByNumber(_: number, value: number): number {
+    return value;
   }
 
   get totalGifts(): number { return this.allGifts.length; }
