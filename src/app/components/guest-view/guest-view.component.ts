@@ -42,6 +42,12 @@ export class GuestViewComponent implements OnInit {
     { id: 'Quarto', label: 'Quarto' },
   ];
 
+  public sortOptions: Array<{ id: string; label: string }> = [
+    { id: 'name', label: 'Nome (A-Z)' },
+    { id: 'price-asc', label: 'Menor preço' },
+    { id: 'price-desc', label: 'Maior preço' },
+  ];
+
   public constructor(public readonly giftService: GiftService, public readonly coupleService: CoupleService) {
     effect((): void => {
       const stateCouple: Couple = this.coupleService.state().couple;
@@ -55,6 +61,51 @@ export class GuestViewComponent implements OnInit {
       this.displayCouplePhoto = this.localCouplePhoto;
     });
   }
+
+  public get filteredGifts(): Gift[] {
+    const allGifts = this.giftService.guestState().gifts;
+    const selectedCategoryKey = this.getCategoryKey(this.selectedCategory);
+    const normalizedSearch = this.normalizeText(this.searchTerm);
+    const cacheKey = `${selectedCategoryKey}|${normalizedSearch}|${this.sortBy}`;
+
+    if (this.filteredGiftsCacheSource === allGifts && this.filteredGiftsCacheKey === cacheKey) {
+      return this.filteredGiftsCache;
+    }
+
+    this.filteredGiftsCache = allGifts
+      .filter(g => {
+        const matchCat = selectedCategoryKey === 'todos' || this.getCategoryKey(g.category) === selectedCategoryKey;
+        const matchSearch = !normalizedSearch || this.normalizeText(g.name).includes(normalizedSearch);
+        return matchCat && matchSearch;
+      })
+      .sort((a, b) => {
+        if (this.sortBy === 'price-asc') return a.price - b.price;
+        if (this.sortBy === 'price-desc') return b.price - a.price;
+        return a.name.localeCompare(b.name);
+      });
+
+    this.filteredGiftsCacheSource = allGifts;
+    this.filteredGiftsCacheKey = cacheKey;
+    return this.filteredGiftsCache;
+  }
+
+  public get totalGifts(): number {
+    return this.giftService.guestState().gifts.length;
+  }
+
+  public get completedGifts(): number {
+    return this.giftService.guestState().gifts.filter((g: Gift): boolean => g.raised >= g.total).length;
+  }
+
+  public get totalRaised(): number {
+    return this.giftService.guestState().gifts.reduce((sum: number, gift: Gift): number => sum + gift.raised, 0);
+  }
+
+  public get totalGoal(): number {
+    return this.giftService.guestState().gifts.reduce((sum: number, gift: Gift): number => sum + gift.total, 0);
+  }
+
+  public get progressPercentage(): number { return this.totalGoal > 0 ? (this.totalRaised / this.totalGoal) * 100 : 0; }
 
   public ngOnInit(): void {
     this.loadCouple();
@@ -111,39 +162,6 @@ export class GuestViewComponent implements OnInit {
     return normalized;
   }
 
-  public sortOptions: Array<{ id: string; label: string }> = [
-    { id: 'name', label: 'Nome (A-Z)' },
-    { id: 'price-asc', label: 'Menor preço' },
-    { id: 'price-desc', label: 'Maior preço' },
-  ];
-
-  public get filteredGifts(): Gift[] {
-    const allGifts = this.giftService.guestState().gifts;
-    const selectedCategoryKey = this.getCategoryKey(this.selectedCategory);
-    const normalizedSearch = this.normalizeText(this.searchTerm);
-    const cacheKey = `${selectedCategoryKey}|${normalizedSearch}|${this.sortBy}`;
-
-    if (this.filteredGiftsCacheSource === allGifts && this.filteredGiftsCacheKey === cacheKey) {
-      return this.filteredGiftsCache;
-    }
-
-    this.filteredGiftsCache = allGifts
-      .filter(g => {
-        const matchCat = selectedCategoryKey === 'todos' || this.getCategoryKey(g.category) === selectedCategoryKey;
-        const matchSearch = !normalizedSearch || this.normalizeText(g.name).includes(normalizedSearch);
-        return matchCat && matchSearch;
-      })
-      .sort((a, b) => {
-        if (this.sortBy === 'price-asc') return a.price - b.price;
-        if (this.sortBy === 'price-desc') return b.price - a.price;
-        return a.name.localeCompare(b.name);
-      });
-
-    this.filteredGiftsCacheSource = allGifts;
-    this.filteredGiftsCacheKey = cacheKey;
-    return this.filteredGiftsCache;
-  }
-
   public trackByGiftId(_: number, gift: Gift): number {
     return gift.id;
   }
@@ -155,22 +173,4 @@ export class GuestViewComponent implements OnInit {
   public trackByNumber(_: number, value: number): number {
     return value;
   }
-
-  public get totalGifts(): number {
-    return this.giftService.guestState().gifts.length;
-  }
-
-  public get completedGifts(): number {
-    return this.giftService.guestState().gifts.filter((g: Gift): boolean => g.raised >= g.total).length;
-  }
-
-  public get totalRaised(): number {
-    return this.giftService.guestState().gifts.reduce((sum: number, gift: Gift): number => sum + gift.raised, 0);
-  }
-
-  public get totalGoal(): number {
-    return this.giftService.guestState().gifts.reduce((sum: number, gift: Gift): number => sum + gift.total, 0);
-  }
-
-  public get progressPercentage(): number { return this.totalGoal > 0 ? (this.totalRaised / this.totalGoal) * 100 : 0; }
 }

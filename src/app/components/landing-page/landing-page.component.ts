@@ -95,16 +95,16 @@ export class LandingPageComponent implements OnInit {
 
   public constructor(public readonly giftService: GiftService, public readonly router: Router) {}
 
-  public ngOnInit(): void {
-    this.giftService.loadGuestGifts();
-  }
-
   public get filteredGifts(): Gift[] {
     const previewGifts: Gift[] = this.giftService.guestState().gifts;
     const gifts = this.selectedCategory === 'todos'
       ? previewGifts.slice(0, 6)
       : previewGifts.filter((gift: Gift): boolean => gift.category === this.selectedCategory);
     return gifts;
+  }
+
+  public ngOnInit(): void {
+    this.giftService.loadGuestGifts();
   }
 
   public scrollTo(id: string): void {

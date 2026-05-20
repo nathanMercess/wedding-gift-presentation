@@ -17,20 +17,8 @@ export class EndpointsUrls {
         return `${this.apiUrl}/gifts`;
     }
 
-    public giftsById(id: number): string {
-        return `${this.apiUrl}/gifts/${id}`;
-    }
-
-    public giftsContribute(giftId: number): string {
-        return `${this.apiUrl}/gifts/${giftId}/contribute`;
-    }
-
     public get adminGiftsList(): string {
         return `${this.apiUrl}/admin/gifts`;
-    }
-
-    public adminGiftsById(id: number): string {
-        return `${this.apiUrl}/admin/gifts/${id}`;
     }
 
     public get coupleGet(): string {
@@ -39,5 +27,17 @@ export class EndpointsUrls {
 
     public get coupleAdminUpdate(): string {
         return `${this.apiUrl}/admin/couple`;
+    }
+
+    public giftsById(id: number): string {
+        return `${this.apiUrl}/gifts/${id}`;
+    }
+
+    public giftsContribute(giftId: number): string {
+        return `${this.apiUrl}/gifts/${giftId}/contribute`;
+    }
+
+    public adminGiftsById(id: number): string {
+        return `${this.apiUrl}/admin/gifts/${id}`;
     }
 }
