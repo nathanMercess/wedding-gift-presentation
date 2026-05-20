@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -12,23 +12,28 @@ import { AuthService } from '../../../services/auth.service';
   styleUrl: './admin-login.component.scss'
 })
 export class AdminLoginComponent {
-  email = '';
-  password = '';
-  loading = false;
-  error = '';
+  public email: string = '';
+  public password: string = '';
 
-  constructor(private auth: AuthService, private router: Router) {}
-
-  onSubmit(): void {
-    if (!this.email || !this.password) return;
-    this.loading = true;
-    this.error = '';
-    this.auth.login({ email: this.email, password: this.password }).subscribe({
-      next: () => this.router.navigate(['/admin']),
-      error: () => {
-        this.error = 'E-mail ou senha inválidos.';
-        this.loading = false;
+  public constructor(public readonly auth: AuthService, public readonly router: Router) {
+    effect((): void => {
+      if (this.auth.loginState().success) {
+        this.router.navigate(['/admin']);
+        this.auth.resetLoginState();
       }
     });
+  }
+
+  public onSubmit(): void {
+    if (!this.email || !this.password) return;
+    this.auth.authenticate({ email: this.email, password: this.password });
+  }
+
+  public get loading(): boolean {
+    return this.auth.loginState().loading;
+  }
+
+  public get error(): string {
+    return this.auth.loginState().error;
   }
 }
