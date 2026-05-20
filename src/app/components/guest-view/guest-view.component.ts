@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GiftCardComponent } from '../gift-card/gift-card.component';
@@ -16,34 +16,24 @@ import { CoupleService } from '../../services/couple.service';
   styleUrl: './guest-view.component.scss'
 })
 export class GuestViewComponent implements OnInit {
-  public searchTerm = '';
-  public selectedCategory = 'todos';
-  public showQuickControls = false;
-  public formattedWeddingDate = '';
-  public readonly localCouplePhoto = 'assets/images/couple-photo.jpg';
-  public readonly fallbackCouplePhoto = 'assets/images/couple-photo-fallback.svg';
-  public displayCouplePhoto = this.localCouplePhoto;
-  private hasTriedApiCouplePhoto = false;
-  private filteredGiftsCache: Gift[] = [];
-  private filteredGiftsCacheKey = '';
-  private filteredGiftsCacheSource: Gift[] | null = null;
-  public sortBy = 'name';
+  public searchTerm: string = '';
+  public selectedCategory: string = 'todos';
+  public showQuickControls: boolean = false;
+  public formattedWeddingDate: string = '';
+  public readonly localCouplePhoto: string = 'assets/images/couple-photo.jpg';
+  public readonly fallbackCouplePhoto: string = 'assets/images/couple-photo-fallback.svg';
+  public displayCouplePhoto: string = this.localCouplePhoto;
+  public hasTriedApiCouplePhoto: boolean = false;
+  public filteredGiftsCache: Gift[] = [];
+  public filteredGiftsCacheKey: string = '';
+  public filteredGiftsCacheSource: Gift[] | null = null;
+  public coupleSignature: string = '';
+  public sortBy: string = 'name';
   public selectedGift: Gift | null = null;
 
-  public allGifts: Gift[] = [];
-  public loading = false;
-  public loadingCouple = false;
-  public error = '';
   public skeletonItems: number[] = [1, 2, 3, 4, 5, 6];
 
-  public couple: Couple = {
-    names: '',
-    weddingDate: '',
-    photo: '',
-    message: ''
-  };
-
-  public quickCategories = [
+  public quickCategories: Array<{ id: string; label: string }> = [
     { id: 'todos', label: 'Todos' },
     { id: 'Cozinha', label: 'Cozinha' },
     { id: 'Casa', label: 'Casa' },
@@ -52,7 +42,19 @@ export class GuestViewComponent implements OnInit {
     { id: 'Quarto', label: 'Quarto' },
   ];
 
-  public constructor(private giftService: GiftService, private coupleService: CoupleService) {}
+  public constructor(public readonly giftService: GiftService, public readonly coupleService: CoupleService) {
+    effect((): void => {
+      const stateCouple: Couple = this.coupleService.state().couple;
+      const nextSignature: string = `${stateCouple.names}|${stateCouple.weddingDate}|${stateCouple.photo}|${stateCouple.message}`;
+
+      if (this.coupleSignature === nextSignature) return;
+
+      this.coupleSignature = nextSignature;
+      this.formattedWeddingDate = this.formatWeddingDate(stateCouple.weddingDate);
+      this.hasTriedApiCouplePhoto = false;
+      this.displayCouplePhoto = this.localCouplePhoto;
+    });
+  }
 
   public ngOnInit(): void {
     this.loadCouple();
@@ -60,23 +62,11 @@ export class GuestViewComponent implements OnInit {
   }
 
   public loadCouple(): void {
-    this.loadingCouple = true;
-    this.coupleService.getCouple().subscribe({
-      next: couple => {
-        this.couple = couple;
-        this.formattedWeddingDate = this.formatWeddingDate(couple.weddingDate);
-        this.hasTriedApiCouplePhoto = false;
-        this.displayCouplePhoto = this.localCouplePhoto;
-        this.loadingCouple = false;
-      },
-      error: () => {
-        this.loadingCouple = false;
-      }
-    });
+    this.coupleService.loadCouple();
   }
 
   public onCouplePhotoError(): void {
-    const apiPhoto = this.couple.photo?.trim();
+    const apiPhoto = this.coupleService.state().couple.photo?.trim();
     if (!this.hasTriedApiCouplePhoto && apiPhoto && apiPhoto !== this.displayCouplePhoto) {
       this.hasTriedApiCouplePhoto = true;
       this.displayCouplePhoto = apiPhoto;
@@ -86,7 +76,7 @@ export class GuestViewComponent implements OnInit {
     this.displayCouplePhoto = this.fallbackCouplePhoto;
   }
 
-  private formatWeddingDate(rawValue: string): string {
+  public formatWeddingDate(rawValue: string): string {
     const value = rawValue?.trim();
     if (!value) return '';
 
@@ -107,51 +97,37 @@ export class GuestViewComponent implements OnInit {
   }
 
   public loadGifts(): void {
-    this.loading = true;
-    this.error = '';
-    this.giftService.getGifts().subscribe({
-      next: gifts => {
-        this.allGifts = gifts;
-        this.filteredGiftsCacheSource = null;
-        this.loading = false;
-      },
-      error: () => {
-        this.error = 'Não foi possível carregar os presentes.';
-        this.loading = false;
-      }
-    });
+    this.giftService.loadGuestGifts();
+    this.filteredGiftsCacheSource = null;
   }
 
-  public get isApiLoading(): boolean {
-    return this.loading || this.loadingCouple;
-  }
-
-  private normalizeText(value: string): string {
+  public normalizeText(value: string): string {
     return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
   }
 
-  private getCategoryKey(category: string): string {
+  public getCategoryKey(category: string): string {
     const normalized = this.normalizeText(category);
     if (normalized === 'eletro' || normalized === 'eletrodomestico' || normalized === 'eletrodomesticos') return 'eletrodomesticos';
     return normalized;
   }
 
-  public sortOptions = [
+  public sortOptions: Array<{ id: string; label: string }> = [
     { id: 'name', label: 'Nome (A-Z)' },
     { id: 'price-asc', label: 'Menor preço' },
     { id: 'price-desc', label: 'Maior preço' },
   ];
 
-  get filteredGifts(): Gift[] {
+  public get filteredGifts(): Gift[] {
+    const allGifts = this.giftService.guestState().gifts;
     const selectedCategoryKey = this.getCategoryKey(this.selectedCategory);
     const normalizedSearch = this.normalizeText(this.searchTerm);
     const cacheKey = `${selectedCategoryKey}|${normalizedSearch}|${this.sortBy}`;
 
-    if (this.filteredGiftsCacheSource === this.allGifts && this.filteredGiftsCacheKey === cacheKey) {
+    if (this.filteredGiftsCacheSource === allGifts && this.filteredGiftsCacheKey === cacheKey) {
       return this.filteredGiftsCache;
     }
 
-    this.filteredGiftsCache = this.allGifts
+    this.filteredGiftsCache = allGifts
       .filter(g => {
         const matchCat = selectedCategoryKey === 'todos' || this.getCategoryKey(g.category) === selectedCategoryKey;
         const matchSearch = !normalizedSearch || this.normalizeText(g.name).includes(normalizedSearch);
@@ -163,7 +139,7 @@ export class GuestViewComponent implements OnInit {
         return a.name.localeCompare(b.name);
       });
 
-    this.filteredGiftsCacheSource = this.allGifts;
+    this.filteredGiftsCacheSource = allGifts;
     this.filteredGiftsCacheKey = cacheKey;
     return this.filteredGiftsCache;
   }
@@ -180,9 +156,21 @@ export class GuestViewComponent implements OnInit {
     return value;
   }
 
-  get totalGifts(): number { return this.allGifts.length; }
-  get completedGifts(): number { return this.allGifts.filter(g => g.raised >= g.total).length; }
-  get totalRaised(): number { return this.allGifts.reduce((s, g) => s + g.raised, 0); }
-  get totalGoal(): number { return this.allGifts.reduce((s, g) => s + g.total, 0); }
-  get progressPercentage(): number { return this.totalGoal > 0 ? (this.totalRaised / this.totalGoal) * 100 : 0; }
+  public get totalGifts(): number {
+    return this.giftService.guestState().gifts.length;
+  }
+
+  public get completedGifts(): number {
+    return this.giftService.guestState().gifts.filter((g: Gift): boolean => g.raised >= g.total).length;
+  }
+
+  public get totalRaised(): number {
+    return this.giftService.guestState().gifts.reduce((sum: number, gift: Gift): number => sum + gift.raised, 0);
+  }
+
+  public get totalGoal(): number {
+    return this.giftService.guestState().gifts.reduce((sum: number, gift: Gift): number => sum + gift.total, 0);
+  }
+
+  public get progressPercentage(): number { return this.totalGoal > 0 ? (this.totalRaised / this.totalGoal) * 100 : 0; }
 }

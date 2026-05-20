@@ -34,10 +34,10 @@
         />
       </div>
 
-      <div *ngIf="error" class="error-msg">{{ error }}</div>
+      <div *ngIf="auth.loginState().error" class="error-msg">{{ auth.loginState().error }}</div>
 
-      <button type="submit" class="submit-btn" [disabled]="loading">
-        {{ loading ? 'Entrando...' : 'Entrar' }}
+      <button type="submit" class="submit-btn" [disabled]="auth.loginState().loading">
+        {{ auth.loginState().loading ? 'Entrando...' : 'Entrar' }}
       </button>
     </form>
   </div>

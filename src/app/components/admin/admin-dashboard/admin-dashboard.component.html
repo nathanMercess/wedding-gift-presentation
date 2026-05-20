@@ -23,8 +23,8 @@
         <button class="btn-primary" (click)="openNewGift()">+ Adicionar presente</button>
       </div>
 
-      <div *ngIf="giftsLoading" class="status-msg">Carregando...</div>
-      <div *ngIf="giftsError" class="error-msg">{{ giftsError }}</div>
+      <div *ngIf="giftService.adminState().giftsLoading" class="status-msg">Carregando...</div>
+      <div *ngIf="giftService.adminState().giftsError" class="error-msg">{{ giftService.adminState().giftsError }}</div>
 
       <!-- Gift Form -->
       <div *ngIf="showGiftForm" class="form-card">
@@ -53,17 +53,17 @@
             <textarea [(ngModel)]="giftForm.description" name="gdesc" class="text-input" rows="2" style="resize:none"></textarea>
           </div>
         </div>
-        <div *ngIf="giftError" class="error-msg">{{ giftError }}</div>
+        <div *ngIf="giftService.adminState().giftError" class="error-msg">{{ giftService.adminState().giftError }}</div>
         <div class="form-actions">
           <button class="btn-outline" (click)="cancelGiftForm()">Cancelar</button>
-          <button class="btn-primary" (click)="saveGift()" [disabled]="giftSaving">
-            {{ giftSaving ? 'Salvando...' : 'Salvar' }}
+          <button class="btn-primary" (click)="saveGift()" [disabled]="giftService.adminState().giftSaving">
+            {{ giftService.adminState().giftSaving ? 'Salvando...' : 'Salvar' }}
           </button>
         </div>
       </div>
 
       <!-- Gifts Table -->
-      <div class="table-wrap" *ngIf="!giftsLoading && gifts.length > 0">
+      <div class="table-wrap" *ngIf="!giftService.adminState().giftsLoading && giftService.adminState().gifts.length > 0">
         <table class="gifts-table">
           <thead>
             <tr>
@@ -76,7 +76,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let gift of gifts">
+            <tr *ngFor="let gift of giftService.adminState().gifts">
               <td>
                 <div class="gift-cell">
                   <img [src]="gift.image" [alt]="gift.name" class="gift-thumb" />
@@ -114,9 +114,9 @@
         <h2>Informações do Casal</h2>
       </div>
 
-      <div *ngIf="coupleLoading" class="status-msg">Carregando...</div>
+      <div *ngIf="coupleService.state().loading" class="status-msg">Carregando...</div>
 
-      <div *ngIf="!coupleLoading" class="form-card">
+      <div *ngIf="!coupleService.state().loading" class="form-card">
         <div class="form-grid">
           <div class="form-group">
             <label>Nomes do casal</label>
@@ -136,12 +136,12 @@
           </div>
         </div>
 
-        <div *ngIf="coupleSuccess" class="success-msg">Informações salvas com sucesso!</div>
-        <div *ngIf="coupleError" class="error-msg">{{ coupleError }}</div>
+        <div *ngIf="coupleService.state().success" class="success-msg">Informações salvas com sucesso!</div>
+        <div *ngIf="coupleService.state().error" class="error-msg">{{ coupleService.state().error }}</div>
 
         <div class="form-actions">
-          <button class="btn-primary" (click)="saveCouple()" [disabled]="coupleSaving">
-            {{ coupleSaving ? 'Salvando...' : 'Salvar alterações' }}
+          <button class="btn-primary" (click)="saveCouple()" [disabled]="coupleService.state().saving">
+            {{ coupleService.state().saving ? 'Salvando...' : 'Salvar alterações' }}
           </button>
         </div>
       </div>

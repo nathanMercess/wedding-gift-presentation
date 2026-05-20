@@ -1,6 +1,6 @@
 <div class="gv-root">
 
-  <div *ngIf="isApiLoading" class="api-loading-overlay" aria-live="polite" aria-busy="true">
+  <div *ngIf="giftService.guestState().loading || coupleService.state().loading" class="api-loading-overlay" aria-live="polite" aria-busy="true">
     <div class="api-loading-shell">
       <div class="sk-line sk-title"></div>
 
@@ -47,14 +47,14 @@
   <section class="couple-section">
     <div class="container couple-inner">
       <div class="couple-photo">
-        <img [src]="displayCouplePhoto" [alt]="couple.names" (error)="onCouplePhotoError()" />
+        <img [src]="displayCouplePhoto" [alt]="coupleService.state().couple.names" (error)="onCouplePhotoError()" />
       </div>
       <div class="couple-info">
         <div>
-          <h1>{{ couple.names }}</h1>
-          <p class="wedding-date">{{ formattedWeddingDate || couple.weddingDate }}</p>
+          <h1>{{ coupleService.state().couple.names }}</h1>
+          <p class="wedding-date">{{ formattedWeddingDate || coupleService.state().couple.weddingDate }}</p>
         </div>
-        <p class="couple-message">"{{ couple.message }}"</p>
+        <p class="couple-message">"{{ coupleService.state().couple.message }}"</p>
         <div class="stats">
           <div class="stat">
             <div class="stat-value">{{ completedGifts }}/{{ totalGifts }}</div>
@@ -126,14 +126,14 @@
   <!-- Gift Grid -->
   <section class="gifts-section">
     <div class="container">
-      <div *ngIf="loading" class="empty-state">
+      <div *ngIf="giftService.guestState().loading" class="empty-state">
         <p>Carregando presentes...</p>
       </div>
-      <div *ngIf="error" class="empty-state">
-        <p>{{ error }}</p>
+      <div *ngIf="giftService.guestState().error" class="empty-state">
+        <p>{{ giftService.guestState().error }}</p>
         <button class="chip" (click)="loadGifts()">Tentar novamente</button>
       </div>
-      <div *ngIf="!loading && !error && filteredGifts.length === 0" class="empty-state">
+      <div *ngIf="!giftService.guestState().loading && !giftService.guestState().error && filteredGifts.length === 0" class="empty-state">
         <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
         </svg>
@@ -141,8 +141,8 @@
         <p>Tente ajustar os filtros ou buscar por outro termo</p>
       </div>
 
-      <div *ngIf="!loading && !error && filteredGifts.length > 0">
-        <p class="results-count">Mostrando {{ filteredGifts.length }} de {{ allGifts.length }} presentes</p>
+      <div *ngIf="!giftService.guestState().loading && !giftService.guestState().error && filteredGifts.length > 0">
+        <p class="results-count">Mostrando {{ filteredGifts.length }} de {{ giftService.guestState().gifts.length }} presentes</p>
         <div class="gifts-grid">
           <div *ngFor="let gift of filteredGifts; trackBy: trackByGiftId" class="gift-grid-item" (click)="selectedGift = gift" style="cursor:pointer">
             <app-gift-card
@@ -162,7 +162,7 @@
   <app-gift-details-modal
     *ngIf="selectedGift"
     [gift]="selectedGift"
-    [coupleName]="couple.names"
+    [coupleName]="coupleService.state().couple.names"
     (close)="selectedGift = null"
   ></app-gift-details-modal>
 </div>

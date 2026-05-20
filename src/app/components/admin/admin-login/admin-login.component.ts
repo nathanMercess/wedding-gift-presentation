@@ -28,12 +28,4 @@ export class AdminLoginComponent {
     if (!this.email || !this.password) return;
     this.auth.authenticate({ email: this.email, password: this.password });
   }
-
-  public get loading(): boolean {
-    return this.auth.loginState().loading;
-  }
-
-  public get error(): string {
-    return this.auth.loginState().error;
-  }
 }

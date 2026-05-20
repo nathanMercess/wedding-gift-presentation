@@ -13,65 +13,53 @@ import { GiftService } from '../../services/gift.service';
   styleUrl: './gift-details-modal.component.scss'
 })
 export class GiftDetailsModalComponent {
-  @Input() gift!: Gift;
-  @Input() coupleName: string = '';
-  @Output() close = new EventEmitter<void>();
+  @Input() public gift!: Gift;
+  @Input() public coupleName: string = '';
+  @Output() public close: EventEmitter<void> = new EventEmitter<void>();
 
-  contributionType: 'full' | 'partial' = 'full';
-  customAmount: string = '';
-  guestName: string = '';
-  guestMessage: string = '';
-  quickAmounts = [50, 100, 200, 300];
+  public contributionType: 'full' | 'partial' = 'full';
+  public customAmount: string = '';
+  public guestName: string = '';
+  public guestMessage: string = '';
+  public quickAmounts: number[] = [50, 100, 200, 300];
 
-  submitting = false;
-  submitSuccess = false;
-  submitError = '';
+  public constructor(public readonly giftService: GiftService) {
+    this.giftService.resetContributionState();
+  }
 
-  constructor(private giftService: GiftService) {}
-
-  get remaining(): number {
+  public get remaining(): number {
     return this.gift.total - this.gift.raised;
   }
 
-  get progress(): number {
+  public get progress(): number {
     return (this.gift.raised / this.gift.total) * 100;
   }
 
-  get isCompleted(): boolean {
+  public get isCompleted(): boolean {
     return this.gift.raised >= this.gift.total;
   }
 
-  getContributionAmount(): number {
+  public getContributionAmount(): number {
     if (this.contributionType === 'full') return this.remaining;
     return parseFloat(this.customAmount) || 0;
   }
 
-  onBackdropClick(event: MouseEvent): void {
+  public onBackdropClick(event: MouseEvent): void {
     if ((event.target as HTMLElement).classList.contains('modal-backdrop')) {
       this.close.emit();
     }
   }
 
-  onSubmit(): void {
-    const amount = this.getContributionAmount();
+  public onSubmit(): void {
+    const amount: number = this.getContributionAmount();
     if (!this.guestName || amount <= 0) return;
 
-    this.submitting = true;
-    this.submitError = '';
-    this.giftService.contribute(this.gift.id, {
+    this.giftService.contributeToGift(this.gift.id, {
       guestName: this.guestName,
       amount,
       message: this.guestMessage || undefined
-    }).subscribe({
-      next: () => {
-        this.submitSuccess = true;
-        this.submitting = false;
-        this.gift = { ...this.gift, raised: Math.min(this.gift.raised + amount, this.gift.total) };
-      },
-      error: () => {
-        this.submitError = 'Erro ao registrar contribuição. Tente novamente.';
-        this.submitting = false;
-      }
+    }, (): void => {
+      this.gift = { ...this.gift, raised: Math.min(this.gift.raised + amount, this.gift.total) };
     });
   }
 }

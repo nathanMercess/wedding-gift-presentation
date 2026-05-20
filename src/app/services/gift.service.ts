@@ -1,15 +1,15 @@
 import { Injectable, WritableSignal, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, finalize } from 'rxjs';
-import { environment } from '../../environments/environment';
-import { Gift } from '../models/gift.model';
-import { Contribution } from '../models/contribution.model';
+import { finalize } from 'rxjs';
+import { EndpointsUrls } from '../constants/api-endpoints';
 import { ContributionRequest } from '../models/contribution-request.model';
 import { AdminGiftState } from '../models/admin-gift-state.model';
+import { GuestGiftState } from '../models/guest-gift-state.model';
+import { GiftContributionState } from '../models/gift-contribution-state.model';
+import { Gift } from '../models/gift.model';
 
 @Injectable({ providedIn: 'root' })
 export class GiftService {
-  public readonly base: string = environment.apiUrl;
   public readonly adminState: WritableSignal<AdminGiftState> = signal<AdminGiftState>({
     gifts: [],
     giftsLoading: false,
@@ -18,44 +18,40 @@ export class GiftService {
     giftError: '',
     giftSaved: false,
   });
+  public readonly guestState: WritableSignal<GuestGiftState> = signal<GuestGiftState>({
+    gifts: [],
+    loading: false,
+    error: '',
+  });
+  public readonly contributionState: WritableSignal<GiftContributionState> = signal<GiftContributionState>({
+    submitting: false,
+    success: false,
+    error: '',
+  });
 
-  public constructor(public readonly http: HttpClient) {}
+  public constructor(public readonly http: HttpClient, public readonly endpointsUrls: EndpointsUrls) {}
 
-  public getGifts(category?: string, search?: string): Observable<Gift[]> {
+  public loadGuestGifts(category?: string, search?: string): void {
+    this.patchGuestState({ loading: true, error: '' });
+
     let params = new HttpParams();
     if (category && category !== 'todos') params = params.set('category', category);
     if (search) params = params.set('search', search);
-    return this.http.get<Gift[]>(`${this.base}/gifts`, { params });
-  }
 
-  public getGift(id: number): Observable<Gift> {
-    return this.http.get<Gift>(`${this.base}/gifts/${id}`);
-  }
-
-  public contribute(giftId: number, payload: ContributionRequest): Observable<Contribution> {
-    return this.http.post<Contribution>(`${this.base}/gifts/${giftId}/contribute`, payload);
-  }
-
-  public getAdminGifts(): Observable<Gift[]> {
-    return this.http.get<Gift[]>(`${this.base}/admin/gifts`);
-  }
-
-  public createGift(gift: Partial<Gift>): Observable<Gift> {
-    return this.http.post<Gift>(`${this.base}/admin/gifts`, gift);
-  }
-
-  public updateGift(id: number, gift: Partial<Gift>): Observable<Gift> {
-    return this.http.put<Gift>(`${this.base}/admin/gifts/${id}`, gift);
-  }
-
-  public deleteGift(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.base}/admin/gifts/${id}`);
+    this.http.get<Gift[]>(this.endpointsUrls.giftsList, { params }).pipe(finalize((): void => this.patchGuestState({ loading: false }))).subscribe({
+      next: (gifts: Gift[]): void => {
+        this.patchGuestState({ gifts });
+      },
+      error: (): void => {
+        this.patchGuestState({ error: 'Nao foi possivel carregar os presentes.' });
+      }
+    });
   }
 
   public loadAdminGifts(): void {
     this.patchAdminState({ giftsLoading: true, giftsError: '' });
 
-    this.getAdminGifts().pipe(finalize((): void => this.patchAdminState({ giftsLoading: false }))).subscribe({
+    this.http.get<Gift[]>(this.endpointsUrls.adminGiftsList).pipe(finalize((): void => this.patchAdminState({ giftsLoading: false }))).subscribe({
       next: (gifts: Gift[]): void => {
         this.patchAdminState({ gifts });
       },
@@ -68,9 +64,20 @@ export class GiftService {
   public saveAdminGift(giftId: number | null, gift: Partial<Gift>): void {
     this.patchAdminState({ giftSaving: true, giftError: '', giftSaved: false });
 
-    const request$: Observable<Gift> = giftId === null ? this.createGift(gift) : this.updateGift(giftId, gift);
+    if (giftId === null) {
+      this.http.post<Gift>(this.endpointsUrls.adminGiftsList, gift).pipe(finalize((): void => this.patchAdminState({ giftSaving: false }))).subscribe({
+        next: (): void => {
+          this.patchAdminState({ giftSaved: true });
+          this.loadAdminGifts();
+        },
+        error: (): void => {
+          this.patchAdminState({ giftError: 'Erro ao salvar presente.' });
+        }
+      });
+      return;
+    }
 
-    request$.pipe(finalize((): void => this.patchAdminState({ giftSaving: false }))).subscribe({
+    this.http.put<Gift>(this.endpointsUrls.adminGiftsById(giftId), gift).pipe(finalize((): void => this.patchAdminState({ giftSaving: false }))).subscribe({
       next: (): void => {
         this.patchAdminState({ giftSaved: true });
         this.loadAdminGifts();
@@ -84,7 +91,7 @@ export class GiftService {
   public deleteAdminGift(id: number): void {
     this.patchAdminState({ giftsError: '' });
 
-    this.deleteGift(id).subscribe({
+    this.http.delete<void>(this.endpointsUrls.adminGiftsById(id)).subscribe({
       next: (): void => {
         this.loadAdminGifts();
       },
@@ -102,7 +109,34 @@ export class GiftService {
     this.patchAdminState({ giftSaved: false });
   }
 
+  public contributeToGift(giftId: number, payload: ContributionRequest, onSuccess?: () => void): void {
+    this.patchContributionState({ submitting: true, success: false, error: '' });
+
+    this.http.post<void>(this.endpointsUrls.giftsContribute(giftId), payload).pipe(finalize((): void => this.patchContributionState({ submitting: false }))).subscribe({
+      next: (): void => {
+        this.patchContributionState({ success: true });
+        this.loadGuestGifts();
+        if (onSuccess) onSuccess();
+      },
+      error: (): void => {
+        this.patchContributionState({ error: 'Erro ao registrar contribuicao. Tente novamente.' });
+      }
+    });
+  }
+
+  public resetContributionState(): void {
+    this.patchContributionState({ submitting: false, success: false, error: '' });
+  }
+
   public patchAdminState(partialState: Partial<AdminGiftState>): void {
     this.adminState.update((currentState: AdminGiftState): AdminGiftState => ({ ...currentState, ...partialState }));
+  }
+
+  public patchGuestState(partialState: Partial<GuestGiftState>): void {
+    this.guestState.update((currentState: GuestGiftState): GuestGiftState => ({ ...currentState, ...partialState }));
+  }
+
+  public patchContributionState(partialState: Partial<GiftContributionState>): void {
+    this.contributionState.update((currentState: GiftContributionState): GiftContributionState => ({ ...currentState, ...partialState }));
   }
 }

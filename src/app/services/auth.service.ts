@@ -1,16 +1,14 @@
 import { Injectable, WritableSignal, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, finalize, map, tap } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { finalize } from 'rxjs';
+import { EndpointsUrls } from '../constants/api-endpoints';
 import { AuthLoginState } from '../models/auth-login-state.model';
 import { LoginApiResponse } from '../models/login-api-response.model';
 import { LoginRequest } from '../models/login-request.model';
-import { LoginResponse } from '../models/login-response.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  public readonly base: string = environment.apiUrl;
   public readonly tokenKey: string = 'auth_token';
   public readonly loginState: WritableSignal<AuthLoginState> = signal<AuthLoginState>({
     loading: false,
@@ -18,24 +16,20 @@ export class AuthService {
     success: false,
   });
 
-  public constructor(public readonly http: HttpClient, public readonly router: Router) {}
-
-  public login(credentials: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginApiResponse>(`${this.base}/auth/login`, credentials).pipe(
-      map((res: LoginApiResponse): LoginResponse => {
-        const token = this.extractToken(res);
-        if (!token) throw new Error('Token ausente na resposta de login.');
-        return { access_token: token };
-      }),
-      tap((res: LoginResponse): void => localStorage.setItem(this.tokenKey, res.access_token))
-    );
-  }
+  public constructor(public readonly http: HttpClient, public readonly router: Router, public readonly endpointsUrls: EndpointsUrls) {}
 
   public authenticate(credentials: LoginRequest): void {
     this.patchLoginState({ loading: true, error: '', success: false });
 
-    this.login(credentials).pipe(finalize((): void => this.patchLoginState({ loading: false }))).subscribe({
-      next: (): void => {
+    this.http.post<LoginApiResponse>(this.endpointsUrls.authLogin, credentials).pipe(finalize((): void => this.patchLoginState({ loading: false }))).subscribe({
+      next: (response: LoginApiResponse): void => {
+        const token: string | null = this.extractToken(response);
+        if (!token) {
+          this.patchLoginState({ error: 'Token ausente na resposta de login.' });
+          return;
+        }
+
+        localStorage.setItem(this.tokenKey, token);
         this.patchLoginState({ success: true });
       },
       error: (): void => {

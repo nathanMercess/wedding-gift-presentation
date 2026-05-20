@@ -101,42 +101,6 @@ export class AdminDashboardComponent implements OnInit {
     this.auth.logout();
   }
 
-  public get gifts(): Gift[] {
-    return this.giftService.adminState().gifts;
-  }
-
-  public get giftsLoading(): boolean {
-    return this.giftService.adminState().giftsLoading;
-  }
-
-  public get giftsError(): string {
-    return this.giftService.adminState().giftsError;
-  }
-
-  public get giftSaving(): boolean {
-    return this.giftService.adminState().giftSaving;
-  }
-
-  public get giftError(): string {
-    return this.giftService.adminState().giftError;
-  }
-
-  public get coupleLoading(): boolean {
-    return this.coupleService.state().loading;
-  }
-
-  public get coupleSaving(): boolean {
-    return this.coupleService.state().saving;
-  }
-
-  public get coupleSuccess(): boolean {
-    return this.coupleService.state().success;
-  }
-
-  public get coupleError(): string {
-    return this.coupleService.state().error;
-  }
-
   public getProgressPercent(gift: Gift): number {
     if (gift.total <= 0) return 0;
     return Math.min((gift.raised / gift.total) * 100, 100);

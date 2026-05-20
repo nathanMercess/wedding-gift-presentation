@@ -17,13 +17,13 @@ import { GiftService } from '../../services/gift.service';
   styleUrl: './landing-page.component.scss'
 })
 export class LandingPageComponent implements OnInit {
-  @Output() viewGuestList = new EventEmitter<void>();
+  @Output() public viewGuestList: EventEmitter<void> = new EventEmitter<void>();
 
-  mobileMenuOpen = false;
-  selectedCategory = 'todos';
-  email = '';
+  public mobileMenuOpen: boolean = false;
+  public selectedCategory: string = 'todos';
+  public email: string = '';
 
-  categories = [
+  public categories: Array<{ id: string; label: string }> = [
     { id: 'todos', label: 'Todos' },
     { id: 'cozinha', label: 'Cozinha' },
     { id: 'eletro', label: 'Eletrodomésticos' },
@@ -31,7 +31,7 @@ export class LandingPageComponent implements OnInit {
     { id: 'banho', label: 'Banho' },
   ];
 
-  howItWorks = [
+  public howItWorks: Array<{ title: string; text: string; icon: string }> = [
     {
       title: '1. Crie sua lista',
       text: 'Escolha os presentes que você deseja receber em poucos cliques',
@@ -49,7 +49,7 @@ export class LandingPageComponent implements OnInit {
     }
   ];
 
-  features = [
+  public features: Array<{ title: string; description: string; iconSvg: string }> = [
     {
       title: 'Pagamento seguro',
       description: 'Todas as transações são protegidas e criptografadas',
@@ -72,7 +72,7 @@ export class LandingPageComponent implements OnInit {
     }
   ];
 
-  testimonials = [
+  public testimonials: Array<{ image: string; names: string; date: string; text: string }> = [
     {
       image: 'https://images.unsplash.com/photo-1765350226723-a96ab0705403?w=400',
       names: 'Ana & Pedro',
@@ -93,30 +93,26 @@ export class LandingPageComponent implements OnInit {
     }
   ];
 
-  previewGifts: Gift[] = [];
+  public constructor(public readonly giftService: GiftService, public readonly router: Router) {}
 
-  constructor(private giftService: GiftService, private router: Router) {}
-
-  ngOnInit(): void {
-    this.giftService.getGifts().subscribe({
-      next: gifts => this.previewGifts = gifts,
-      error: () => {}
-    });
+  public ngOnInit(): void {
+    this.giftService.loadGuestGifts();
   }
 
-  get filteredGifts(): Gift[] {
+  public get filteredGifts(): Gift[] {
+    const previewGifts: Gift[] = this.giftService.guestState().gifts;
     const gifts = this.selectedCategory === 'todos'
-      ? this.previewGifts.slice(0, 6)
-      : this.previewGifts.filter(g => g.category === this.selectedCategory);
+      ? previewGifts.slice(0, 6)
+      : previewGifts.filter((gift: Gift): boolean => gift.category === this.selectedCategory);
     return gifts;
   }
 
-  scrollTo(id: string): void {
+  public scrollTo(id: string): void {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
     this.mobileMenuOpen = false;
   }
 
-  onCreateList(): void {
+  public onCreateList(): void {
     this.router.navigate(['/admin/login']);
   }
 }
