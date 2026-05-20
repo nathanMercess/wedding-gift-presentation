@@ -42,6 +42,7 @@
   flex-direction: column;
   gap: 0.625rem;
   min-width: 0;
+  flex: 1;
 }
 h3 {
   font-family: var(--font-sans);
@@ -55,6 +56,7 @@ h3 {
   line-clamp: 2;
   -webkit-line-clamp: 2;
   overflow: hidden;
+  min-height: 2.6em;
 }
 .progress-section {
   display: flex;

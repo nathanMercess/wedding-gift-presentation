@@ -25,6 +25,9 @@ export class GuestViewComponent implements OnInit {
   public readonly fallbackCouplePhoto = 'assets/images/couple-photo-fallback.svg';
   public displayCouplePhoto = this.localCouplePhoto;
   private hasTriedApiCouplePhoto = false;
+  private filteredGiftsCache: Gift[] = [];
+  private filteredGiftsCacheKey = '';
+  private filteredGiftsCacheSource: Gift[] | null = null;
   sortBy = 'name';
   selectedGift: Gift | null = null;
 
@@ -104,6 +107,7 @@ export class GuestViewComponent implements OnInit {
     this.giftService.getGifts().subscribe({
       next: gifts => {
         this.allGifts = gifts;
+        this.filteredGiftsCacheSource = null;
         this.loading = false;
       },
       error: () => {
@@ -139,10 +143,16 @@ export class GuestViewComponent implements OnInit {
   ];
 
   get filteredGifts(): Gift[] {
-    return this.allGifts
+    const selectedCategoryKey = this.getCategoryKey(this.selectedCategory);
+    const normalizedSearch = this.normalizeText(this.searchTerm);
+    const cacheKey = `${selectedCategoryKey}|${normalizedSearch}|${this.sortBy}`;
+
+    if (this.filteredGiftsCacheSource === this.allGifts && this.filteredGiftsCacheKey === cacheKey) {
+      return this.filteredGiftsCache;
+    }
+
+    this.filteredGiftsCache = this.allGifts
       .filter(g => {
-        const selectedCategoryKey = this.getCategoryKey(this.selectedCategory);
-        const normalizedSearch = this.normalizeText(this.searchTerm);
         const matchCat = selectedCategoryKey === 'todos' || this.getCategoryKey(g.category) === selectedCategoryKey;
         const matchSearch = !normalizedSearch || this.normalizeText(g.name).includes(normalizedSearch);
         return matchCat && matchSearch;
@@ -152,6 +162,18 @@ export class GuestViewComponent implements OnInit {
         if (this.sortBy === 'price-desc') return b.price - a.price;
         return a.name.localeCompare(b.name);
       });
+
+    this.filteredGiftsCacheSource = this.allGifts;
+    this.filteredGiftsCacheKey = cacheKey;
+    return this.filteredGiftsCache;
+  }
+
+  public trackByGiftId(_: number, gift: Gift): number {
+    return gift.id;
+  }
+
+  public trackByOptionId(_: number, option: { id: string }): string {
+    return option.id;
   }
 
   get totalGifts(): number { return this.allGifts.length; }

@@ -74,7 +74,7 @@
           <h3>Categorias</h3>
           <div class="filter-chips">
             <button
-              *ngFor="let cat of categoriesWithCount"
+              *ngFor="let cat of categoriesWithCount; trackBy: trackByOptionId"
               [class.active]="selectedCategory === cat.id"
               class="chip"
               (click)="selectedCategory = cat.id"
@@ -85,7 +85,7 @@
           <h3>Ordenar por</h3>
           <div class="filter-chips">
             <button
-              *ngFor="let s of sortOptions"
+              *ngFor="let s of sortOptions; trackBy: trackByOptionId"
               [class.active]="sortBy === s.id"
               class="chip"
               (click)="sortBy = s.id"
@@ -107,7 +107,7 @@
       <!-- Quick filters -->
       <div *ngIf="!showFilters" class="quick-filters" [class.expanded]="showQuickFiltersMobile">
         <button
-          *ngFor="let cat of quickCategories"
+          *ngFor="let cat of quickCategories; trackBy: trackByOptionId"
           [class.active]="selectedCategory === cat.id"
           class="chip"
           (click)="selectedCategory = cat.id; showQuickFiltersMobile = false"
@@ -137,7 +137,7 @@
       <div *ngIf="!loading && !error && filteredGifts.length > 0">
         <p class="results-count">Mostrando {{ filteredGifts.length }} de {{ allGifts.length }} presentes</p>
         <div class="gifts-grid">
-          <div *ngFor="let gift of filteredGifts" class="gift-grid-item" (click)="selectedGift = gift" style="cursor:pointer">
+          <div *ngFor="let gift of filteredGifts; trackBy: trackByGiftId" class="gift-grid-item" (click)="selectedGift = gift" style="cursor:pointer">
             <app-gift-card
               [image]="gift.image"
               [name]="gift.name"
