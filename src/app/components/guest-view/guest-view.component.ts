@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ButtonComponent } from '../button/button.component';
 import { GiftCardComponent } from '../gift-card/gift-card.component';
 import { GiftDetailsModalComponent } from '../gift-details-modal/gift-details-modal.component';
 import { Gift } from '../../models/gift.model';
@@ -12,7 +11,7 @@ import { CoupleService } from '../../services/couple.service';
 @Component({
   selector: 'app-guest-view',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonComponent, GiftCardComponent, GiftDetailsModalComponent],
+  imports: [CommonModule, FormsModule, GiftCardComponent, GiftDetailsModalComponent],
   templateUrl: './guest-view.component.html',
   styleUrl: './guest-view.component.scss'
 })
@@ -20,6 +19,7 @@ export class GuestViewComponent implements OnInit {
   searchTerm = '';
   selectedCategory = 'todos';
   showFilters = false;
+  public showQuickFiltersMobile = false;
   sortBy = 'name';
   selectedGift: Gift | null = null;
 
