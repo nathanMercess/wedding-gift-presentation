@@ -15,10 +15,12 @@ interface LoginResponse {
 
 interface LoginApiResponse {
   access_token?: string;
+  accessToken?: string;
   token?: string;
   jwt?: string;
   data?: {
     access_token?: string;
+    accessToken?: string;
     token?: string;
     jwt?: string;
   };
@@ -58,9 +60,11 @@ export class AuthService {
   private extractToken(response: LoginApiResponse): string | null {
     const candidates = [
       response.access_token,
+      response.accessToken,
       response.token,
       response.jwt,
       response.data?.access_token,
+      response.data?.accessToken,
       response.data?.token,
       response.data?.jwt
     ];
