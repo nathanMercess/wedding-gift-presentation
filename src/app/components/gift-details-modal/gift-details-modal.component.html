@@ -3,13 +3,13 @@
     <!-- Header -->
     <div class="modal-header">
       <div class="modal-header-left">
-        <button *ngIf="step === 'payment'" type="button" class="back-btn" (click)="backToContribution()">
+        <button *ngIf="step !== 'contribution'" type="button" class="back-btn" (click)="backToPrevious()">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
           Voltar
         </button>
-        <h2>{{ step === 'contribution' ? 'Detalhes do Presente' : 'Pagamento' }}</h2>
+        <h2>{{ step === 'contribution' ? 'Detalhes do Presente' : step === 'payer-info' ? 'Dados do Pagador' : 'Pagamento' }}</h2>
       </div>
       <button class="close-btn" (click)="close.emit()">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -193,29 +193,42 @@
         </div>
       </div>
 
-      <!-- PASSO 2: Pagamento -->
+      <!-- PASSO 2: Dados do pagador -->
+      <div *ngIf="step === 'payer-info'" class="payment-step">
+        <app-payer-info
+          (payerDataConfirmed)="onPayerConfirmed($event)">
+        </app-payer-info>
+      </div>
+
+      <!-- PASSO 3: Pagamento -->
       <div *ngIf="step === 'payment'" class="payment-step">
         <div class="payment-summary-bar">
           <span class="payment-gift-name">{{ gift.name }}</span>
           <span class="payment-total">{{ getContributionAmount() | currency:'BRL' }}</span>
         </div>
 
-        <app-seletor-metodo
+        <app-payment-method-selector
           (methodSelected)="activeMethod = $event">
-        </app-seletor-metodo>
+        </app-payment-method-selector>
 
         <ng-container *ngIf="activeMethod">
-          <app-cartao-form
+          <app-card-brick
             *ngIf="activeMethod === 'credit_card' || activeMethod === 'debit_card'"
-            [metodo]="activeMethod"
+            [cardType]="activeMethod"
             [orderId]="gift.id.toString()"
-            [totalAmount]="getContributionAmount()">
-          </app-cartao-form>
+            [amount]="getContributionAmount()"
+            [payerEmail]="payerEmail"
+            [payerDocType]="payerDocType"
+            [payerDocNumber]="payerDocNumber">
+          </app-card-brick>
 
           <app-pix-display
             *ngIf="activeMethod === 'pix'"
             [orderId]="gift.id.toString()"
-            [totalAmount]="getContributionAmount()">
+            [amount]="getContributionAmount()"
+            [payerEmail]="payerEmail"
+            [payerDocType]="payerDocType"
+            [payerDocNumber]="payerDocNumber">
           </app-pix-display>
         </ng-container>
 

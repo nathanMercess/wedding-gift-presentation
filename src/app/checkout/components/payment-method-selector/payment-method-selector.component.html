@@ -1,0 +1,23 @@
+<div class="method-selector">
+  <button
+    type="button"
+    class="method-btn"
+    [class.active]="activeMethod === 'credit_card'"
+    (click)="select('credit_card')">
+    Cartão de Crédito
+  </button>
+  <button
+    type="button"
+    class="method-btn"
+    [class.active]="activeMethod === 'debit_card'"
+    (click)="select('debit_card')">
+    Cartão de Débito
+  </button>
+  <button
+    type="button"
+    class="method-btn"
+    [class.active]="activeMethod === 'pix'"
+    (click)="select('pix')">
+    PIX
+  </button>
+</div>

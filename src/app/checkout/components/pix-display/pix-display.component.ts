@@ -12,23 +12,27 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { take } from 'rxjs';
-import { QRCodeComponent } from 'angularx-qrcode';
-import { PaymentService } from '../../services/pagamento.service';
+import { PaymentService } from '../../services/payment.service';
+import { PixPaymentDto } from '../../models/pix-payment-dto.model';
 
 @Component({
   selector: 'app-pix-display',
   standalone: true,
-  imports: [CommonModule, QRCodeComponent],
+  imports: [CommonModule],
   templateUrl: './pix-display.component.html',
   styleUrl: './pix-display.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PixDisplayComponent implements OnInit, OnDestroy {
   @Input() orderId = '';
-  @Input() totalAmount = 0;
+  @Input() amount = 0;
+  @Input() payerEmail = '';
+  @Input() payerDocType = '';
+  @Input() payerDocNumber = '';
 
-  brCode = '';
-  nsu = '';
+  qrCode = '';
+  qrCodeBase64 = '';
+  mpOrderId = '';
   loading = true;
   error = '';
   expired = false;
@@ -43,21 +47,30 @@ export class PixDisplayComponent implements OnInit, OnDestroy {
   constructor(
     private readonly paymentService: PaymentService,
     private readonly router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.initializePix();
   }
 
   private initializePix(): void {
+    const dto: PixPaymentDto = {
+      orderId: this.orderId,
+      amount: this.amount,
+      payerEmail: this.payerEmail,
+      payerDocType: this.payerDocType,
+      payerDocNumber: this.payerDocNumber
+    };
+
     this.paymentService
-      .payWithPix({ orderId: this.orderId, amount: this.totalAmount })
+      .payWithPix(dto)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
-          if (response.brCode && response.nsu) {
-            this.brCode = response.brCode;
-            this.nsu = response.nsu;
+          if (response.mpOrderId && response.qrCodeBase64) {
+            this.mpOrderId = response.mpOrderId;
+            this.qrCode = response.qrCode ?? '';
+            this.qrCodeBase64 = response.qrCodeBase64;
             this.loading = false;
             this.cdr.markForCheck();
             this.startPolling();
@@ -78,20 +91,20 @@ export class PixDisplayComponent implements OnInit, OnDestroy {
 
   private startPolling(): void {
     this.pollingInterval = setInterval(() => {
-      this.paymentService.getPaymentStatus(this.nsu)
+      this.paymentService.getStatus(this.mpOrderId)
         .pipe(take(1))
         .subscribe({
           next: (response) => {
             if (response.status === 'approved') {
               this.stopPolling();
               this.router.navigate(['/sucesso']);
-            } else if (response.status === 'declined') {
+            } else if (response.status === 'rejected') {
               this.stopPolling();
-              this.error = response.message ?? 'Payment declined.';
+              this.error = response.message ?? 'Payment rejected.';
               this.cdr.markForCheck();
             }
           },
-          error: (_err) => {
+          error: () => {
             // Transient polling error — retries on the next interval
           }
         });
@@ -118,7 +131,7 @@ export class PixDisplayComponent implements OnInit, OnDestroy {
   }
 
   copyCode(): void {
-    navigator.clipboard.writeText(this.brCode).then(() => {
+    navigator.clipboard.writeText(this.qrCode).then(() => {
       this.copied = true;
       this.cdr.markForCheck();
       setTimeout(() => {

@@ -42,14 +42,14 @@ export class EndpointsUrls {
     }
 
     public get paymentCard(): string {
-        return `${this.apiUrl}/payments/card`;
+        return `${this.apiUrl}/payment/card`;
     }
 
     public get paymentPix(): string {
-        return `${this.apiUrl}/payments/pix`;
+        return `${this.apiUrl}/payment/pix`;
     }
 
     public paymentStatus(nsu: string): string {
-        return `${this.apiUrl}/payments/status/${nsu}`;
+        return `${this.apiUrl}/payment/status/${nsu}`;
     }
 }

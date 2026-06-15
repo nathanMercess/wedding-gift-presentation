@@ -2,14 +2,14 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Output } from '@angul
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-seletor-metodo',
+  selector: 'app-payment-method-selector',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './seletor-metodo.component.html',
-  styleUrl: './seletor-metodo.component.scss',
+  templateUrl: './payment-method-selector.component.html',
+  styleUrl: './payment-method-selector.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SeletorMetodoComponent {
+export class PaymentMethodSelectorComponent {
   @Output() methodSelected = new EventEmitter<'credit_card' | 'debit_card' | 'pix'>();
 
   activeMethod: 'credit_card' | 'debit_card' | 'pix' | null = null;

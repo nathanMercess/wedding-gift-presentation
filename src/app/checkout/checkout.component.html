@@ -1,23 +1,39 @@
 <div class="checkout-container">
-  <h2 class="checkout-titulo">Complete payment</h2>
+  <h2 class="checkout-title">Complete payment</h2>
   <p class="checkout-total">Total: {{ totalAmount | currency:'BRL' }}</p>
 
-  <app-seletor-metodo
-    (methodSelected)="activeMethod = $event">
-  </app-seletor-metodo>
+  <!-- Step 1: Payer info -->
+  <app-payer-info
+    *ngIf="step === 'payer-info'"
+    (payerDataConfirmed)="onPayerConfirmed($event)">
+  </app-payer-info>
 
-  <div class="checkout-form" *ngIf="activeMethod">
-    <app-cartao-form
-      *ngIf="activeMethod === 'credit_card' || activeMethod === 'debit_card'"
-      [metodo]="activeMethod"
-      [orderId]="orderId"
-      [totalAmount]="totalAmount">
-    </app-cartao-form>
+  <!-- Step 2: Payment method + form -->
+  <ng-container *ngIf="step === 'payment'">
+    <app-payment-method-selector
+      (methodSelected)="onMethodSelected($event)">
+    </app-payment-method-selector>
 
-    <app-pix-display
-      *ngIf="activeMethod === 'pix'"
-      [orderId]="orderId"
-      [totalAmount]="totalAmount">
-    </app-pix-display>
-  </div>
+    <div class="checkout-form" *ngIf="activeMethod">
+      <app-card-brick
+        *ngIf="activeMethod === 'credit_card' || activeMethod === 'debit_card'"
+        [cardType]="activeMethod"
+        [orderId]="orderId"
+        [amount]="totalAmount"
+        [payerEmail]="payerEmail"
+        [payerDocType]="payerDocType"
+        [payerDocNumber]="payerDocNumber">
+      </app-card-brick>
+
+      <app-pix-display
+        *ngIf="activeMethod === 'pix'"
+        [orderId]="orderId"
+        [amount]="totalAmount"
+        [payerEmail]="payerEmail"
+        [payerDocType]="payerDocType"
+        [payerDocNumber]="payerDocNumber">
+      </app-pix-display>
+    </div>
+  </ng-container>
 </div>
+

@@ -1,0 +1,18 @@
+.brick-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.brick-container {
+  min-height: 100px;
+}
+
+.error-message {
+  padding: 0.75rem 1rem;
+  background: #fef2f2;
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  border-radius: var(--radius);
+  color: #dc2626;
+  font-size: 0.875rem;
+}

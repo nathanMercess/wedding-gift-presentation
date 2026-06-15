@@ -1,31 +1,35 @@
 <div class="pix-container">
 
-  <div *ngIf="loading" class="pix-carregando">
+  <div *ngIf="loading" class="pix-loading">
     Generating PIX...
   </div>
 
   <ng-container *ngIf="!loading && !error && !expired">
-    <p class="pix-instrucao">
+    <p class="pix-instruction">
       Scan the QR Code or copy the code below to pay:
     </p>
 
     <div class="pix-qrcode">
-      <qrcode [qrdata]="brCode" [width]="256" [errorCorrectionLevel]="'M'"></qrcode>
+      <img
+        [src]="'data:image/png;base64,' + qrCodeBase64"
+        alt="PIX QR Code"
+        width="256"
+        height="256">
     </div>
 
-    <div class="pix-codigo">
-      <textarea class="pix-texto" readonly [value]="brCode" rows="3"></textarea>
-      <button type="button" class="btn-copiar" (click)="copyCode()">
+    <div class="pix-code">
+      <textarea class="pix-text" readonly [value]="qrCode" rows="3"></textarea>
+      <button type="button" class="btn-copy" (click)="copyCode()">
         {{ copied ? 'Copied!' : 'Copy PIX code' }}
       </button>
     </div>
   </ng-container>
 
-  <div *ngIf="expired" class="pix-expirado" role="alert">
+  <div *ngIf="expired" class="pix-expired" role="alert">
     PIX expired. Generate a new one.
   </div>
 
-  <div *ngIf="error" class="erro-global" role="alert">
+  <div *ngIf="error" class="error-global" role="alert">
     {{ error }}
   </div>
 

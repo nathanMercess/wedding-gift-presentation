@@ -4,14 +4,15 @@ import { FormsModule } from '@angular/forms';
 import { Gift } from '../../models/gift.model';
 import { ButtonComponent } from '../button/button.component';
 import { GiftService } from '../../services/gift.service';
-import { SeletorMetodoComponent } from '../../checkout/components/seletor-metodo/seletor-metodo.component';
-import { CartaoFormComponent } from '../../checkout/components/cartao-form/cartao-form.component';
+import { PaymentMethodSelectorComponent } from '../../checkout/components/payment-method-selector/payment-method-selector.component';
+import { CardBrickComponent } from '../../checkout/components/card-brick/card-brick.component';
 import { PixDisplayComponent } from '../../checkout/components/pix-display/pix-display.component';
+import { PayerInfoComponent, PayerData } from '../../checkout/components/payer-info/payer-info.component';
 
 @Component({
   selector: 'app-gift-details-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonComponent, SeletorMetodoComponent, CartaoFormComponent, PixDisplayComponent],
+  imports: [CommonModule, FormsModule, ButtonComponent, PayerInfoComponent, PaymentMethodSelectorComponent, CardBrickComponent, PixDisplayComponent],
   templateUrl: './gift-details-modal.component.html',
   styleUrl: './gift-details-modal.component.scss'
 })
@@ -20,7 +21,7 @@ export class GiftDetailsModalComponent {
   @Input() public coupleName: string = '';
   @Output() public close: EventEmitter<void> = new EventEmitter<void>();
 
-  public step: 'contribution' | 'payment' = 'contribution';
+  public step: 'contribution' | 'payer-info' | 'payment' = 'contribution';
   public activeMethod: 'credit_card' | 'debit_card' | 'pix' | null = null;
 
   public contributionType: 'full' | 'partial' = 'full';
@@ -29,6 +30,10 @@ export class GiftDetailsModalComponent {
   public guestMessage: string = '';
   public quickAmounts: number[] = [50, 100, 200, 300];
   public validationError: string = '';
+
+  public payerEmail = '';
+  public payerDocType = '';
+  public payerDocNumber = '';
 
   public constructor(public readonly giftService: GiftService) {
     this.giftService.resetContributionState();
@@ -70,11 +75,22 @@ export class GiftDetailsModalComponent {
     }
 
     this.validationError = '';
+    this.step = 'payer-info';
+  }
+
+  public onPayerConfirmed(data: PayerData): void {
+    this.payerEmail = data.email;
+    this.payerDocType = data.docType;
+    this.payerDocNumber = data.docNumber;
     this.step = 'payment';
   }
 
-  public backToContribution(): void {
-    this.step = 'contribution';
-    this.activeMethod = null;
+  public backToPrevious(): void {
+    if (this.step === 'payment') {
+      this.step = 'payer-info';
+      this.activeMethod = null;
+    } else if (this.step === 'payer-info') {
+      this.step = 'contribution';
+    }
   }
 }

@@ -42,7 +42,8 @@
                   "maximumError": "1mb"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "allowedCommonJsDependencies": ["@mercadopago/sdk-js"]
             },
             "development": {
               "optimization": false,

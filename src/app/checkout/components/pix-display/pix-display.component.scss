@@ -6,12 +6,12 @@
   text-align: center;
 }
 
-.pix-carregando {
+.pix-loading {
   font-size: 0.875rem;
   color: var(--muted-foreground);
 }
 
-.pix-instrucao {
+.pix-instruction {
   font-size: 0.875rem;
   color: var(--muted-foreground);
   margin: 0;
@@ -26,14 +26,14 @@
   border: 1px solid var(--border);
 }
 
-.pix-codigo {
+.pix-code {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.75rem;
   width: 100%;
 
-  .pix-texto {
+  .pix-text {
     width: 100%;
     padding: 0.75rem;
     border: 1px solid var(--border);
@@ -47,7 +47,7 @@
   }
 }
 
-.btn-copiar {
+.btn-copy {
   width: 100%;
   padding: 0.75rem 1rem;
   border: 2px solid var(--primary);
@@ -66,7 +66,7 @@
   }
 }
 
-.pix-expirado {
+.pix-expired {
   padding: 0.875rem 1rem;
   background: rgba(199, 154, 109, 0.1);
   border: 1px solid rgba(199, 154, 109, 0.2);
@@ -75,7 +75,7 @@
   font-size: 0.875rem;
 }
 
-.erro-global {
+.error-global {
   padding: 0.75rem 1rem;
   background: #fef2f2;
   border: 1px solid rgba(220, 38, 38, 0.2);
