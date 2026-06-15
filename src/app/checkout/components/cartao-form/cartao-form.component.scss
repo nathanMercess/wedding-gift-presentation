@@ -1,0 +1,83 @@
+.cartao-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--foreground);
+  }
+
+  input,
+  select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    outline: none;
+    transition: box-shadow 0.2s;
+    box-sizing: border-box;
+
+    &:focus {
+      box-shadow: 0 0 0 2px var(--ring);
+    }
+
+    &::placeholder {
+      color: var(--muted-foreground);
+    }
+  }
+}
+
+.campos-linha {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.erro-campo {
+  font-size: 0.75rem;
+  color: #dc2626;
+}
+
+.erro-global {
+  padding: 0.75rem 1rem;
+  background: #fef2f2;
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  border-radius: var(--radius);
+  color: #dc2626;
+  font-size: 0.875rem;
+}
+
+.btn-pagar {
+  width: 100%;
+  padding: 0.875rem;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border: none;
+  border-radius: var(--radius);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:hover:not(:disabled) {
+    opacity: 0.88;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

@@ -190,3 +190,64 @@ h3 {
 }
 .actions app-button { flex: 1; }
 .legal-text { font-size: 0.75rem; color: var(--muted-foreground); text-align: center; margin: 0; }
+
+/* Header com botão Voltar */
+.modal-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.375rem 0.625rem;
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  transition: background 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+
+.back-btn:hover {
+  background: var(--secondary);
+  color: var(--foreground);
+}
+
+/* Passo de pagamento */
+.payment-step {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 28rem;
+  margin: 0 auto;
+}
+
+.payment-summary-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.875rem 1rem;
+  background: var(--secondary);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.payment-gift-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+.payment-total {
+  font-family: var(--font-serif);
+  font-size: 1.125rem;
+  color: var(--primary);
+}
+
+.payment-hint {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  text-align: center;
+}

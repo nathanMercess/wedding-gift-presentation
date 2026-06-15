@@ -25,6 +25,11 @@ export const appConfig: ApplicationConfig = {
         loadComponent: () =>
           import('./components/admin/admin-dashboard/admin-dashboard.component').then(m => m.AdminDashboardComponent)
       },
+      {
+        path: 'checkout',
+        loadChildren: () =>
+          import('./checkout/checkout.routes').then(m => m.CHECKOUT_ROUTES)
+      },
       { path: '**', redirectTo: 'gifts' }
     ])
   ]

@@ -4,11 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { Gift } from '../../models/gift.model';
 import { ButtonComponent } from '../button/button.component';
 import { GiftService } from '../../services/gift.service';
+import { SeletorMetodoComponent } from '../../checkout/components/seletor-metodo/seletor-metodo.component';
+import { CartaoFormComponent } from '../../checkout/components/cartao-form/cartao-form.component';
+import { PixDisplayComponent } from '../../checkout/components/pix-display/pix-display.component';
 
 @Component({
   selector: 'app-gift-details-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonComponent],
+  imports: [CommonModule, FormsModule, ButtonComponent, SeletorMetodoComponent, CartaoFormComponent, PixDisplayComponent],
   templateUrl: './gift-details-modal.component.html',
   styleUrl: './gift-details-modal.component.scss'
 })
@@ -17,11 +20,15 @@ export class GiftDetailsModalComponent {
   @Input() public coupleName: string = '';
   @Output() public close: EventEmitter<void> = new EventEmitter<void>();
 
+  public step: 'contribution' | 'payment' = 'contribution';
+  public activeMethod: 'credit_card' | 'debit_card' | 'pix' | null = null;
+
   public contributionType: 'full' | 'partial' = 'full';
   public customAmount: string = '';
   public guestName: string = '';
   public guestMessage: string = '';
   public quickAmounts: number[] = [50, 100, 200, 300];
+  public validationError: string = '';
 
   public constructor(public readonly giftService: GiftService) {
     this.giftService.resetContributionState();
@@ -51,15 +58,23 @@ export class GiftDetailsModalComponent {
   }
 
   public onSubmit(): void {
-    const amount: number = this.getContributionAmount();
-    if (!this.guestName || amount <= 0) return;
+    const amount = this.getContributionAmount();
 
-    this.giftService.contributeToGift(this.gift.id, {
-      guestName: this.guestName,
-      amount,
-      message: this.guestMessage || undefined
-    }, (): void => {
-      this.gift = { ...this.gift, raised: Math.min(this.gift.raised + amount, this.gift.total) };
-    });
+    if (!this.guestName.trim()) {
+      this.validationError = 'Por favor, informe seu nome completo.';
+      return;
+    }
+    if (amount <= 0) {
+      this.validationError = 'Informe um valor de contribuição válido.';
+      return;
+    }
+
+    this.validationError = '';
+    this.step = 'payment';
+  }
+
+  public backToContribution(): void {
+    this.step = 'contribution';
+    this.activeMethod = null;
   }
 }

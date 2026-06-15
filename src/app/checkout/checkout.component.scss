@@ -1,0 +1,28 @@
+.checkout-container {
+  max-width: 480px;
+  margin: 40px auto;
+  padding: 32px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+
+.checkout-titulo {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 8px;
+}
+
+.checkout-total {
+  font-family: 'Lato', sans-serif;
+  font-size: 16px;
+  color: #b8860b;
+  font-weight: 600;
+  margin: 0 0 24px;
+}
+
+.checkout-form {
+  margin-top: 8px;
+}

@@ -1,0 +1,23 @@
+<div class="checkout-container">
+  <h2 class="checkout-titulo">Complete payment</h2>
+  <p class="checkout-total">Total: {{ totalAmount | currency:'BRL' }}</p>
+
+  <app-seletor-metodo
+    (methodSelected)="activeMethod = $event">
+  </app-seletor-metodo>
+
+  <div class="checkout-form" *ngIf="activeMethod">
+    <app-cartao-form
+      *ngIf="activeMethod === 'credit_card' || activeMethod === 'debit_card'"
+      [metodo]="activeMethod"
+      [orderId]="orderId"
+      [totalAmount]="totalAmount">
+    </app-cartao-form>
+
+    <app-pix-display
+      *ngIf="activeMethod === 'pix'"
+      [orderId]="orderId"
+      [totalAmount]="totalAmount">
+    </app-pix-display>
+  </div>
+</div>

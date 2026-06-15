@@ -40,4 +40,16 @@ export class EndpointsUrls {
     public adminGiftsById(id: number): string {
         return `${this.apiUrl}/admin/gifts/${id}`;
     }
+
+    public get paymentCard(): string {
+        return `${this.apiUrl}/payments/card`;
+    }
+
+    public get paymentPix(): string {
+        return `${this.apiUrl}/payments/pix`;
+    }
+
+    public paymentStatus(nsu: string): string {
+        return `${this.apiUrl}/payments/status/${nsu}`;
+    }
 }
