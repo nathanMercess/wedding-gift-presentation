@@ -4,20 +4,19 @@
     class="method-btn"
     [class.active]="activeMethod === 'credit_card'"
     (click)="select('credit_card')">
-    Cartão de Crédito
-  </button>
-  <button
-    type="button"
-    class="method-btn"
-    [class.active]="activeMethod === 'debit_card'"
-    (click)="select('debit_card')">
-    Cartão de Débito
+    <svg class="method-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+    </svg>
+    Cartão de crédito ou débito
   </button>
   <button
     type="button"
     class="method-btn"
     [class.active]="activeMethod === 'pix'"
     (click)="select('pix')">
+    <svg class="method-icon" viewBox="0 0 512 512" fill="currentColor">
+      <path d="M389.6 354.4l-82.2-82.2a42.4 42.4 0 0 0-30-12.4h-42.8a42.4 42.4 0 0 0-30 12.4l-82.2 82.2a6 6 0 0 0 0 8.5l36.6 36.6a6 6 0 0 0 8.5 0l62.8-62.8a6 6 0 0 1 4.2-1.7h64.2a6 6 0 0 1 4.2 1.7l62.8 62.8a6 6 0 0 0 8.5 0l36.6-36.6a6 6 0 0 0 0-8.5zM389.6 149.6l-36.6-36.6a6 6 0 0 0-8.5 0l-62.8 62.8a6 6 0 0 1-4.2 1.7h-64.2a6 6 0 0 1-4.2-1.7l-62.8-62.8a6 6 0 0 0-8.5 0l-36.6 36.6a6 6 0 0 0 0 8.5l82.2 82.2a42.4 42.4 0 0 0 30 12.4h42.8a42.4 42.4 0 0 0 30-12.4l82.2-82.2a6 6 0 0 0 0-8.5z"/>
+    </svg>
     PIX
   </button>
 </div>

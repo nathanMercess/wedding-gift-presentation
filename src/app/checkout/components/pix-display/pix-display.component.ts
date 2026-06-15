@@ -10,33 +10,50 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidationErrors,
+  ValidatorFn,
+  Validators
+} from '@angular/forms';
 import { Router } from '@angular/router';
 import { take } from 'rxjs';
 import { PaymentService } from '../../services/payment.service';
 import { PixPaymentDto } from '../../models/pix-payment-dto.model';
 
+function cpfValidator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const digits = (control.value as string)?.replace(/\D/g, '') ?? '';
+    return digits.length === 11 ? null : { invalidCpf: true };
+  };
+}
+
 @Component({
   selector: 'app-pix-display',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './pix-display.component.html',
   styleUrl: './pix-display.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PixDisplayComponent implements OnInit, OnDestroy {
+export class PixDisplayComponent implements OnDestroy {
   @Input() orderId = '';
   @Input() amount = 0;
-  @Input() payerEmail = '';
-  @Input() payerDocType = '';
-  @Input() payerDocNumber = '';
+
+  /** Internal step: collect payer data first, then show QR */
+  pixStep: 'form' | 'loading' | 'qr' = 'form';
 
   qrCode = '';
   qrCodeBase64 = '';
   mpOrderId = '';
-  loading = true;
   error = '';
   expired = false;
   copied = false;
+
+  readonly payerForm: FormGroup;
 
   private pollingInterval: ReturnType<typeof setInterval> | null = null;
   private expirationTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -46,20 +63,47 @@ export class PixDisplayComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly paymentService: PaymentService,
-    private readonly router: Router
-  ) { }
-
-  ngOnInit(): void {
-    this.initializePix();
+    private readonly router: Router,
+    private readonly fb: FormBuilder
+  ) {
+    this.payerForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      cpf: ['', [Validators.required, cpfValidator()]]
+    });
   }
 
-  private initializePix(): void {
+  onCpfInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    let digits = input.value.replace(/\D/g, '').slice(0, 11);
+    let formatted = digits;
+    if (digits.length > 9) {
+      formatted = `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+    } else if (digits.length > 6) {
+      formatted = `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+    } else if (digits.length > 3) {
+      formatted = `${digits.slice(0, 3)}.${digits.slice(3)}`;
+    }
+    this.payerForm.get('cpf')!.setValue(formatted, { emitEvent: false });
+  }
+
+  generatePix(): void {
+    if (this.payerForm.invalid) {
+      this.payerForm.markAllAsTouched();
+      return;
+    }
+
+    this.pixStep = 'loading';
+    this.error = '';
+    this.cdr.markForCheck();
+
+    const rawCpf = (this.payerForm.value.cpf as string).replace(/\D/g, '');
+
     const dto: PixPaymentDto = {
       orderId: this.orderId,
       amount: this.amount,
-      payerEmail: this.payerEmail,
-      payerDocType: this.payerDocType,
-      payerDocNumber: this.payerDocNumber
+      payerEmail: this.payerForm.value.email as string,
+      payerDocType: 'CPF',
+      payerDocNumber: rawCpf
     };
 
     this.paymentService
@@ -71,19 +115,19 @@ export class PixDisplayComponent implements OnInit, OnDestroy {
             this.mpOrderId = response.mpOrderId;
             this.qrCode = response.qrCode ?? '';
             this.qrCodeBase64 = response.qrCodeBase64;
-            this.loading = false;
+            this.pixStep = 'qr';
             this.cdr.markForCheck();
             this.startPolling();
             this.startExpirationTimeout();
           } else {
-            this.error = response.message ?? 'Error generating PIX. Please try again.';
-            this.loading = false;
+            this.error = response.message ?? 'Erro ao gerar o PIX. Tente novamente.';
+            this.pixStep = 'form';
             this.cdr.markForCheck();
           }
         },
         error: () => {
-          this.error = 'Error generating PIX. Please try again.';
-          this.loading = false;
+          this.error = 'Erro ao gerar o PIX. Tente novamente.';
+          this.pixStep = 'form';
           this.cdr.markForCheck();
         }
       });
@@ -100,7 +144,7 @@ export class PixDisplayComponent implements OnInit, OnDestroy {
               this.router.navigate(['/sucesso']);
             } else if (response.status === 'rejected') {
               this.stopPolling();
-              this.error = response.message ?? 'Payment rejected.';
+              this.error = response.message ?? 'Pagamento rejeitado.';
               this.cdr.markForCheck();
             }
           },

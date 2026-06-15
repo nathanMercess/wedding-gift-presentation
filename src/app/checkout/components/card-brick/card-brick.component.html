@@ -1,8 +1,23 @@
 <div class="brick-wrapper">
 
+  <!-- Loading skeleton shown until Brick fires onReady -->
+  <div *ngIf="!brickReady && !error" class="brick-loading" aria-hidden="true">
+    <div class="skeleton skeleton-title"></div>
+    <div class="skeleton skeleton-icons"></div>
+    <div class="skeleton skeleton-input"></div>
+    <div class="skeleton skeleton-row">
+      <div class="skeleton skeleton-input-half"></div>
+      <div class="skeleton skeleton-input-half"></div>
+    </div>
+    <div class="skeleton skeleton-input"></div>
+    <div class="skeleton skeleton-input"></div>
+    <div class="skeleton skeleton-btn"></div>
+  </div>
+
   <div
     id="cardPaymentBrick_container"
-    class="brick-container">
+    class="brick-container"
+    [class.brick-hidden]="!brickReady">
   </div>
 
   <div *ngIf="error" class="error-message" role="alert">
