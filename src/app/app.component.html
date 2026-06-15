@@ -1,8 +1,0 @@
-<app-landing-page
-  *ngIf="currentView === 'landing'"
-  (viewGuestList)="currentView = 'guest'"
-></app-landing-page>
-<app-guest-view
-  *ngIf="currentView === 'guest'"
-  (backToLanding)="currentView = 'landing'"
-></app-guest-view>

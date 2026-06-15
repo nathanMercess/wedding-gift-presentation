@@ -50,16 +50,13 @@ Acesse: http://localhost:8080
 ```
 src/
 ├── app/
-│   ├── app.component.ts          # Componente raiz (controla a view atual)
+│   ├── app.component.ts          # Componente raiz (router-outlet)
 │   ├── models/
 │   │   └── gift.model.ts         # Interface Gift + dados mock
 │   └── components/
 │       ├── button/               # Botão reutilizável (primary/secondary/outline)
-│       ├── feature-card/         # Card de benefício (ícone + título + descrição)
-│       ├── testimonial/          # Card de depoimento
 │       ├── gift-card/            # Card de presente com progresso
 │       ├── gift-details-modal/   # Modal de detalhes + formulário de contribuição
-│       ├── landing-page/         # Página principal (hero, como funciona, etc.)
 │       └── guest-view/           # Visão do convidado (lista de presentes)
 ├── styles/
 │   └── global.css                # Variáveis CSS + reset global
