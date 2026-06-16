@@ -1,7 +1,7 @@
 <div class="pix-container">
 
   <!-- Step 1: Payer data form -->
-  <ng-container *ngIf="pixStep === PixStep.Form">
+  <ng-container *ngIf="pixStep() === PixStep.Form">
     <div class="pix-intro">
       <div class="pix-icon">
         <svg width="32" height="32" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -40,7 +40,7 @@
         </span>
       </div>
 
-      <div *ngIf="error" class="error-banner" role="alert">{{ error }}</div>
+      <div *ngIf="error()" class="error-banner" role="alert">{{ error() }}</div>
 
       <button type="submit" class="btn-primary" [disabled]="payerForm.invalid">
         Gerar código PIX
@@ -49,41 +49,41 @@
   </ng-container>
 
   <!-- Loading -->
-  <div *ngIf="pixStep === PixStep.Loading" class="pix-loading">
+  <div *ngIf="pixStep() === PixStep.Loading" class="pix-loading">
     <div class="loading-spinner"></div>
     <p>Gerando seu PIX...</p>
   </div>
 
   <!-- Step 2: QR Code -->
-  <ng-container *ngIf="pixStep === PixStep.Qr && !expired && !error">
+  <ng-container *ngIf="pixStep() === PixStep.Qr && !expired() && !error()">
     <div class="qr-header">
       <p class="qr-instruction">Escaneie o QR Code ou copie o código abaixo</p>
-      <span class="qr-timer">Expira em {{ formattedCountdown }}</span>
+      <span class="qr-timer">Expira em {{ formattedCountdown() }}</span>
     </div>
 
     <div class="qr-image-wrap">
       <img
-        [src]="'data:image/png;base64,' + qrCodeBase64"
+        [src]="'data:image/png;base64,' + qrCodeBase64()"
         alt="QR Code PIX"
         width="220"
         height="220">
     </div>
 
     <div class="qr-code-block">
-      <textarea class="qr-text" readonly [value]="qrCode" rows="3" aria-label="Código PIX copia e cola"></textarea>
+      <textarea class="qr-text" readonly [value]="qrCode()" rows="3" aria-label="Código PIX copia e cola"></textarea>
       <button type="button" class="btn-copy" (click)="copyCode()">
-        <svg *ngIf="!copied" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg *ngIf="!copied()" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
         </svg>
-        <svg *ngIf="copied" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg *ngIf="copied()" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="20 6 9 17 4 12"/>
         </svg>
-        {{ copied ? 'Copiado!' : 'Copiar código' }}
+        {{ copied() ? 'Copiado!' : 'Copiar código' }}
       </button>
     </div>
   </ng-container>
 
-  <div *ngIf="expired" class="pix-expired" role="alert">
+  <div *ngIf="expired()" class="pix-expired" role="alert">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
     </svg>
@@ -91,7 +91,6 @@
     <button type="button" class="btn-retry" (click)="retryPix()">Gerar novo código</button>
   </div>
 
-  <div *ngIf="pixStep === PixStep.Qr && error" class="error-banner" role="alert">{{ error }}</div>
+  <div *ngIf="pixStep() === PixStep.Qr && error()" class="error-banner" role="alert">{{ error() }}</div>
 
 </div>
-

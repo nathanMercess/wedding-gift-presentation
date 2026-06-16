@@ -1,12 +1,18 @@
-import { HttpInterceptorFn } from '@angular/common/http';
-import { inject } from '@angular/core';
+import { Injectable } from '@angular/core';
+import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { AuthService } from '../services/auth.service';
-//==CLAUDE==: Mudar isso para ser uma classe abstrata, para facilitar a adição de outras funcionalidades no futuro, como controle de expiração do token e refresh token, e também para seguir a convenção do Angular que é usar classes para serviços e interceptors
-export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const auth = inject(AuthService);
-  const token = auth.getToken();
-  if (token) {
-    req = req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
+
+@Injectable()
+export class AuthInterceptor implements HttpInterceptor {
+  public constructor(private readonly auth: AuthService) {}
+
+  public intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
+    const token = this.auth.getToken();
+
+    if (!token)
+      return next.handle(req);
+
+    return next.handle(req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }));
   }
-  return next(req);
-};
+}

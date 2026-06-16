@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, InputSignal, OnDestroy, OutputEmitterRef, effect, inject, input, output } from '@angular/core';
+import { Component, InputSignal, OnDestroy, OutputEmitterRef, WritableSignal, computed, effect, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { PaymentService } from '../../services/payment.service';
@@ -17,7 +17,6 @@ const PIX_EXPIRATION_SECONDS = 10 * 60;
   templateUrl: './pix-display.component.html',
   styleUrl: './pix-display.component.scss',
   imports: [CommonModule, ReactiveFormsModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PixDisplayComponent implements OnDestroy {
   public readonly orderId: InputSignal<string> = input<string>('');
@@ -28,15 +27,22 @@ export class PixDisplayComponent implements OnDestroy {
   public readonly paymentApproved: OutputEmitterRef<void> = output<void>();
 
   public readonly PixStep: typeof PixStep = PixStep;
-  public pixStep: PixStep = PixStep.Form;
 
-  public qrCode: string = '';
-  public qrCodeBase64: string = '';
-  public mpOrderId: string = '';
-  public error: string = '';
-  public expired: boolean = false;
-  public copied: boolean = false;
-  public remainingSeconds: number = PIX_EXPIRATION_SECONDS;
+  public readonly pixStep: WritableSignal<PixStep> = signal(PixStep.Form);
+  public readonly qrCode: WritableSignal<string> = signal('');
+  public readonly qrCodeBase64: WritableSignal<string> = signal('');
+  public readonly mpOrderId: WritableSignal<string> = signal('');
+  public readonly error: WritableSignal<string> = signal('');
+  public readonly expired: WritableSignal<boolean> = signal(false);
+  public readonly copied: WritableSignal<boolean> = signal(false);
+  public readonly remainingSeconds: WritableSignal<number> = signal(PIX_EXPIRATION_SECONDS);
+
+  public readonly formattedCountdown = computed((): string => {
+    const total = Math.max(this.remainingSeconds(), 0);
+    const minutes = Math.floor(total / 60);
+    const seconds = total % 60;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  });
 
   public readonly payerForm: FormGroup;
 
@@ -45,13 +51,10 @@ export class PixDisplayComponent implements OnDestroy {
   private awaitingPixResponse: boolean = false;
   private awaitingStatusCheck: boolean = false;
 
-  //==CLAUDE==: Validar se esse é a melhor maneira, não gosto de ficar usando ChangeDetectorRef
-  private readonly cdr: ChangeDetectorRef = inject(ChangeDetectorRef);
-
   public constructor(public readonly paymentService: PaymentService, public readonly fb: FormBuilder) {
     this.payerForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      cpf: ['', [Validators.required, CpfValidators.validator()]]
+      cpf: ['', [Validators.required, CpfValidators.validator()]],
     });
 
     effect((): void => this.handlePaymentState(this.paymentService.paymentState()));
@@ -83,9 +86,8 @@ export class PixDisplayComponent implements OnDestroy {
       return;
     }
 
-    this.pixStep = PixStep.Loading;
-    this.error = '';
-    this.cdr.markForCheck();
+    this.pixStep.set(PixStep.Loading);
+    this.error.set('');
 
     const rawCpf = (this.payerForm.value.cpf as string).replace(/\D/g, '');
 
@@ -97,7 +99,7 @@ export class PixDisplayComponent implements OnDestroy {
       amount: this.amount(),
       payerEmail: this.payerForm.value.email as string,
       payerDocType: 'CPF',
-      payerDocNumber: rawCpf
+      payerDocNumber: rawCpf,
     };
 
     this.awaitingPixResponse = true;
@@ -105,84 +107,86 @@ export class PixDisplayComponent implements OnDestroy {
   }
 
   private handlePaymentState(state: PaymentState): void {
-    if (state.submitting || !this.awaitingPixResponse) return;
+    if (state.submitting || !this.awaitingPixResponse)
+      return;
+
     this.awaitingPixResponse = false;
 
     if (state.error) {
-      this.error = state.error;
-      this.pixStep = PixStep.Form;
-      this.cdr.markForCheck();
+      this.error.set(state.error);
+      this.pixStep.set(PixStep.Form);
       return;
     }
 
-    if (!state.response) return;
+    if (!state.response)
+      return;
 
     const response = state.response;
 
     if (response.mpOrderId && response.qrCodeBase64) {
-      this.mpOrderId = response.mpOrderId;
-      this.qrCode = response.qrCode ?? '';
-      this.qrCodeBase64 = response.qrCodeBase64;
-      this.pixStep = PixStep.Qr;
-      this.cdr.markForCheck();
+      this.mpOrderId.set(response.mpOrderId);
+      this.qrCode.set(response.qrCode ?? '');
+      this.qrCodeBase64.set(response.qrCodeBase64);
+      this.pixStep.set(PixStep.Qr);
       this.startPolling();
       this.startCountdown();
       return;
     }
 
-    this.error = response.message ?? 'Erro ao gerar o PIX. Tente novamente.';
-    this.pixStep = PixStep.Form;
-    this.cdr.markForCheck();
+    this.error.set(response.message ?? 'Erro ao gerar o PIX. Tente novamente.');
+    this.pixStep.set(PixStep.Form);
   }
 
   private handleStatusState(state: PaymentStatusState): void {
-    if (!this.awaitingStatusCheck) return;
+    if (!this.awaitingStatusCheck)
+      return;
+
     this.awaitingStatusCheck = false;
 
     if (state.response?.status === PaymentStatus.Approved) {
       this.stopPolling();
       this.paymentApproved.emit();
-    } else if (state.response?.status === PaymentStatus.Rejected) {
-      this.stopPolling();
-      this.error = state.response.message ?? 'Pagamento rejeitado.';
-      this.cdr.markForCheck();
+      return;
     }
-    // status pendente ou erro transitório: mantém o polling até a próxima tentativa
+
+    if (state.response?.status === PaymentStatus.Rejected) {
+      this.stopPolling();
+      this.error.set(state.response.message ?? 'Pagamento rejeitado.');
+    }
   }
 
   private startPolling(): void {
     this.pollingInterval = setInterval(() => {
       this.awaitingStatusCheck = true;
-      this.paymentService.checkStatus(this.mpOrderId);
+      this.paymentService.checkStatus(this.mpOrderId());
     }, 5000);
   }
 
   private startCountdown(): void {
-    this.remainingSeconds = PIX_EXPIRATION_SECONDS;
+    this.remainingSeconds.set(PIX_EXPIRATION_SECONDS);
     this.countdownInterval = setInterval(() => {
-      this.remainingSeconds -= 1;
-      if (this.remainingSeconds <= 0) {
+      this.remainingSeconds.update(s => s - 1);
+      if (this.remainingSeconds() <= 0) {
         this.stopPolling();
-        this.expired = true;
+        this.expired.set(true);
       }
-      this.cdr.markForCheck();
     }, 1000);
   }
 
-  public get formattedCountdown(): string {
-    const minutes = Math.floor(Math.max(this.remainingSeconds, 0) / 60);
-    const seconds = Math.max(this.remainingSeconds, 0) % 60;
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  public retryPix(): void {
+    this.pixStep.set(PixStep.Form);
+    this.expired.set(false);
+    this.error.set('');
+    this.qrCode.set('');
+    this.qrCodeBase64.set('');
+    this.mpOrderId.set('');
   }
 
-  public retryPix(): void {
-    this.pixStep = PixStep.Form;
-    this.expired = false;
-    this.error = '';
-    this.qrCode = '';
-    this.qrCodeBase64 = '';
-    this.mpOrderId = '';
-    this.cdr.markForCheck();
+  public copyCode(): void {
+    navigator.clipboard.writeText(this.qrCode()).then(() => {
+      this.copied.set(true);
+      setTimeout(() => this.copied.set(false), 2000);
+    });
   }
 
   private stopPolling(): void {
@@ -194,17 +198,6 @@ export class PixDisplayComponent implements OnDestroy {
       clearInterval(this.countdownInterval);
       this.countdownInterval = null;
     }
-  }
-
-  public copyCode(): void {
-    navigator.clipboard.writeText(this.qrCode).then(() => {
-      this.copied = true;
-      this.cdr.markForCheck();
-      setTimeout(() => {
-        this.copied = false;
-        this.cdr.markForCheck();
-      }, 2000);
-    });
   }
 
   public ngOnDestroy(): void {
