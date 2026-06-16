@@ -12,6 +12,7 @@ import { PaymentMethod } from '../../checkout/enums/payment-method.enum';
 import { ModalStep } from '../../enums/modal-step.enum';
 import { ButtonVariant } from '../../enums/button-variant.enum';
 import { ButtonType } from '../../enums/button-type.enum';
+import { ContributionType } from '../../enums/contribution-type.enum';
 
 @Component({
   standalone: true,
@@ -30,12 +31,12 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy {
   public readonly PaymentMethod: typeof PaymentMethod = PaymentMethod;
   public readonly ButtonVariant: typeof ButtonVariant = ButtonVariant;
   public readonly ButtonType: typeof ButtonType = ButtonType;
+  public readonly ContributionType: typeof ContributionType = ContributionType;
+
   public step: ModalStep = ModalStep.Contribution;
   public activeMethod: PaymentMethod | null = null;
   public orderId: string = '';
-  
-  //==CLAUDE==: Criar enum para isso
-  public contributionType: 'full' | 'partial' = 'full';
+  public contributionType: ContributionType = ContributionType.Full;
   public customAmount: string = '';
   public guestName: string = '';
   public guestMessage: string = '';
@@ -80,9 +81,9 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy {
   }
 
   public getContributionAmount(): number {
-    if (this.contributionType === 'full') 
+    if (this.contributionType === ContributionType.Full)
       return this.remaining;
-   
+
     return parseFloat(this.customAmount) || 0;
   }
 

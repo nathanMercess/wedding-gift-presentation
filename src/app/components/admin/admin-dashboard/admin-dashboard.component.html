@@ -47,8 +47,7 @@
           <div class="form-group">
             <label>Categoria</label>
             <select [(ngModel)]="giftForm.category" name="gcat" class="text-input">
-              <!--==CLAUDE==: NÃO GOSTO DE variaveis e lambdas sem significado claro, mudar no projeto todo-->
-              <option *ngFor="let c of categories" [value]="c.id">{{ c.label }}</option>
+              <option *ngFor="let category of categories" [value]="category.id">{{ category.label }}</option>
             </select>
           </div>
           <div class="form-group">

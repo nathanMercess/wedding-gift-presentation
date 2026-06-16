@@ -7,6 +7,8 @@ import { GiftService } from '../../../services/gift.service';
 import { CoupleService } from '../../../services/couple.service';
 import { AuthService } from '../../../services/auth.service';
 import { ConfirmDialogComponent } from '../../confirm-dialog/confirm-dialog.component';
+import { AdminTab } from '../../../enums/admin-tab.enum';
+import { GIFT_CATEGORIES } from '../../../constants/gift-categories.constant';
 
 const MAX_IMAGE_SIZE_BYTES = 20 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -16,33 +18,18 @@ const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
   selector: 'app-admin-dashboard',
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss',
-  imports: [CommonModule, FormsModule, ConfirmDialogComponent]
+  imports: [CommonModule, FormsModule, ConfirmDialogComponent],
 })
 export class AdminDashboardComponent implements OnInit {
-  
-  //==CLAUDE==: Criar enum para isso, para evitar usar strings soltas no código e facilitar mudanças futuras
-  //==CLAUDE==: pular linha entre as propriedades e o construtor, para facilitar a leitura do código
-  
-  public activeTab: 'gifts' | 'couple' = 'gifts';
-  
-  public couple: Couple = { names: '', weddingDate: '', photo: '', message: '' };
-  
-  public showGiftForm: boolean = false;
-  
-  public editingGift: Gift | null = null;
-  
-  public giftForm: Partial<Gift> = {};
-  
-  public giftPendingDeletion: Gift | null = null;
+  public readonly AdminTab: typeof AdminTab = AdminTab;
+  public readonly categories: typeof GIFT_CATEGORIES = GIFT_CATEGORIES;
 
-  //==CLAUDE==: Criar arquivo de constantes para os valores iniciais e só usar a constante aqui, para evitar usar strings soltas no código e facilitar mudanças futuras
-  public readonly categories: Array<{ id: string; label: string }> = [
-    { id: 'Cozinha', label: 'Cozinha' },
-    { id: 'Eletrodomésticos', label: 'Eletrodomésticos' },
-    { id: 'Quarto', label: 'Quarto' },
-    { id: 'Mesa', label: 'Mesa' },
-    { id: 'Casa', label: 'Casa' },
-  ];
+  public activeTab: AdminTab = AdminTab.Gifts;
+  public couple: Couple = { names: '', weddingDate: '', photo: '', message: '' };
+  public showGiftForm: boolean = false;
+  public editingGift: Gift | null = null;
+  public giftForm: Partial<Gift> = {};
+  public giftPendingDeletion: Gift | null = null;
 
   public constructor(
     public readonly giftService: GiftService,
@@ -65,7 +52,6 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   public ngOnInit(): void {
-    //Validar se o usuario está autenticado, se não estiver, redirecionar para a página de login admin/login 
     this.loadGifts();
     this.loadCouple();
   }
@@ -80,7 +66,7 @@ export class AdminDashboardComponent implements OnInit {
 
   public openNewGift(): void {
     this.editingGift = null;
-    this.giftForm = { category: 'Cozinha', raised: 0 };
+    this.giftForm = { category: GIFT_CATEGORIES[0].id, raised: 0 };
     this.giftService.clearAdminGiftError();
     this.giftService.resetAdminGiftSaved();
     this.showGiftForm = true;
@@ -117,10 +103,10 @@ export class AdminDashboardComponent implements OnInit {
   public onImageSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
-    
+
     input.value = '';
-    
-    if (!file) 
+
+    if (!file)
       return;
 
     if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
@@ -152,9 +138,8 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   public confirmDeleteGift(): void {
-    if (this.giftPendingDeletion) {
+    if (this.giftPendingDeletion)
       this.giftService.deleteAdminGift(this.giftPendingDeletion.id);
-    }
 
     this.giftPendingDeletion = null;
   }
@@ -172,9 +157,9 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   public getProgressPercent(gift: Gift): number {
-    if (gift.total <= 0) 
+    if (gift.total <= 0)
       return 0;
-    
+
     return Math.min((gift.raised / gift.total) * 100, 100);
   }
 }
