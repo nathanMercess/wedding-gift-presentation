@@ -5,21 +5,25 @@ import { environment } from '../../../../environments/environment';
 import { PaymentService } from '../../services/payment.service';
 import { PaymentState } from '../../models/payment-state.model';
 import { CardPaymentDto } from '../../models/card-payment-dto.model';
+import { PaymentMethod } from '../../enums/payment-method.enum';
+import { PaymentStatus } from '../../enums/payment-status.enum';
 
 @Component({
-    selector: 'app-card-brick',
     standalone: true,
-    imports: [CommonModule],
+    selector: 'app-card-brick',
     templateUrl: './card-brick.component.html',
-    styleUrl: './card-brick.component.scss'
+    styleUrl: './card-brick.component.scss',
+    imports: [CommonModule]
 })
 export class CardBrickComponent implements AfterViewInit, OnDestroy {
+
+    //==CLAUDE==: Criar interface para não ter varios inputs separados, e sim um input com a interface, para facilitar a passagem de dados e evitar erros de passar input errado.
     public readonly amount: InputSignal<number> = input<number>(0);
     public readonly orderId: InputSignal<string> = input<string>('');
     public readonly giftId: InputSignal<string> = input<string>('');
     public readonly contributorName: InputSignal<string> = input<string>('');
     public readonly message: InputSignal<string> = input<string>('');
-    public readonly cardType: InputSignal<'credit_card' | 'debit_card'> = input<'credit_card' | 'debit_card'>('credit_card');
+    public readonly cardType: InputSignal<PaymentMethod.CreditCard | PaymentMethod.DebitCard> = input<PaymentMethod.CreditCard | PaymentMethod.DebitCard>(PaymentMethod.CreditCard);
     public readonly payerEmail: InputSignal<string> = input<string>('');
     public readonly paymentApproved: OutputEmitterRef<void> = output<void>();
 
@@ -64,6 +68,7 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
             );
             const bricksBuilder = mp.bricks();
 
+            //==CLAUDE==: mover isso para uma service dele e o que for constante, criar a contante para não ficar com o código jogado
             this.brickController = await bricksBuilder.create(
                 'cardPayment',
                 'cardPaymentBrick_container',
@@ -102,7 +107,7 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
                         paymentMethods: {
                             creditCard: 'all',
                             debitCard: 'all',
-                            maxInstallments: this.cardType() === 'credit_card' ? 12 : 1
+                            maxInstallments: this.cardType() === PaymentMethod.CreditCard ? 12 : 1
                         }
                     },
                     callbacks: {
@@ -125,6 +130,11 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
             );
         } catch {
             this.clearLoadTimeout();
+            /*
+            ==CLAUDE==: (PROJETO TODO usar p-toast do primeng) Criar componente generico de erro, sucesso, info, warn , mudar no backend para retornar CODES de erro 
+                        e o componente ter um switch para mostrar a mensagem correta para cada tipo de erro, ao invés de 
+                        setar a mensagem de erro direto aqui, para evitar ter mensagens de erro espalhadas pelo código.
+            */
             this.error = 'Falha ao carregar o formulário de pagamento. Verifique sua conexão e tente novamente.';
         }
     }
@@ -136,7 +146,6 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
         }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private onSubmit(formData: any): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             this.pendingResolve = resolve;
@@ -164,29 +173,47 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
         });
     }
 
+    private clearPending(): void {
+        this.pendingResolve = null;
+        this.pendingReject = null;
+    }
+
     private handlePaymentState(state: PaymentState): void {
-        if (state.submitting || (!this.pendingResolve && !this.pendingReject)) return;
+        if (state.submitting || (!this.pendingResolve && !this.pendingReject)) 
+            return;
 
         this.ngZone.run(() => {
-            if (state.response) {
-                const response = state.response!;
-                if (response.status === 'approved' || response.status === 'processed') {
-                    this.pendingResolve?.();
-                    this.paymentApproved.emit();
-                } else if (response.status === 'in_process' || response.status === 'pending') {
-                    this.pendingResolve?.();
-                    this.error = 'Pagamento em análise. Você será notificado assim que for confirmado.';
-                } else {
-                    this.pendingReject?.(new Error(response.statusDetail ?? 'declined'));
-                    this.error = 'Pagamento recusado: ' + (response.statusDetail ?? 'tente outro cartão.');
-                }
-            } else if (state.error) {
+            if (state.error) {
                 this.pendingReject?.(new Error('network_error'));
                 this.error = state.error;
+                this.clearPending();
+                return;
             }
 
-            this.pendingResolve = null;
-            this.pendingReject = null;
+            if (!state.response) {
+                this.clearPending();
+                return;
+            }
+
+            const response = state.response!;
+
+            if (response.status === PaymentStatus.Approved || response.status === PaymentStatus.Processed) {
+                this.pendingResolve?.();
+                this.paymentApproved.emit();
+                this.clearPending();
+                return;
+            }
+
+            if (response.status === PaymentStatus.InProcess || response.status === PaymentStatus.Pending) {
+                this.pendingResolve?.();
+                this.error = 'Pagamento em análise. Você será notificado assim que for confirmado.';
+                this.clearPending();
+                return;
+            }
+
+            this.pendingReject?.(new Error(response.statusDetail ?? 'declined'));
+            this.error = 'Pagamento recusado: ' + (response.statusDetail ?? 'tente outro cartão.');
+            this.clearPending();
         });
     }
 

@@ -1,5 +1,7 @@
+import { PaymentStatus } from '../enums/payment-status.enum';
+
 export interface PaymentResponse {
-  status: 'approved' | 'rejected' | 'pending' | 'in_process' | 'error'| 'processed';
+  status: PaymentStatus;
   statusDetail?: string;
   mpOrderId?: string;
   qrCode?: string;

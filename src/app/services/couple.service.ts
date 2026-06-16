@@ -1,9 +1,10 @@
 import { Injectable, WritableSignal, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { finalize } from 'rxjs';
 import { EndpointsUrls } from '../constants/api-endpoints';
 import { Couple } from '../models/couple.model';
 import { CoupleState } from '../models/couple-state.model';
+import { HttpErrorUtil } from '../utils/http-error';
 
 @Injectable({ providedIn: 'root' })
 export class CoupleService {
@@ -24,8 +25,8 @@ export class CoupleService {
       next: (couple: Couple): void => {
         this.patchState({ couple });
       },
-      error: (): void => {
-        this.patchState({ error: 'Erro ao carregar informações do casal.' });
+      error: (err: HttpErrorResponse): void => {
+        this.patchState({ error: HttpErrorUtil.extract(err, 'Erro ao carregar informações do casal.') });
       }
     });
   }
@@ -37,8 +38,8 @@ export class CoupleService {
       next: (updatedCouple: Couple): void => {
         this.patchState({ couple: updatedCouple, success: true });
       },
-      error: (): void => {
-        this.patchState({ error: 'Erro ao salvar informações do casal.' });
+      error: (err: HttpErrorResponse): void => {
+        this.patchState({ error: HttpErrorUtil.extract(err, 'Erro ao salvar informações do casal.') });
       }
     });
   }

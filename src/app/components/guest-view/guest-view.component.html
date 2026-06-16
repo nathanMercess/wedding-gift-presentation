@@ -1,6 +1,9 @@
 <div class="gv-root">
-
-  <div *ngIf="giftService.guestState().loading || coupleService.state().loading" class="api-loading-overlay" aria-live="polite" aria-busy="true">
+  <!--==CLAUDE==: Componentizar as coisas, para facilitar a manutenção e reutilização dos componentes -->
+  
+  <!--==CLAUDE==: criar filtro e paginação descente -->
+  <div *ngIf="giftService.guestState().loading || coupleService.state().loading" class="api-loading-overlay"
+    aria-live="polite" aria-busy="true">
     <div class="api-loading-shell">
       <div class="sk-line sk-title"></div>
 
@@ -34,8 +37,10 @@
     <div class="container header-inner">
       <div style="width:5rem"></div>
       <div class="brand">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="brand-icon">
-          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"
+          class="brand-icon">
+          <path
+            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
         </svg>
         <span class="brand-name">David & Maira</span>
       </div>
@@ -44,6 +49,7 @@
   </header>
 
   <!-- Couple Hero -->
+   
   <section class="couple-section">
     <div class="container couple-inner">
       <div class="couple-photo">
@@ -74,21 +80,28 @@
     <div class="container">
       <div class="search-row">
         <div class="search-wrap">
-          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
-          <input
-            type="text"
-            placeholder="Buscar presente..."
-            [(ngModel)]="searchTerm"
-            name="search"
-            class="search-input"
-          />
+          <input type="text" placeholder="Buscar presente..." [(ngModel)]="searchTerm" name="search"
+            class="search-input" />
         </div>
 
-        <button class="quick-toggle-btn" [class.active]="showQuickControls" (click)="showQuickControls = !showQuickControls" aria-label="Mostrar filtros rapidos">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>
+        <button class="quick-toggle-btn" [class.active]="showQuickControls"
+          (click)="showQuickControls = !showQuickControls" aria-label="Mostrar filtros rapidos">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2">
+            <line x1="4" y1="21" x2="4" y2="14" />
+            <line x1="4" y1="10" x2="4" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="12" />
+            <line x1="12" y1="8" x2="12" y2="3" />
+            <line x1="20" y1="21" x2="20" y2="16" />
+            <line x1="20" y1="12" x2="20" y2="3" />
+            <line x1="1" y1="14" x2="7" y2="14" />
+            <line x1="9" y1="8" x2="15" y2="8" />
+            <line x1="17" y1="16" x2="23" y2="16" />
           </svg>
         </button>
       </div>
@@ -98,12 +111,9 @@
         <div class="quick-group categories-group">
           <p class="quick-text">Categorias</p>
           <div class="quick-filters">
-            <button
-              *ngFor="let cat of quickCategories; trackBy: trackByOptionId"
-              [class.active]="selectedCategory === cat.id"
-              class="chip"
-              (click)="selectedCategory = cat.id"
-            >{{ cat.label }}</button>
+            <button *ngFor="let cat of quickCategories; trackBy: trackByOptionId"
+              [class.active]="selectedCategory === cat.id" class="chip" (click)="selectedCategory = cat.id">{{ cat.label
+              }}</button>
           </div>
           <p class="quick-scroll-hint">Deslize para ver mais categorias</p>
         </div>
@@ -111,12 +121,8 @@
         <div class="quick-group">
           <p class="quick-text">Ordenar</p>
           <div class="quick-orders">
-            <button
-              *ngFor="let s of sortOptions; trackBy: trackByOptionId"
-              [class.active]="sortBy === s.id"
-              class="chip"
-              (click)="sortBy = s.id"
-            >{{ s.label }}</button>
+            <button *ngFor="let s of sortOptions; trackBy: trackByOptionId" [class.active]="sortBy === s.id"
+              class="chip" (click)="sortBy = s.id">{{ s.label }}</button>
           </div>
         </div>
       </div>
@@ -133,25 +139,25 @@
         <p>{{ giftService.guestState().error }}</p>
         <button class="chip" (click)="loadGifts()">Tentar novamente</button>
       </div>
-      <div *ngIf="!giftService.guestState().loading && !giftService.guestState().error && filteredGifts.length === 0" class="empty-state">
-        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      <div *ngIf="!giftService.guestState().loading && !giftService.guestState().error && filteredGifts.length === 0"
+        class="empty-state">
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="1.5">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>
         <h3>Nenhum presente encontrado</h3>
         <p>Tente ajustar os filtros ou buscar por outro termo</p>
       </div>
 
       <div *ngIf="!giftService.guestState().loading && !giftService.guestState().error && filteredGifts.length > 0">
-        <p class="results-count">Mostrando {{ filteredGifts.length }} de {{ giftService.guestState().gifts.length }} presentes</p>
+        <p class="results-count">Mostrando {{ filteredGifts.length }} de {{ giftService.guestState().gifts.length }}
+          presentes</p>
         <div class="gifts-grid">
-          <div *ngFor="let gift of filteredGifts; trackBy: trackByGiftId" class="gift-grid-item" (click)="selectedGift = gift" style="cursor:pointer">
-            <app-gift-card
-              [image]="gift.image"
-              [name]="gift.name"
-              [price]="gift.price"
-              [raised]="gift.raised"
-              [total]="gift.total"
-            ></app-gift-card>
+          <div *ngFor="let gift of filteredGifts; trackBy: trackByGiftId" class="gift-grid-item"
+            (click)="selectedGift = gift" style="cursor:pointer">
+            <app-gift-card [image]="gift.image" [name]="gift.name" [price]="gift.price" [raised]="gift.raised"
+              [total]="gift.total"></app-gift-card>
           </div>
         </div>
       </div>
@@ -159,11 +165,6 @@
   </section>
 
   <!-- Modal -->
-  <app-gift-details-modal
-    *ngIf="selectedGift"
-    [gift]="selectedGift"
-    [coupleName]="coupleService.state().couple.names"
-    (close)="selectedGift = null"
-    (paymentCompleted)="onGiftPaymentCompleted()"
-  ></app-gift-details-modal>
+  <app-gift-details-modal *ngIf="selectedGift" [gift]="selectedGift" [coupleName]="coupleService.state().couple.names"
+    (close)="selectedGift = null" (paymentCompleted)="onGiftPaymentCompleted()"></app-gift-details-modal>
 </div>

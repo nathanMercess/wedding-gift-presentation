@@ -1,3 +1,5 @@
+import { PaymentMethod } from '../enums/payment-method.enum';
+
 export interface CardPaymentDto {
   giftId: string;
   contributorName: string;
@@ -7,7 +9,7 @@ export interface CardPaymentDto {
   cardToken: string;
   paymentMethodId: string;
   installments: number;
-  method: 'credit_card' | 'debit_card'; 
+  method: PaymentMethod.CreditCard | PaymentMethod.DebitCard;
   payerEmail: string;
   payerDocType: string;
   payerDocNumber: string;

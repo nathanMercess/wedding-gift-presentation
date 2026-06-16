@@ -4,21 +4,18 @@ import { ActivatedRoute } from '@angular/router';
 import { PaymentMethodSelectorComponent } from './components/payment-method-selector/payment-method-selector.component';
 import { CardBrickComponent } from './components/card-brick/card-brick.component';
 import { PixDisplayComponent } from './components/pix-display/pix-display.component';
+import { PaymentMethod } from './enums/payment-method.enum';
 
 @Component({
-  selector: 'app-checkout',
   standalone: true,
-  imports: [
-    CommonModule,
-    PaymentMethodSelectorComponent,
-    CardBrickComponent,
-    PixDisplayComponent
-  ],
+  selector: 'app-checkout',
   templateUrl: './checkout.component.html',
-  styleUrl: './checkout.component.scss'
+  styleUrl: './checkout.component.scss',
+  imports: [CommonModule, PaymentMethodSelectorComponent, CardBrickComponent, PixDisplayComponent]
 })
 export class CheckoutComponent implements OnInit {
-  public activeMethod: 'credit_card' | 'debit_card' | 'pix' | null = null;
+  public readonly PaymentMethod: typeof PaymentMethod = PaymentMethod;
+  public activeMethod: PaymentMethod | null = null;
   public orderId: string = '';
   public totalAmount: number = 0;
   public paymentApproved: boolean = false;
@@ -32,7 +29,7 @@ export class CheckoutComponent implements OnInit {
     });
   }
 
-  public onMethodSelected(method: 'credit_card' | 'debit_card' | 'pix'): void {
+  public onMethodSelected(method: PaymentMethod): void {
     this.paymentApproved = false;
     this.activeMethod = method;
   }

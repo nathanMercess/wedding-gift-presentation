@@ -5,11 +5,11 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 
 @Component({
-  selector: 'app-admin-login',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  selector: 'app-admin-login',
   templateUrl: './admin-login.component.html',
-  styleUrl: './admin-login.component.scss'
+  styleUrl: './admin-login.component.scss',
+  imports: [CommonModule, FormsModule]
 })
 export class AdminLoginComponent {
   public email: string = '';
@@ -25,7 +25,9 @@ export class AdminLoginComponent {
   }
 
   public onSubmit(): void {
-    if (!this.email || !this.password) return;
+    if (!this.email || !this.password) 
+      return;
+    
     this.auth.authenticate({ email: this.email, password: this.password });
   }
 }

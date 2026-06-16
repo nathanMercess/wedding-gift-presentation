@@ -1,24 +1,27 @@
 import { ChangeDetectionStrategy, Component, OnInit, OutputEmitterRef, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { PaymentMethod } from '../../enums/payment-method.enum';
 
 @Component({
-  selector: 'app-payment-method-selector',
   standalone: true,
-  imports: [CommonModule],
+  selector: 'app-payment-method-selector',
   templateUrl: './payment-method-selector.component.html',
   styleUrl: './payment-method-selector.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  imports: [CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PaymentMethodSelectorComponent implements OnInit {
-  public readonly methodSelected: OutputEmitterRef<'credit_card' | 'debit_card' | 'pix'> = output<'credit_card' | 'debit_card' | 'pix'>();
+  public readonly methodSelected: OutputEmitterRef<PaymentMethod> = output<PaymentMethod>();
 
-  public activeMethod: 'credit_card' | 'debit_card' | 'pix' = 'credit_card';
+  public activeMethod: PaymentMethod = PaymentMethod.CreditCard;
+
+  public readonly PaymentMethod: typeof PaymentMethod = PaymentMethod;
 
   public ngOnInit(): void {
     this.methodSelected.emit(this.activeMethod);
   }
 
-  public select(method: 'credit_card' | 'debit_card' | 'pix'): void {
+  public select(method: PaymentMethod): void {
     this.activeMethod = method;
     this.methodSelected.emit(method);
   }

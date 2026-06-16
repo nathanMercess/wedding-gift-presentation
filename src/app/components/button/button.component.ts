@@ -1,18 +1,21 @@
 import { Component, InputSignal, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ButtonVariant } from '../../enums/button-variant.enum';
+import { ButtonSize } from '../../enums/button-size.enum';
+import { ButtonType } from '../../enums/button-type.enum';
 
 @Component({
-  selector: 'app-button',
   standalone: true,
-  imports: [CommonModule],
+  selector: 'app-button',
   templateUrl: './button.component.html',
-  styleUrl: './button.component.scss'
+  styleUrl: './button.component.scss',
+  imports: [CommonModule]
 })
 export class ButtonComponent {
-  public readonly variant: InputSignal<'primary' | 'secondary' | 'outline'> = input<'primary' | 'secondary' | 'outline'>('primary');
-  public readonly size: InputSignal<'sm' | 'md' | 'lg'> = input<'sm' | 'md' | 'lg'>('md');
+  public readonly variant: InputSignal<ButtonVariant> = input<ButtonVariant>(ButtonVariant.Primary);
+  public readonly size: InputSignal<ButtonSize> = input<ButtonSize>(ButtonSize.Md);
   public readonly disabled: InputSignal<boolean> = input<boolean>(false);
-  public readonly type: InputSignal<'button' | 'submit' | 'reset'> = input<'button' | 'submit' | 'reset'>('button');
+  public readonly type: InputSignal<ButtonType> = input<ButtonType>(ButtonType.Button);
 
   public get buttonClasses(): string {
     return `${this.variant()} ${this.size()}`;

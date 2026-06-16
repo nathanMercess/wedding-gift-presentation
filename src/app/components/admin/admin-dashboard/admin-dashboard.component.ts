@@ -12,19 +12,30 @@ const MAX_IMAGE_SIZE_BYTES = 20 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 @Component({
-  selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, ConfirmDialogComponent],
+  selector: 'app-admin-dashboard',
   templateUrl: './admin-dashboard.component.html',
-  styleUrl: './admin-dashboard.component.scss'
+  styleUrl: './admin-dashboard.component.scss',
+  imports: [CommonModule, FormsModule, ConfirmDialogComponent]
 })
 export class AdminDashboardComponent implements OnInit {
+  
+  //==CLAUDE==: Criar enum para isso, para evitar usar strings soltas no código e facilitar mudanças futuras
+  //==CLAUDE==: pular linha entre as propriedades e o construtor, para facilitar a leitura do código
+  
   public activeTab: 'gifts' | 'couple' = 'gifts';
+  
   public couple: Couple = { names: '', weddingDate: '', photo: '', message: '' };
+  
   public showGiftForm: boolean = false;
+  
   public editingGift: Gift | null = null;
+  
   public giftForm: Partial<Gift> = {};
+  
   public giftPendingDeletion: Gift | null = null;
+
+  //==CLAUDE==: Criar arquivo de constantes para os valores iniciais e só usar a constante aqui, para evitar usar strings soltas no código e facilitar mudanças futuras
   public readonly categories: Array<{ id: string; label: string }> = [
     { id: 'Cozinha', label: 'Cozinha' },
     { id: 'Eletrodomésticos', label: 'Eletrodomésticos' },
@@ -54,6 +65,7 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   public ngOnInit(): void {
+    //Validar se o usuario está autenticado, se não estiver, redirecionar para a página de login admin/login 
     this.loadGifts();
     this.loadCouple();
   }
@@ -105,13 +117,17 @@ export class AdminDashboardComponent implements OnInit {
   public onImageSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
+    
     input.value = '';
-    if (!file) return;
+    
+    if (!file) 
+      return;
 
     if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
       this.giftService.patchAdminState({ imageUploadError: 'Envie uma imagem JPG, PNG ou WEBP.' });
       return;
     }
+
     if (file.size > MAX_IMAGE_SIZE_BYTES) {
       this.giftService.patchAdminState({ imageUploadError: 'O tamanho máximo permitido é 20MB.' });
       return;
@@ -139,6 +155,7 @@ export class AdminDashboardComponent implements OnInit {
     if (this.giftPendingDeletion) {
       this.giftService.deleteAdminGift(this.giftPendingDeletion.id);
     }
+
     this.giftPendingDeletion = null;
   }
 
@@ -155,7 +172,9 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   public getProgressPercent(gift: Gift): number {
-    if (gift.total <= 0) return 0;
+    if (gift.total <= 0) 
+      return 0;
+    
     return Math.min((gift.raised / gift.total) * 100, 100);
   }
 }

@@ -8,13 +8,17 @@ import { PaymentMethodSelectorComponent } from '../../checkout/components/paymen
 import { CardBrickComponent } from '../../checkout/components/card-brick/card-brick.component';
 import { PixDisplayComponent } from '../../checkout/components/pix-display/pix-display.component';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
+import { PaymentMethod } from '../../checkout/enums/payment-method.enum';
+import { ModalStep } from '../../enums/modal-step.enum';
+import { ButtonVariant } from '../../enums/button-variant.enum';
+import { ButtonType } from '../../enums/button-type.enum';
 
 @Component({
-  selector: 'app-gift-details-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonComponent, PaymentMethodSelectorComponent, CardBrickComponent, PixDisplayComponent, ConfirmDialogComponent],
+  selector: 'app-gift-details-modal',
   templateUrl: './gift-details-modal.component.html',
-  styleUrl: './gift-details-modal.component.scss'
+  styleUrl: './gift-details-modal.component.scss',
+  imports: [CommonModule, FormsModule, ButtonComponent, PaymentMethodSelectorComponent, CardBrickComponent, PixDisplayComponent, ConfirmDialogComponent]
 })
 export class GiftDetailsModalComponent implements OnInit, OnDestroy {
   public readonly gift: InputSignal<Gift> = input.required<Gift>();
@@ -22,10 +26,15 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy {
   public readonly close: OutputEmitterRef<void> = output<void>();
   public readonly paymentCompleted: OutputEmitterRef<void> = output<void>();
 
-  public step: 'contribution' | 'payment' | 'success' = 'contribution';
-  public activeMethod: 'credit_card' | 'debit_card' | 'pix' | null = null;
+  public readonly ModalStep: typeof ModalStep = ModalStep;
+  public readonly PaymentMethod: typeof PaymentMethod = PaymentMethod;
+  public readonly ButtonVariant: typeof ButtonVariant = ButtonVariant;
+  public readonly ButtonType: typeof ButtonType = ButtonType;
+  public step: ModalStep = ModalStep.Contribution;
+  public activeMethod: PaymentMethod | null = null;
   public orderId: string = '';
-
+  
+  //==CLAUDE==: Criar enum para isso
   public contributionType: 'full' | 'partial' = 'full';
   public customAmount: string = '';
   public guestName: string = '';
@@ -47,7 +56,7 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy {
   }
 
   public get hasUnsavedInput(): boolean {
-    return this.step === 'contribution' && (this.guestName.trim().length > 0 || this.customAmount.trim().length > 0);
+    return this.step === ModalStep.Contribution && (this.guestName.trim().length > 0 || this.customAmount.trim().length > 0);
   }
 
   public get remaining(): number {
@@ -71,7 +80,9 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy {
   }
 
   public getContributionAmount(): number {
-    if (this.contributionType === 'full') return this.remaining;
+    if (this.contributionType === 'full') 
+      return this.remaining;
+   
     return parseFloat(this.customAmount) || 0;
   }
 
@@ -81,13 +92,13 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy {
       this.cancelExit();
       return;
     }
+
     this.requestClose();
   }
 
   public onBackdropClick(event: MouseEvent): void {
-    if ((event.target as HTMLElement).classList.contains('modal-backdrop')) {
+    if ((event.target as HTMLElement).classList.contains('modal-backdrop')) 
       this.requestClose();
-    }
   }
 
   public requestClose(): void {
@@ -115,10 +126,12 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy {
       this.validationError = 'Por favor, informe seu nome completo.';
       return;
     }
+
     if (amount <= 0) {
       this.validationError = 'Informe um valor de contribuição válido.';
       return;
     }
+    
     if (amount > this.remaining) {
       this.validationError = `O valor não pode ser maior que R$ ${this.remaining.toFixed(2)}.`;
       return;
@@ -126,17 +139,17 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy {
 
     this.validationError = '';
     this.orderId = crypto.randomUUID();
-    this.step = 'payment';
+    this.step = ModalStep.Payment;
   }
 
   public backToContribution(): void {
-    this.step = 'contribution';
+    this.step = ModalStep.Contribution;
     this.activeMethod = null;
   }
 
   public onPaymentApproved(): void {
     this.activeMethod = null;
-    this.step = 'success';
+    this.step = ModalStep.Success;
     this.paymentCompleted.emit();
   }
 }

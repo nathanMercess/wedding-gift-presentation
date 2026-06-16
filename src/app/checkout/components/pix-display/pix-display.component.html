@@ -1,7 +1,7 @@
 <div class="pix-container">
 
   <!-- Step 1: Payer data form -->
-  <ng-container *ngIf="pixStep === 'form'">
+  <ng-container *ngIf="pixStep === PixStep.Form">
     <div class="pix-intro">
       <div class="pix-icon">
         <svg width="32" height="32" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -49,13 +49,13 @@
   </ng-container>
 
   <!-- Loading -->
-  <div *ngIf="pixStep === 'loading'" class="pix-loading">
+  <div *ngIf="pixStep === PixStep.Loading" class="pix-loading">
     <div class="loading-spinner"></div>
     <p>Gerando seu PIX...</p>
   </div>
 
   <!-- Step 2: QR Code -->
-  <ng-container *ngIf="pixStep === 'qr' && !expired && !error">
+  <ng-container *ngIf="pixStep === PixStep.Qr && !expired && !error">
     <div class="qr-header">
       <p class="qr-instruction">Escaneie o QR Code ou copie o código abaixo</p>
       <span class="qr-timer">Expira em {{ formattedCountdown }}</span>
@@ -91,7 +91,7 @@
     <button type="button" class="btn-retry" (click)="retryPix()">Gerar novo código</button>
   </div>
 
-  <div *ngIf="pixStep === 'qr' && error" class="error-banner" role="alert">{{ error }}</div>
+  <div *ngIf="pixStep === PixStep.Qr && error" class="error-banner" role="alert">{{ error }}</div>
 
 </div>
 

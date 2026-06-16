@@ -9,11 +9,11 @@ import { GiftService } from '../../services/gift.service';
 import { CoupleService } from '../../services/couple.service';
 
 @Component({
-  selector: 'app-guest-view',
   standalone: true,
-  imports: [CommonModule, FormsModule, GiftCardComponent, GiftDetailsModalComponent],
+  selector: 'app-guest-view',
   templateUrl: './guest-view.component.html',
-  styleUrl: './guest-view.component.scss'
+  styleUrl: './guest-view.component.scss',
+  imports: [CommonModule, FormsModule, GiftCardComponent, GiftDetailsModalComponent]
 })
 export class GuestViewComponent implements OnInit {
   public searchTerm: string = '';
@@ -33,6 +33,7 @@ export class GuestViewComponent implements OnInit {
 
   public skeletonItems: number[] = [1, 2, 3, 4, 5, 6];
 
+  //==CLAUDE==: Criar arquivo de constantes para os valores iniciais e só usar a constante aqui
   public quickCategories: Array<{ id: string; label: string }> = [
     { id: 'todos', label: 'Todos' },
     { id: 'Cozinha', label: 'Cozinha' },
@@ -41,7 +42,8 @@ export class GuestViewComponent implements OnInit {
     { id: 'Mesa', label: 'Mesa' },
     { id: 'Quarto', label: 'Quarto' },
   ];
-
+  
+  //==CLAUDE==: Criar arquivo de constantes para os valores iniciais e só usar a constante aqui
   public sortOptions: Array<{ id: string; label: string }> = [
     { id: 'name', label: 'Nome (A-Z)' },
     { id: 'price-asc', label: 'Menor preço' },
@@ -51,9 +53,11 @@ export class GuestViewComponent implements OnInit {
   public constructor(public readonly giftService: GiftService, public readonly coupleService: CoupleService) {
     effect((): void => {
       const stateCouple: Couple = this.coupleService.state().couple;
+
       const nextSignature: string = `${stateCouple.names}|${stateCouple.weddingDate}|${stateCouple.photo}|${stateCouple.message}`;
 
-      if (this.coupleSignature === nextSignature) return;
+      if (this.coupleSignature === nextSignature)
+        return;
 
       this.coupleSignature = nextSignature;
       this.formattedWeddingDate = this.formatWeddingDate(stateCouple.weddingDate);
@@ -68,28 +72,31 @@ export class GuestViewComponent implements OnInit {
     const normalizedSearch = this.normalizeText(this.searchTerm);
     const cacheKey = `${selectedCategoryKey}|${normalizedSearch}|${this.sortBy}`;
 
-    if (this.filteredGiftsCacheSource === allGifts && this.filteredGiftsCacheKey === cacheKey) {
+    if (this.filteredGiftsCacheSource === allGifts && this.filteredGiftsCacheKey === cacheKey)
       return this.filteredGiftsCache;
-    }
 
     this.filteredGiftsCache = allGifts
-      .filter(g => {
-        const matchCat = selectedCategoryKey === 'todos' || this.getCategoryKey(g.category) === selectedCategoryKey;
-        const matchSearch = !normalizedSearch || this.normalizeText(g.name).includes(normalizedSearch);
+      .filter(gift => {
+        const matchCat = selectedCategoryKey === 'todos' || this.getCategoryKey(gift.category) === selectedCategoryKey;
+
+        const matchSearch = !normalizedSearch || this.normalizeText(gift.name).includes(normalizedSearch);
+
         return matchCat && matchSearch;
       })
       .sort((a, b) => {
-        if (this.sortBy === 'price-asc') 
+        if (this.sortBy === 'price-asc')
           return a.price - b.price;
-        
-        if (this.sortBy === 'price-desc') 
+
+        if (this.sortBy === 'price-desc')
           return b.price - a.price;
-        
+
         return a.name.localeCompare(b.name);
       });
 
+    //==CLAUDE==: Confirmar se é necessario ter cache na busca, não parece util
     this.filteredGiftsCacheSource = allGifts;
     this.filteredGiftsCacheKey = cacheKey;
+
     return this.filteredGiftsCache;
   }
 
@@ -109,7 +116,9 @@ export class GuestViewComponent implements OnInit {
     return this.giftService.guestState().gifts.reduce((sum: number, gift: Gift): number => sum + gift.total, 0);
   }
 
-  public get progressPercentage(): number { return this.totalGoal > 0 ? (this.totalRaised / this.totalGoal) * 100 : 0; }
+  public get progressPercentage(): number {
+    return this.totalGoal > 0 ? (this.totalRaised / this.totalGoal) * 100 : 0;
+  }
 
   public ngOnInit(): void {
     this.loadCouple();
@@ -122,6 +131,7 @@ export class GuestViewComponent implements OnInit {
 
   public onCouplePhotoError(): void {
     const apiPhoto = this.coupleService.state().couple.photo?.trim();
+    
     if (!this.hasTriedApiCouplePhoto && apiPhoto && apiPhoto !== this.displayCouplePhoto) {
       this.hasTriedApiCouplePhoto = true;
       this.displayCouplePhoto = apiPhoto;
@@ -131,12 +141,17 @@ export class GuestViewComponent implements OnInit {
     this.displayCouplePhoto = this.fallbackCouplePhoto;
   }
 
+  //==CLAUDE==: Criar o Date.helper.ts para ter esse método de formatação de data, e possivelmente outros métodos relacionados a datas.
   public formatWeddingDate(rawValue: string): string {
     const value = rawValue?.trim();
-    if (!value) return '';
+    
+    if (!value) 
+      return '';
 
     const match = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
-    if (!match) return value;
+    
+    if (!match) 
+      return value;
 
     const year = Number(match[1]);
     const month = Number(match[2]);
@@ -166,7 +181,7 @@ export class GuestViewComponent implements OnInit {
 
   public getCategoryKey(category: string): string {
     const normalized = this.normalizeText(category);
-    if (normalized === 'eletro' || normalized === 'eletrodomestico' || normalized === 'eletrodomesticos') 
+    if (normalized === 'eletro' || normalized === 'eletrodomestico' || normalized === 'eletrodomesticos')
       return 'eletrodomesticos';
 
     return normalized;

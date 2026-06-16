@@ -3,8 +3,8 @@
     <h3>{{ title() }}</h3>
     <p *ngIf="message()">{{ message() }}</p>
     <div class="confirm-actions">
-      <app-button variant="outline" type="button" (click)="cancelled.emit()">{{ cancelLabel() }}</app-button>
-      <app-button variant="primary" type="button" (click)="confirmed.emit()">{{ confirmLabel() }}</app-button>
+      <app-button [variant]="ButtonVariant.Outline" [type]="ButtonType.Button" (click)="cancelled.emit()">{{ cancelLabel() }}</app-button>
+      <app-button [variant]="ButtonVariant.Primary" [type]="ButtonType.Button" (click)="confirmed.emit()">{{ confirmLabel() }}</app-button>
     </div>
   </div>
 </div>

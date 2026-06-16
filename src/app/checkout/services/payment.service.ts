@@ -7,6 +7,7 @@ import { PixPaymentDto } from '../models/pix-payment-dto.model';
 import { PaymentResponse } from '../models/payment-response.model';
 import { PaymentState } from '../models/payment-state.model';
 import { PaymentStatusState } from '../models/payment-status-state.model';
+import { HttpErrorUtil } from '../../utils/http-error';
 
 @Injectable({ providedIn: 'root' })
 export class PaymentService {
@@ -31,10 +32,7 @@ export class PaymentService {
         this.patchPaymentState({ response });
       },
       error: (err: HttpErrorResponse): void => {
-        const error = err.status === 0
-          ? 'Não foi possível conectar. Verifique sua internet e tente novamente.'
-          : 'Erro ao processar o pagamento. Tente novamente.';
-        this.patchPaymentState({ error });
+        this.patchPaymentState({ error: HttpErrorUtil.extract(err, 'Erro ao processar o pagamento. Tente novamente.') });
       }
     });
   }
@@ -47,10 +45,7 @@ export class PaymentService {
         this.patchPaymentState({ response });
       },
       error: (err: HttpErrorResponse): void => {
-        const error = err.status === 0
-          ? 'Não foi possível conectar. Verifique sua internet e tente novamente.'
-          : 'Erro ao gerar o PIX. Tente novamente.';
-        this.patchPaymentState({ error });
+        this.patchPaymentState({ error: HttpErrorUtil.extract(err, 'Erro ao gerar o PIX. Tente novamente.') });
       }
     });
   }
@@ -61,10 +56,7 @@ export class PaymentService {
         this.patchStatusState({ response, error: '' });
       },
       error: (err: HttpErrorResponse): void => {
-        const error = err.status === 0
-          ? 'Sem conexão para consultar o status. Tentando novamente...'
-          : 'Erro ao consultar status do pagamento.';
-        this.patchStatusState({ error });
+        this.patchStatusState({ error: HttpErrorUtil.extract(err, 'Erro ao consultar status do pagamento.') });
       }
     });
   }
