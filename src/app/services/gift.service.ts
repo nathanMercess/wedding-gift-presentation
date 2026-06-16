@@ -1,5 +1,5 @@
 import { Injectable, WritableSignal, signal } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { finalize } from 'rxjs';
 import { EndpointsUrls } from '../constants/api-endpoints';
 import { ContributionRequest } from '../models/contribution-request.model';
@@ -120,8 +120,14 @@ export class GiftService {
         next: (response: ImageUploadResponse): void => {
           onSuccess(response.url);
         },
-        error: (): void => {
-          this.patchAdminState({ imageUploadError: 'Erro ao enviar a imagem. Tente novamente.' });
+        error: (err: HttpErrorResponse): void => {
+          const detail = err.error?.detail || err.error?.title;
+          const message = err.status === 0
+            ? 'Não foi possível conectar para enviar a imagem. Verifique sua internet.'
+            : err.status === 413
+              ? 'A imagem é muito grande para o servidor aceitar.'
+              : detail || `Erro ao enviar a imagem (${err.status}). Tente novamente.`;
+          this.patchAdminState({ imageUploadError: message });
           if (onError) onError();
         }
       });
