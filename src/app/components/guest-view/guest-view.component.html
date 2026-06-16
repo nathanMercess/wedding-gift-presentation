@@ -156,8 +156,7 @@
         <div class="gifts-grid">
           <div *ngFor="let gift of filteredGifts; trackBy: trackByGiftId" class="gift-grid-item"
             (click)="selectedGift = gift" style="cursor:pointer">
-            <app-gift-card [image]="gift.image" [name]="gift.name" [price]="gift.price" [raised]="gift.raised"
-              [total]="gift.total"></app-gift-card>
+            <app-gift-card [gift]="gift"></app-gift-card>
           </div>
         </div>
       </div>

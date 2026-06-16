@@ -188,8 +188,8 @@
 
         <ng-container *ngIf="activeMethod">
           <app-card-brick *ngIf="activeMethod === PaymentMethod.CreditCard || activeMethod === PaymentMethod.DebitCard"
-            [cardType]="activeMethod" [orderId]="orderId" [giftId]="gift().id" [contributorName]="guestName"
-            [message]="guestMessage" [amount]="getContributionAmount()" (paymentApproved)="onPaymentApproved()">
+            [config]="{ cardType: activeMethod, orderId: orderId, giftId: gift().id, contributorName: guestName, message: guestMessage, amount: getContributionAmount(), payerEmail: '' }"
+            (paymentApproved)="onPaymentApproved()">
           </app-card-brick>
 
           <app-pix-display *ngIf="activeMethod === PaymentMethod.Pix" [orderId]="orderId" [giftId]="gift().id"

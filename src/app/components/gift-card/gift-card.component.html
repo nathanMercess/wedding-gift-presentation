@@ -1,13 +1,13 @@
 <div class="gift-card" (click)="onPresent()">
   <div class="image-wrap">
-    <img [src]="image()" [alt]="name()" (error)="onImgError($event)" />
+    <img [src]="gift().image" [alt]="gift().name" (error)="onImgError($event)" />
   </div>
   <div class="content">
-    <h3>{{ name() }}</h3>
+    <h3>{{ gift().name }}</h3>
     <div class="progress-section">
       <div class="progress-labels">
         <span class="label">Arrecadado</span>
-        <span class="values">R$ {{ raised().toFixed(2) }} de R$ {{ total().toFixed(2) }}</span>
+        <span class="values">R$ {{ gift().raised.toFixed(2) }} de R$ {{ gift().total.toFixed(2) }}</span>
       </div>
       <div class="progress-bar">
         <div class="progress-fill" [style.width.%]="progressPercent"></div>
