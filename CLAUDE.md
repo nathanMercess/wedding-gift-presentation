@@ -6,6 +6,39 @@ Estes padrões são obrigatórios para qualquer componente ou service novo/edita
 - **Componentes**: seguir o padrão de [src/app/components/guest-view/guest-view.component.ts](src/app/components/guest-view/guest-view.component.ts)
 - **Services**: seguir o padrão de [src/app/services/auth.service.ts](src/app/services/auth.service.ts)
 
+## Ordem das propriedades no `@Component`
+
+Sempre nesta ordem, com trailing comma em cada propriedade:
+
+```ts
+@Component({
+  standalone: true,
+  selector: 'app-example',
+  templateUrl: './example.component.html',
+  styleUrl: './example.component.scss',
+  imports: [CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush, // só se usado
+})
+```
+
+---
+
+## Enums
+
+Todo union type de strings deve virar enum — nunca usar `'value1' | 'value2'` diretamente em propriedades, parâmetros ou modelos. Cada enum em seu próprio arquivo:
+
+```
+src/app/enums/              → enums compartilhados (ModalStep, ButtonVariant, etc.)
+src/app/checkout/enums/     → enums do domínio de pagamento (PaymentMethod, PaymentStatus, PixStep)
+```
+
+Para usar enums em templates Angular, expor o tipo no componente:
+```ts
+public readonly PaymentMethod: typeof PaymentMethod = PaymentMethod;
+```
+
+---
+
 ## Regras gerais
 
 1. **Imports em uma única linha por statement.** Não quebrar imports do `@angular/core`, `@angular/forms` etc em múltiplas linhas, mesmo que fiquem longos.
