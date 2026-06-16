@@ -260,6 +260,18 @@
   border-collapse: collapse;
   font-size: .9rem;
 
+  tr.editing-row {
+    background: rgba(196,149,106,.08);
+  }
+
+  tr.editing-row td {
+    background: rgba(196,149,106,.08);
+  }
+
+  tr.editing-row td:first-child {
+    border-left: 3px solid #C4956A;
+  }
+
   th {
     background: #F7F0EA;
     text-align: left;

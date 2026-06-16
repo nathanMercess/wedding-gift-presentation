@@ -95,7 +95,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let gift of giftService.adminState().gifts">
+            <tr *ngFor="let gift of giftService.adminState().gifts" [class.editing-row]="editingGift?.id === gift.id">
               <td data-label="Presente">
                 <div class="gift-cell">
                   <img [src]="gift.image" [alt]="gift.name" class="gift-thumb" />

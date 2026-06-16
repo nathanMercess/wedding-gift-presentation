@@ -22,7 +22,7 @@
     <div class="modal-content">
 
       <!-- PASSO 1: Detalhes e contribuição -->
-      <div *ngIf="step === 'contribution'" class="modal-grid">
+      <div *ngIf="step === 'contribution'" class="modal-grid" [class.single-column]="isCompleted">
         <!-- Left: Gift Info -->
         <div class="gift-info">
           <div class="gift-image">
@@ -58,10 +58,14 @@
             </svg>
             <p>Este presente já foi completamente presenteado! Escolha outro para contribuir.</p>
           </div>
+
+          <div *ngIf="isCompleted" class="actions">
+            <app-button variant="primary" type="button" (click)="close.emit()">Fechar</app-button>
+          </div>
         </div>
 
         <!-- Right: Form -->
-        <div class="form-side" *ngIf="!isCompleted; else completedActions">
+        <div class="form-side" *ngIf="!isCompleted">
           <div>
             <h3 class="serif">Como deseja presentear?</h3>
             <p class="subtitle">Presenteie {{ coupleName() }} com este item especial</p>
@@ -191,14 +195,6 @@
             </p>
           </form>
         </div>
-
-        <ng-template #completedActions>
-          <div class="form-side">
-            <div class="actions">
-              <app-button variant="primary" type="button" (click)="close.emit()">Fechar</app-button>
-            </div>
-          </div>
-        </ng-template>
       </div>
 
       <!-- PASSO 2: Pagamento -->

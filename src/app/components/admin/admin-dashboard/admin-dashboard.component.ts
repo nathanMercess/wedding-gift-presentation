@@ -26,10 +26,11 @@ export class AdminDashboardComponent implements OnInit {
   public giftForm: Partial<Gift> = {};
   public giftPendingDeletion: Gift | null = null;
   public readonly categories: Array<{ id: string; label: string }> = [
-    { id: 'cozinha', label: 'Cozinha' },
-    { id: 'eletro', label: 'Eletrodomésticos' },
-    { id: 'quarto', label: 'Quarto' },
-    { id: 'banho', label: 'Banho' },
+    { id: 'Cozinha', label: 'Cozinha' },
+    { id: 'Eletrodomésticos', label: 'Eletrodomésticos' },
+    { id: 'Quarto', label: 'Quarto' },
+    { id: 'Mesa', label: 'Mesa' },
+    { id: 'Casa', label: 'Casa' },
   ];
 
   public constructor(
@@ -67,10 +68,11 @@ export class AdminDashboardComponent implements OnInit {
 
   public openNewGift(): void {
     this.editingGift = null;
-    this.giftForm = { category: 'cozinha', raised: 0 };
+    this.giftForm = { category: 'Cozinha', raised: 0 };
     this.giftService.clearAdminGiftError();
     this.giftService.resetAdminGiftSaved();
     this.showGiftForm = true;
+    this.scrollToGiftForm();
   }
 
   public openEditGift(gift: Gift): void {
@@ -79,6 +81,13 @@ export class AdminDashboardComponent implements OnInit {
     this.giftService.clearAdminGiftError();
     this.giftService.resetAdminGiftSaved();
     this.showGiftForm = true;
+    this.scrollToGiftForm();
+  }
+
+  private scrollToGiftForm(): void {
+    setTimeout((): void => {
+      document.querySelector('.form-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   }
 
   public cancelGiftForm(): void {

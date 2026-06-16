@@ -57,6 +57,11 @@
 }
 @media (min-width: 768px) {
   .modal-grid { grid-template-columns: 1fr 1fr; }
+  .modal-grid.single-column {
+    grid-template-columns: 1fr;
+    max-width: 28rem;
+    margin: 0 auto;
+  }
 }
 .gift-info {
   display: flex;
