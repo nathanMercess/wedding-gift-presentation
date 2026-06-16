@@ -8,6 +8,7 @@ import { GuestGiftState } from '../models/guest-gift-state.model';
 import { GiftContributionState } from '../models/gift-contribution-state.model';
 import { Gift } from '../models/gift.model';
 import { ImageUploadResponse } from '../models/image-upload-response.model';
+import { HttpErrorUtil } from '../utils/http-error';
 
 @Injectable({ providedIn: 'root' })
 export class GiftService {
@@ -45,8 +46,8 @@ export class GiftService {
       next: (gifts: Gift[]): void => {
         this.patchGuestState({ gifts });
       },
-      error: (): void => {
-        this.patchGuestState({ error: 'Nao foi possivel carregar os presentes.' });
+      error: (err: HttpErrorResponse): void => {
+        this.patchGuestState({ error: HttpErrorUtil.extract(err, 'Não foi possível carregar os presentes.') });
       }
     });
   }
@@ -58,8 +59,8 @@ export class GiftService {
       next: (gifts: Gift[]): void => {
         this.patchAdminState({ gifts });
       },
-      error: (): void => {
-        this.patchAdminState({ giftsError: 'Erro ao carregar presentes.' });
+      error: (err: HttpErrorResponse): void => {
+        this.patchAdminState({ giftsError: HttpErrorUtil.extract(err, 'Erro ao carregar presentes.') });
       }
     });
   }
@@ -73,8 +74,8 @@ export class GiftService {
           this.patchAdminState({ giftSaved: true });
           this.loadAdminGifts();
         },
-        error: (): void => {
-          this.patchAdminState({ giftError: 'Erro ao salvar presente.' });
+        error: (err: HttpErrorResponse): void => {
+          this.patchAdminState({ giftError: HttpErrorUtil.extract(err, 'Erro ao salvar presente.') });
         }
       });
       return;
@@ -85,8 +86,8 @@ export class GiftService {
         this.patchAdminState({ giftSaved: true });
         this.loadAdminGifts();
       },
-      error: (): void => {
-        this.patchAdminState({ giftError: 'Erro ao salvar presente.' });
+      error: (err: HttpErrorResponse): void => {
+        this.patchAdminState({ giftError: HttpErrorUtil.extract(err, 'Erro ao salvar presente.') });
       }
     });
   }
@@ -98,8 +99,8 @@ export class GiftService {
       next: (): void => {
         this.loadAdminGifts();
       },
-      error: (): void => {
-        this.patchAdminState({ giftsError: 'Erro ao remover presente.' });
+      error: (err: HttpErrorResponse): void => {
+        this.patchAdminState({ giftsError: HttpErrorUtil.extract(err, 'Erro ao remover presente.') });
       }
     });
   }
@@ -121,12 +122,9 @@ export class GiftService {
           onSuccess(response.url);
         },
         error: (err: HttpErrorResponse): void => {
-          const detail = err.error?.detail || err.error?.title;
-          const message = err.status === 0
-            ? 'Não foi possível conectar para enviar a imagem. Verifique sua internet.'
-            : err.status === 413
-              ? 'A imagem é muito grande para o servidor aceitar.'
-              : detail || `Erro ao enviar a imagem (${err.status}). Tente novamente.`;
+          const message = err.status === 413
+            ? 'A imagem é muito grande para o servidor aceitar.'
+            : HttpErrorUtil.extract(err, 'Erro ao enviar a imagem.');
           this.patchAdminState({ imageUploadError: message });
           if (onError) onError();
         }
@@ -146,8 +144,8 @@ export class GiftService {
         this.loadGuestGifts();
         if (onSuccess) onSuccess();
       },
-      error: (): void => {
-        this.patchContributionState({ error: 'Erro ao registrar contribuicao. Tente novamente.' });
+      error: (err: HttpErrorResponse): void => {
+        this.patchContributionState({ error: HttpErrorUtil.extract(err, 'Erro ao registrar contribuição. Tente novamente.') });
       }
     });
   }

@@ -45,3 +45,66 @@ Estes padrões são obrigatórios para qualquer componente ou service novo/edita
 9. **Services sem estado** (ex: `payment.service.ts`) seguem a mesma estrutura de construtor `public readonly`, métodos `public`, tipos de retorno explícitos (`Observable<T>`), mesmo sem signals.
 
 10. Não criar abstrações, comentários ou validações extras além do necessário — manter o código tão direto quanto os arquivos de referência.
+
+11. **Sem `function` keyword e sem `const fn = () =>`** — utilitários são sempre **classe abstrata com métodos estáticos**:
+    ```ts
+    export abstract class HttpErrorUtil {
+      public static extract(err: HttpErrorResponse, fallback: string): string { ... }
+    }
+    ```
+
+12. **`if` sem `else`** — usar early returns. Nunca encadear `if/else if/else`. Formato obrigatório: condição na mesma linha do `if`, retorno na linha seguinte indentada, linha em branco após o bloco:
+    ```ts
+    if (err.status === 0)
+      return 'Sem conexão.';
+
+    const body = err.error;
+
+    if (!body)
+      return `${fallback} (${err.status})`;
+    ```
+    Chaves (`{}`) só quando o bloco tiver mais de uma instrução.
+
+---
+
+## Tratamento de erros HTTP em services
+
+Todo handler `error:` de `HttpClient` deve usar `HttpErrorUtil.extract` de `src/app/utils/http-error.ts` em vez de string fixa. Lê `ProblemDetails`/`ValidationProblemDetails` em ordem: erros de validação campo-a-campo → `detail` → `title` → fallback com status HTTP.
+
+```ts
+import { HttpErrorUtil } from '../utils/http-error';
+
+error: (err: HttpErrorResponse): void => {
+  this.patchState({ error: HttpErrorUtil.extract(err, 'Mensagem de fallback.') });
+}
+```
+
+Utilitários ficam em `src/app/utils/` como **classe abstrata com métodos estáticos públicos** — nunca `function`, nunca `const fn = () =>`, nunca método privado no service.
+
+---
+
+## Componentes de diálogo e confirmação
+
+- Usar `ConfirmDialogComponent` (`src/app/components/confirm-dialog/`) para toda ação destrutiva — nunca `window.confirm()`.
+- Inputs: `title`, `message`, `confirmLabel`, `cancelLabel`. Outputs: `(confirmed)`, `(cancelled)`.
+- Controlar visibilidade com uma flag booleana no componente pai (`showXxxConfirm: boolean`).
+- Fechar com `Esc` deve cancelar o diálogo (chamar o handler de `cancelled`).
+
+---
+
+## Categorias de presentes
+
+Os valores válidos de categoria são exatamente (case-sensitive, como o backend armazena):
+`Cozinha` | `Eletrodomésticos` | `Quarto` | `Mesa` | `Casa`
+
+Qualquer select/filtro de categoria deve usar esses valores exatos como `id`.
+
+---
+
+## Deploy e infraestrutura
+
+- Push em `main` dispara CI/CD automaticamente (GitHub Actions) para frontend e backend separadamente.
+- O nginx da VM (`/etc/nginx/sites-enabled/davidmaira.com`) é a camada externa antes dos containers Docker — qualquer limite de upload ou header deve ser configurado lá via SSH (`gcloud compute ssh wedding-gift --zone southamerica-east1-c`).
+- O nginx dentro do container Docker (`nginx.conf`) está atrás do nginx da VM.
+- Migrations de banco são aplicadas automaticamente no startup da API (`MigrateAsync`).
+- Bucket GCS: `weddinggift-uploads` (southamerica-east1) — fotos ficam em `gifts/{uuid}.ext`, URLs públicas `https://storage.googleapis.com/weddinggift-uploads/gifts/...`.
