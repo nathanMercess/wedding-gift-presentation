@@ -8,7 +8,7 @@ import { CoupleService } from '../../../services/couple.service';
 import { AuthService } from '../../../services/auth.service';
 import { ConfirmDialogComponent } from '../../confirm-dialog/confirm-dialog.component';
 
-const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
+const MAX_IMAGE_SIZE_BYTES = 20 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 @Component({
@@ -113,7 +113,7 @@ export class AdminDashboardComponent implements OnInit {
       return;
     }
     if (file.size > MAX_IMAGE_SIZE_BYTES) {
-      this.giftService.patchAdminState({ imageUploadError: 'O tamanho máximo permitido é 5MB.' });
+      this.giftService.patchAdminState({ imageUploadError: 'O tamanho máximo permitido é 20MB.' });
       return;
     }
 

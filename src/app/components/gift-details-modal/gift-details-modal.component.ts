@@ -1,4 +1,4 @@
-import { Component, InputSignal, OnDestroy, OnInit, OutputEmitterRef, input, output } from '@angular/core';
+import { Component, HostListener, InputSignal, OnDestroy, OnInit, OutputEmitterRef, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Gift } from '../../models/gift.model';
@@ -73,6 +73,15 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy {
   public getContributionAmount(): number {
     if (this.contributionType === 'full') return this.remaining;
     return parseFloat(this.customAmount) || 0;
+  }
+
+  @HostListener('document:keydown.escape')
+  public onEscapePressed(): void {
+    if (this.showExitConfirm) {
+      this.cancelExit();
+      return;
+    }
+    this.requestClose();
   }
 
   public onBackdropClick(event: MouseEvent): void {
