@@ -3,13 +3,13 @@
     <!-- Header -->
     <div class="modal-header">
       <div class="modal-header-left">
-        <button *ngIf="step !== 'contribution'" type="button" class="back-btn" (click)="backToContribution()">
+        <button *ngIf="step === 'payment'" type="button" class="back-btn" (click)="backToContribution()">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
           Voltar
         </button>
-        <h2>{{ step === 'contribution' ? 'Detalhes do Presente' : 'Pagamento' }}</h2>
+        <h2>{{ step === 'contribution' ? 'Detalhes do Presente' : step === 'payment' ? 'Pagamento' : 'Pagamento confirmado' }}</h2>
       </div>
       <button class="close-btn" (click)="close.emit()">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -209,19 +209,47 @@
             *ngIf="activeMethod === 'credit_card' || activeMethod === 'debit_card'"
             [cardType]="activeMethod"
             [orderId]="gift.id.toString()"
-            [amount]="getContributionAmount()">
+            [amount]="getContributionAmount()"
+            [payerEmail]="guestName"
+            (paymentApproved)="onPaymentApproved()">
           </app-card-brick>
 
           <app-pix-display
             *ngIf="activeMethod === 'pix'"
             [orderId]="gift.id.toString()"
-            [amount]="getContributionAmount()">
+            [amount]="getContributionAmount()"
+            (paymentApproved)="onPaymentApproved()">
           </app-pix-display>
         </ng-container>
 
         <p *ngIf="!activeMethod" class="payment-hint">
           Escolha como deseja pagar para continuar.
         </p>
+      </div>
+
+      <!-- PASSO 3: Sucesso -->
+      <div *ngIf="step === 'success'" class="payment-step success-step">
+        <div class="completed-notice success-notice" role="status" aria-live="polite">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 6L9 17l-5-5" />
+          </svg>
+          <p>Pagamento aprovado com sucesso. Obrigado por presentear {{ coupleName }}.</p>
+        </div>
+
+        <div class="summary-box">
+          <div class="summary-row">
+            <span class="label">Presente</span>
+            <span class="value">{{ gift.name }}</span>
+          </div>
+          <div class="summary-row total-row">
+            <span class="value">Valor pago</span>
+            <span class="total-amount">{{ getContributionAmount() | currency:'BRL' }}</span>
+          </div>
+        </div>
+
+        <div class="actions">
+          <app-button variant="primary" type="button" (click)="close.emit()">Fechar</app-button>
+        </div>
       </div>
 
     </div>

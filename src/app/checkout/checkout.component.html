@@ -3,22 +3,29 @@
   <p class="checkout-total">Total: {{ totalAmount | currency:'BRL' }}</p>
 
   <app-payment-method-selector
+    *ngIf="!paymentApproved"
     (methodSelected)="onMethodSelected($event)">
   </app-payment-method-selector>
 
-  <div class="checkout-form" *ngIf="activeMethod">
+  <div class="checkout-form" *ngIf="activeMethod && !paymentApproved">
     <app-card-brick
       *ngIf="activeMethod === 'credit_card' || activeMethod === 'debit_card'"
       [cardType]="activeMethod"
       [orderId]="orderId"
-      [amount]="totalAmount">
+      [amount]="totalAmount"
+      (paymentApproved)="onPaymentApproved()">
     </app-card-brick>
 
     <app-pix-display
       *ngIf="activeMethod === 'pix'"
       [orderId]="orderId"
-      [amount]="totalAmount">
+      [amount]="totalAmount"
+      (paymentApproved)="onPaymentApproved()">
     </app-pix-display>
+  </div>
+
+  <div *ngIf="paymentApproved" class="checkout-success" role="status" aria-live="polite">
+    Pagamento aprovado com sucesso.
   </div>
 </div>
 

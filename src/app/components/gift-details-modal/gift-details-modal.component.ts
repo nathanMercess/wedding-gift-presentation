@@ -20,7 +20,7 @@ export class GiftDetailsModalComponent {
   @Input() public coupleName: string = '';
   @Output() public close: EventEmitter<void> = new EventEmitter<void>();
 
-  public step: 'contribution' | 'payment' = 'contribution';
+  public step: 'contribution' | 'payment' | 'success' = 'contribution';
   public activeMethod: 'credit_card' | 'debit_card' | 'pix' | null = null;
 
   public contributionType: 'full' | 'partial' = 'full';
@@ -76,5 +76,10 @@ export class GiftDetailsModalComponent {
   public backToContribution(): void {
     this.step = 'contribution';
     this.activeMethod = null;
+  }
+
+  public onPaymentApproved(): void {
+    this.activeMethod = null;
+    this.step = 'success';
   }
 }

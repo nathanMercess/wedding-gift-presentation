@@ -3,10 +3,11 @@ import {
   ChangeDetectorRef,
   Component,
   DestroyRef,
+  EventEmitter,
   inject,
   Input,
+  Output,
   OnDestroy,
-  OnInit
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
@@ -19,7 +20,6 @@ import {
   ValidatorFn,
   Validators
 } from '@angular/forms';
-import { Router } from '@angular/router';
 import { take } from 'rxjs';
 import { PaymentService } from '../../services/payment.service';
 import { PixPaymentDto } from '../../models/pix-payment-dto.model';
@@ -42,6 +42,7 @@ function cpfValidator(): ValidatorFn {
 export class PixDisplayComponent implements OnDestroy {
   @Input() orderId = '';
   @Input() amount = 0;
+  @Output() paymentApproved = new EventEmitter<void>();
 
   /** Internal step: collect payer data first, then show QR */
   pixStep: 'form' | 'loading' | 'qr' = 'form';
@@ -63,7 +64,6 @@ export class PixDisplayComponent implements OnDestroy {
 
   constructor(
     private readonly paymentService: PaymentService,
-    private readonly router: Router,
     private readonly fb: FormBuilder
   ) {
     this.payerForm = this.fb.group({
@@ -141,7 +141,7 @@ export class PixDisplayComponent implements OnDestroy {
           next: (response) => {
             if (response.status === 'approved') {
               this.stopPolling();
-              this.router.navigate(['/sucesso']);
+              this.paymentApproved.emit();
             } else if (response.status === 'rejected') {
               this.stopPolling();
               this.error = response.message ?? 'Pagamento rejeitado.';

@@ -21,6 +21,7 @@ export class CheckoutComponent implements OnInit {
   activeMethod: 'credit_card' | 'debit_card' | 'pix' | null = null;
   orderId = '';
   totalAmount = 0;
+  paymentApproved = false;
 
   constructor(private readonly route: ActivatedRoute) {}
 
@@ -32,7 +33,13 @@ export class CheckoutComponent implements OnInit {
   }
 
   onMethodSelected(method: 'credit_card' | 'debit_card' | 'pix'): void {
+    this.paymentApproved = false;
     this.activeMethod = method;
+  }
+
+  onPaymentApproved(): void {
+    this.paymentApproved = true;
+    this.activeMethod = null;
   }
 }
 

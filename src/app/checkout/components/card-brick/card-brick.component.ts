@@ -1,6 +1,5 @@
-import { AfterViewInit, ChangeDetectorRef, Component, inject, Input, NgZone, OnDestroy } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, inject, Input, NgZone, OnDestroy, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
 import { loadMercadoPago } from '@mercadopago/sdk-js';
 import { environment } from '../../../../environments/environment';
 import { PaymentService } from '../../services/payment.service';
@@ -18,18 +17,17 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
     @Input() orderId = '';
     @Input() cardType: 'credit_card' | 'debit_card' = 'credit_card';
     @Input() payerEmail = '';
+    @Output() paymentApproved = new EventEmitter<void>();
 
     brickReady = false;
     error = '';
 
     private brickController: any = null;
 
-    private readonly cdr = inject(ChangeDetectorRef);
     private readonly ngZone = inject(NgZone);
 
     constructor(
-        private readonly paymentService: PaymentService,
-        private readonly router: Router
+        private readonly paymentService: PaymentService
     ) { }
 
     async ngAfterViewInit(): Promise<void> {
@@ -126,7 +124,7 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
                     this.ngZone.run(() => {
                         if (res.status === 'approved' || res.status === 'processed') {
                             resolve();
-                            this.router.navigate(['/sucesso']);
+                            this.paymentApproved.emit();
                         } else if (res.status === 'in_process' || res.status === 'pending') {
                             resolve();
                             this.error = 'Pagamento em análise. Você será notificado assim que for confirmado.';
