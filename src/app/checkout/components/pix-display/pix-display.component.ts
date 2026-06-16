@@ -1,27 +1,9 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  DestroyRef,
-  EventEmitter,
-  inject,
-  Input,
-  Output,
-  OnDestroy,
-} from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, InputSignal, OnDestroy, OutputEmitterRef, effect, inject, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  AbstractControl,
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  ValidationErrors,
-  ValidatorFn,
-  Validators
-} from '@angular/forms';
-import { take } from 'rxjs';
+import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { PaymentService } from '../../services/payment.service';
+import { PaymentState } from '../../models/payment-state.model';
+import { PaymentStatusState } from '../../models/payment-status-state.model';
 import { PixPaymentDto } from '../../models/pix-payment-dto.model';
 
 function cpfValidator(): ValidatorFn {
@@ -40,39 +22,40 @@ function cpfValidator(): ValidatorFn {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PixDisplayComponent implements OnDestroy {
-  @Input() orderId = '';
-  @Input() amount = 0;
-  @Output() paymentApproved = new EventEmitter<void>();
+  public readonly orderId: InputSignal<string> = input<string>('');
+  public readonly amount: InputSignal<number> = input<number>(0);
+  public readonly paymentApproved: OutputEmitterRef<void> = output<void>();
 
   /** Internal step: collect payer data first, then show QR */
-  pixStep: 'form' | 'loading' | 'qr' = 'form';
+  public pixStep: 'form' | 'loading' | 'qr' = 'form';
 
-  qrCode = '';
-  qrCodeBase64 = '';
-  mpOrderId = '';
-  error = '';
-  expired = false;
-  copied = false;
+  public qrCode: string = '';
+  public qrCodeBase64: string = '';
+  public mpOrderId: string = '';
+  public error: string = '';
+  public expired: boolean = false;
+  public copied: boolean = false;
 
-  readonly payerForm: FormGroup;
+  public readonly payerForm: FormGroup;
 
   private pollingInterval: ReturnType<typeof setInterval> | null = null;
   private expirationTimeout: ReturnType<typeof setTimeout> | null = null;
+  private awaitingPixResponse: boolean = false;
+  private awaitingStatusCheck: boolean = false;
 
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly cdr: ChangeDetectorRef = inject(ChangeDetectorRef);
 
-  constructor(
-    private readonly paymentService: PaymentService,
-    private readonly fb: FormBuilder
-  ) {
+  public constructor(public readonly paymentService: PaymentService, public readonly fb: FormBuilder) {
     this.payerForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       cpf: ['', [Validators.required, cpfValidator()]]
     });
+
+    effect((): void => this.handlePaymentState(this.paymentService.paymentState()));
+    effect((): void => this.handleStatusState(this.paymentService.statusState()));
   }
 
-  onCpfInput(event: Event): void {
+  public onCpfInput(event: Event): void {
     const input = event.target as HTMLInputElement;
     let digits = input.value.replace(/\D/g, '').slice(0, 11);
     let formatted = digits;
@@ -86,7 +69,7 @@ export class PixDisplayComponent implements OnDestroy {
     this.payerForm.get('cpf')!.setValue(formatted, { emitEvent: false });
   }
 
-  generatePix(): void {
+  public generatePix(): void {
     if (this.payerForm.invalid) {
       this.payerForm.markAllAsTouched();
       return;
@@ -99,59 +82,62 @@ export class PixDisplayComponent implements OnDestroy {
     const rawCpf = (this.payerForm.value.cpf as string).replace(/\D/g, '');
 
     const dto: PixPaymentDto = {
-      orderId: this.orderId,
-      amount: this.amount,
+      orderId: this.orderId(),
+      amount: this.amount(),
       payerEmail: this.payerForm.value.email as string,
       payerDocType: 'CPF',
       payerDocNumber: rawCpf
     };
 
-    this.paymentService
-      .payWithPix(dto)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          if (response.mpOrderId && response.qrCodeBase64) {
-            this.mpOrderId = response.mpOrderId;
-            this.qrCode = response.qrCode ?? '';
-            this.qrCodeBase64 = response.qrCodeBase64;
-            this.pixStep = 'qr';
-            this.cdr.markForCheck();
-            this.startPolling();
-            this.startExpirationTimeout();
-          } else {
-            this.error = response.message ?? 'Erro ao gerar o PIX. Tente novamente.';
-            this.pixStep = 'form';
-            this.cdr.markForCheck();
-          }
-        },
-        error: () => {
-          this.error = 'Erro ao gerar o PIX. Tente novamente.';
-          this.pixStep = 'form';
-          this.cdr.markForCheck();
-        }
-      });
+    this.awaitingPixResponse = true;
+    this.paymentService.payWithPix(dto);
+  }
+
+  private handlePaymentState(state: PaymentState): void {
+    if (state.submitting || !this.awaitingPixResponse) return;
+    this.awaitingPixResponse = false;
+
+    if (state.response) {
+      const response = state.response;
+      if (response.mpOrderId && response.qrCodeBase64) {
+        this.mpOrderId = response.mpOrderId;
+        this.qrCode = response.qrCode ?? '';
+        this.qrCodeBase64 = response.qrCodeBase64;
+        this.pixStep = 'qr';
+        this.cdr.markForCheck();
+        this.startPolling();
+        this.startExpirationTimeout();
+      } else {
+        this.error = response.message ?? 'Erro ao gerar o PIX. Tente novamente.';
+        this.pixStep = 'form';
+        this.cdr.markForCheck();
+      }
+    } else if (state.error) {
+      this.error = 'Erro ao gerar o PIX. Tente novamente.';
+      this.pixStep = 'form';
+      this.cdr.markForCheck();
+    }
+  }
+
+  private handleStatusState(state: PaymentStatusState): void {
+    if (!this.awaitingStatusCheck) return;
+    this.awaitingStatusCheck = false;
+
+    if (state.response?.status === 'approved') {
+      this.stopPolling();
+      this.paymentApproved.emit();
+    } else if (state.response?.status === 'rejected') {
+      this.stopPolling();
+      this.error = state.response.message ?? 'Pagamento rejeitado.';
+      this.cdr.markForCheck();
+    }
+    // status pendente ou erro transitório: mantém o polling até a próxima tentativa
   }
 
   private startPolling(): void {
     this.pollingInterval = setInterval(() => {
-      this.paymentService.getStatus(this.mpOrderId)
-        .pipe(take(1))
-        .subscribe({
-          next: (response) => {
-            if (response.status === 'approved') {
-              this.stopPolling();
-              this.paymentApproved.emit();
-            } else if (response.status === 'rejected') {
-              this.stopPolling();
-              this.error = response.message ?? 'Pagamento rejeitado.';
-              this.cdr.markForCheck();
-            }
-          },
-          error: () => {
-            // Transient polling error — retries on the next interval
-          }
-        });
+      this.awaitingStatusCheck = true;
+      this.paymentService.checkStatus(this.mpOrderId);
     }, 5000);
   }
 
@@ -174,7 +160,7 @@ export class PixDisplayComponent implements OnDestroy {
     }
   }
 
-  copyCode(): void {
+  public copyCode(): void {
     navigator.clipboard.writeText(this.qrCode).then(() => {
       this.copied = true;
       this.cdr.markForCheck();
@@ -185,7 +171,7 @@ export class PixDisplayComponent implements OnDestroy {
     });
   }
 
-  ngOnDestroy(): void {
+  public ngOnDestroy(): void {
     this.stopPolling();
   }
 }

@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, InputSignal, OutputEmitterRef, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Gift } from '../../models/gift.model';
@@ -16,9 +16,9 @@ import { PixDisplayComponent } from '../../checkout/components/pix-display/pix-d
   styleUrl: './gift-details-modal.component.scss'
 })
 export class GiftDetailsModalComponent {
-  @Input() public gift!: Gift;
-  @Input() public coupleName: string = '';
-  @Output() public close: EventEmitter<void> = new EventEmitter<void>();
+  public readonly gift: InputSignal<Gift> = input.required<Gift>();
+  public readonly coupleName: InputSignal<string> = input<string>('');
+  public readonly close: OutputEmitterRef<void> = output<void>();
 
   public step: 'contribution' | 'payment' | 'success' = 'contribution';
   public activeMethod: 'credit_card' | 'debit_card' | 'pix' | null = null;
@@ -35,15 +35,15 @@ export class GiftDetailsModalComponent {
   }
 
   public get remaining(): number {
-    return this.gift.total - this.gift.raised;
+    return this.gift().total - this.gift().raised;
   }
 
   public get progress(): number {
-    return (this.gift.raised / this.gift.total) * 100;
+    return (this.gift().raised / this.gift().total) * 100;
   }
 
   public get isCompleted(): boolean {
-    return this.gift.raised >= this.gift.total;
+    return this.gift().raised >= this.gift().total;
   }
 
   public getContributionAmount(): number {

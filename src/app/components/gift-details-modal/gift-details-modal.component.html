@@ -26,20 +26,20 @@
         <!-- Left: Gift Info -->
         <div class="gift-info">
           <div class="gift-image">
-            <img [src]="gift.image" [alt]="gift.name" decoding="async" />
+            <img [src]="gift().image" [alt]="gift().name" decoding="async" />
           </div>
           <div>
-            <h3>{{ gift.name }}</h3>
-            <p class="description">{{ gift.description }}</p>
+            <h3>{{ gift().name }}</h3>
+            <p class="description">{{ gift().description }}</p>
           </div>
           <div class="summary-box">
             <div class="summary-row">
               <span class="label">Valor total</span>
-              <span class="value">R$ {{ gift.total.toFixed(2) }}</span>
+              <span class="value">R$ {{ gift().total.toFixed(2) }}</span>
             </div>
             <div class="summary-row">
               <span class="label">Arrecadado</span>
-              <span class="value primary">R$ {{ gift.raised.toFixed(2) }}</span>
+              <span class="value primary">R$ {{ gift().raised.toFixed(2) }}</span>
             </div>
             <div class="summary-row">
               <span class="label">Faltam</span>
@@ -64,7 +64,7 @@
         <div class="form-side">
           <div>
             <h3 class="serif">Como deseja presentear?</h3>
-            <p class="subtitle">Presenteie {{ coupleName }} com este item especial</p>
+            <p class="subtitle">Presenteie {{ coupleName() }} com este item especial</p>
           </div>
 
           <form (ngSubmit)="onSubmit()" class="gift-form">
@@ -196,7 +196,7 @@
       <!-- PASSO 2: Pagamento -->
       <div *ngIf="step === 'payment'" class="payment-step">
         <div class="payment-summary-bar">
-          <span class="payment-gift-name">{{ gift.name }}</span>
+          <span class="payment-gift-name">{{ gift().name }}</span>
           <span class="payment-total">{{ getContributionAmount() | currency:'BRL' }}</span>
         </div>
 
@@ -208,7 +208,7 @@
           <app-card-brick
             *ngIf="activeMethod === 'credit_card' || activeMethod === 'debit_card'"
             [cardType]="activeMethod"
-            [orderId]="gift.id.toString()"
+            [orderId]="gift().id.toString()"
             [amount]="getContributionAmount()"
             [payerEmail]="guestName"
             (paymentApproved)="onPaymentApproved()">
@@ -216,7 +216,7 @@
 
           <app-pix-display
             *ngIf="activeMethod === 'pix'"
-            [orderId]="gift.id.toString()"
+            [orderId]="gift().id.toString()"
             [amount]="getContributionAmount()"
             (paymentApproved)="onPaymentApproved()">
           </app-pix-display>
@@ -233,13 +233,13 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M20 6L9 17l-5-5" />
           </svg>
-          <p>Pagamento aprovado com sucesso. Obrigado por presentear {{ coupleName }}.</p>
+          <p>Pagamento aprovado com sucesso. Obrigado por presentear {{ coupleName() }}.</p>
         </div>
 
         <div class="summary-box">
           <div class="summary-row">
             <span class="label">Presente</span>
-            <span class="value">{{ gift.name }}</span>
+            <span class="value">{{ gift().name }}</span>
           </div>
           <div class="summary-row total-row">
             <span class="value">Valor pago</span>

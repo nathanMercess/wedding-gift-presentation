@@ -1,8 +1,9 @@
-import { AfterViewInit, Component, EventEmitter, inject, Input, NgZone, OnDestroy, Output } from '@angular/core';
+import { AfterViewInit, Component, InputSignal, NgZone, OnDestroy, OutputEmitterRef, effect, inject, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { loadMercadoPago } from '@mercadopago/sdk-js';
 import { environment } from '../../../../environments/environment';
 import { PaymentService } from '../../services/payment.service';
+import { PaymentState } from '../../models/payment-state.model';
 import { CardPaymentDto } from '../../models/card-payment-dto.model';
 
 @Component({
@@ -13,24 +14,26 @@ import { CardPaymentDto } from '../../models/card-payment-dto.model';
     styleUrl: './card-brick.component.scss'
 })
 export class CardBrickComponent implements AfterViewInit, OnDestroy {
-    @Input() amount = 0;
-    @Input() orderId = '';
-    @Input() cardType: 'credit_card' | 'debit_card' = 'credit_card';
-    @Input() payerEmail = '';
-    @Output() paymentApproved = new EventEmitter<void>();
+    public readonly amount: InputSignal<number> = input<number>(0);
+    public readonly orderId: InputSignal<string> = input<string>('');
+    public readonly cardType: InputSignal<'credit_card' | 'debit_card'> = input<'credit_card' | 'debit_card'>('credit_card');
+    public readonly payerEmail: InputSignal<string> = input<string>('');
+    public readonly paymentApproved: OutputEmitterRef<void> = output<void>();
 
-    brickReady = false;
-    error = '';
+    public brickReady: boolean = false;
+    public error: string = '';
 
     private brickController: any = null;
+    private pendingResolve: (() => void) | null = null;
+    private pendingReject: ((reason?: unknown) => void) | null = null;
 
-    private readonly ngZone = inject(NgZone);
+    private readonly ngZone: NgZone = inject(NgZone);
 
-    constructor(
-        private readonly paymentService: PaymentService
-    ) { }
+    public constructor(public readonly paymentService: PaymentService) {
+        effect((): void => this.handlePaymentState(this.paymentService.paymentState()));
+    }
 
-    async ngAfterViewInit(): Promise<void> {
+    public async ngAfterViewInit(): Promise<void> {
         try {
             await loadMercadoPago();
             const mp = new (window as any)['MercadoPago'](
@@ -44,9 +47,9 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
                 'cardPaymentBrick_container',
                 {
                     initialization: {
-                        amount: this.amount,
+                        amount: this.amount(),
                         payer: {
-                            email: this.payerEmail
+                            email: this.payerEmail()
                         }
                     },
                     customization: {
@@ -77,7 +80,7 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
                         paymentMethods: {
                             creditCard: 'all',
                             debitCard: 'all',
-                            maxInstallments: this.cardType === 'credit_card' ? 12 : 1
+                            maxInstallments: this.cardType() === 'credit_card' ? 12 : 1
                         }
                     },
                     callbacks: {
@@ -104,47 +107,55 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private onSubmit(formData: any): Promise<void> {
         return new Promise<void>((resolve, reject) => {
+            this.pendingResolve = resolve;
+            this.pendingReject = reject;
+
             const payer = formData.payer ?? {};
             const identification = payer.identification ?? {};
 
             const dto: CardPaymentDto = {
-                orderId: this.orderId,
-                amount: this.amount,
+                orderId: this.orderId(),
+                amount: this.amount(),
                 cardToken: formData.token,
                 paymentMethodId: formData.payment_method_id,
                 installments: formData.installments ?? 1,
-                method: this.cardType,
-                payerEmail: payer.email ?? this.payerEmail,
+                method: this.cardType(),
+                payerEmail: payer.email ?? this.payerEmail(),
                 payerDocType: identification.type ?? 'CPF',
                 payerDocNumber: identification.number ?? ''
             };
 
-            this.paymentService.payWithCard(dto).subscribe({
-                next: (res) => {
-                    this.ngZone.run(() => {
-                        if (res.status === 'approved' || res.status === 'processed') {
-                            resolve();
-                            this.paymentApproved.emit();
-                        } else if (res.status === 'in_process' || res.status === 'pending') {
-                            resolve();
-                            this.error = 'Pagamento em análise. Você será notificado assim que for confirmado.';
-                        } else {
-                            reject(new Error(res.statusDetail ?? 'declined'));
-                            this.error = 'Pagamento recusado: ' + (res.statusDetail ?? 'tente outro cartão.');
-                        }
-                    });
-                },
-                error: () => {
-                    this.ngZone.run(() => {
-                        reject(new Error('network_error'));
-                        this.error = 'Erro ao processar o pagamento. Tente novamente.';
-                    });
-                }
-            });
+            this.ngZone.run(() => this.paymentService.payWithCard(dto));
         });
     }
 
-    ngOnDestroy(): void {
+    private handlePaymentState(state: PaymentState): void {
+        if (state.submitting || (!this.pendingResolve && !this.pendingReject)) return;
+
+        this.ngZone.run(() => {
+            if (state.response) {
+                const response = state.response!;
+                if (response.status === 'approved' || response.status === 'processed') {
+                    this.pendingResolve?.();
+                    this.paymentApproved.emit();
+                } else if (response.status === 'in_process' || response.status === 'pending') {
+                    this.pendingResolve?.();
+                    this.error = 'Pagamento em análise. Você será notificado assim que for confirmado.';
+                } else {
+                    this.pendingReject?.(new Error(response.statusDetail ?? 'declined'));
+                    this.error = 'Pagamento recusado: ' + (response.statusDetail ?? 'tente outro cartão.');
+                }
+            } else if (state.error) {
+                this.pendingReject?.(new Error('network_error'));
+                this.error = 'Erro ao processar o pagamento. Tente novamente.';
+            }
+
+            this.pendingResolve = null;
+            this.pendingReject = null;
+        });
+    }
+
+    public ngOnDestroy(): void {
         this.brickController?.unmount();
     }
 }

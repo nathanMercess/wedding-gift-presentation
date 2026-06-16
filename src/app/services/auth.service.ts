@@ -16,7 +16,10 @@ export class AuthService {
     success: false,
   });
 
-  public constructor(public readonly http: HttpClient, public readonly router: Router, public readonly endpointsUrls: EndpointsUrls) {}
+  public constructor(
+    public readonly http: HttpClient,
+    public readonly router: Router,
+    public readonly endpointsUrls: EndpointsUrls) { }
 
   public authenticate(credentials: LoginRequest): void {
     this.patchLoginState({ loading: true, error: '', success: false });

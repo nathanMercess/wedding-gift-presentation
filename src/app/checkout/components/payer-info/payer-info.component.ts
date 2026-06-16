@@ -1,19 +1,6 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  EventEmitter,
-  Output
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, OutputEmitterRef, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  AbstractControl,
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  ValidationErrors,
-  ValidatorFn,
-  Validators
-} from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 
 export interface PayerData {
   email: string;
@@ -37,18 +24,18 @@ function cpfValidator(): ValidatorFn {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PayerInfoComponent {
-  @Output() payerDataConfirmed = new EventEmitter<PayerData>();
+  public readonly payerDataConfirmed: OutputEmitterRef<PayerData> = output<PayerData>();
 
-  readonly form: FormGroup;
+  public readonly form: FormGroup;
 
-  constructor(private readonly fb: FormBuilder) {
+  public constructor(public readonly fb: FormBuilder) {
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       cpf: ['', [Validators.required, cpfValidator()]]
     });
   }
 
-  onCpfInput(event: Event): void {
+  public onCpfInput(event: Event): void {
     const input = event.target as HTMLInputElement;
     let digits = input.value.replace(/\D/g, '').slice(0, 11);
     let formatted = digits;
@@ -62,7 +49,7 @@ export class PayerInfoComponent {
     this.form.get('cpf')!.setValue(formatted, { emitEvent: false });
   }
 
-  confirm(): void {
+  public confirm(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;

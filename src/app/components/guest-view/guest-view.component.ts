@@ -79,8 +79,12 @@ export class GuestViewComponent implements OnInit {
         return matchCat && matchSearch;
       })
       .sort((a, b) => {
-        if (this.sortBy === 'price-asc') return a.price - b.price;
-        if (this.sortBy === 'price-desc') return b.price - a.price;
+        if (this.sortBy === 'price-asc') 
+          return a.price - b.price;
+        
+        if (this.sortBy === 'price-desc') 
+          return b.price - a.price;
+        
         return a.name.localeCompare(b.name);
       });
 
@@ -158,7 +162,9 @@ export class GuestViewComponent implements OnInit {
 
   public getCategoryKey(category: string): string {
     const normalized = this.normalizeText(category);
-    if (normalized === 'eletro' || normalized === 'eletrodomestico' || normalized === 'eletrodomesticos') return 'eletrodomesticos';
+    if (normalized === 'eletro' || normalized === 'eletrodomestico' || normalized === 'eletrodomesticos') 
+      return 'eletrodomesticos';
+
     return normalized;
   }
 
