@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, InputSignal, OutputEmitterRef, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '../button/button.component';
 
@@ -10,24 +10,24 @@ import { ButtonComponent } from '../button/button.component';
   styleUrl: './gift-card.component.scss'
 })
 export class GiftCardComponent {
-  @Input() image: string = '';
-  @Input() name: string = '';
-  @Input() price: number = 0;
-  @Input() raised: number = 0;
-  @Input() total: number = 0;
-  @Output() presentClick = new EventEmitter<void>();
+  public readonly image: InputSignal<string> = input<string>('');
+  public readonly name: InputSignal<string> = input<string>('');
+  public readonly price: InputSignal<number> = input<number>(0);
+  public readonly raised: InputSignal<number> = input<number>(0);
+  public readonly total: InputSignal<number> = input<number>(0);
+  public readonly presentClick: OutputEmitterRef<void> = output<void>();
 
-  isHovered = false;
+  public isHovered: boolean = false;
 
-  get progressPercent(): number {
-    return Math.min((this.raised / this.total) * 100, 100);
+  public get progressPercent(): number {
+    return Math.min((this.raised() / this.total()) * 100, 100);
   }
 
-  onPresent(): void {
+  public onPresent(): void {
     this.presentClick.emit();
   }
 
-  onImgError(event: Event): void {
+  public onImgError(event: Event): void {
     const img = event.target as HTMLImageElement;
     img.style.background = '#F7F0EA';
   }

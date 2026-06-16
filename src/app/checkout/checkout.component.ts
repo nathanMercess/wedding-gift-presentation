@@ -18,28 +18,27 @@ import { PixDisplayComponent } from './components/pix-display/pix-display.compon
   styleUrl: './checkout.component.scss'
 })
 export class CheckoutComponent implements OnInit {
-  activeMethod: 'credit_card' | 'debit_card' | 'pix' | null = null;
-  orderId = '';
-  totalAmount = 0;
-  paymentApproved = false;
+  public activeMethod: 'credit_card' | 'debit_card' | 'pix' | null = null;
+  public orderId: string = '';
+  public totalAmount: number = 0;
+  public paymentApproved: boolean = false;
 
-  constructor(private readonly route: ActivatedRoute) {}
+  public constructor(public readonly route: ActivatedRoute) { }
 
-  ngOnInit(): void {
+  public ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
       this.orderId = (params['orderId'] as string) ?? '';
       this.totalAmount = Number(params['amount'] ?? 0);
     });
   }
 
-  onMethodSelected(method: 'credit_card' | 'debit_card' | 'pix'): void {
+  public onMethodSelected(method: 'credit_card' | 'debit_card' | 'pix'): void {
     this.paymentApproved = false;
     this.activeMethod = method;
   }
 
-  onPaymentApproved(): void {
+  public onPaymentApproved(): void {
     this.paymentApproved = true;
     this.activeMethod = null;
   }
 }
-

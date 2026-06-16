@@ -1,4 +1,4 @@
-import { Component, Input, HostBinding } from '@angular/core';
+import { Component, InputSignal, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -9,12 +9,12 @@ import { CommonModule } from '@angular/common';
   styleUrl: './button.component.scss'
 })
 export class ButtonComponent {
-  @Input() variant: 'primary' | 'secondary' | 'outline' = 'primary';
-  @Input() size: 'sm' | 'md' | 'lg' = 'md';
-  @Input() disabled: boolean = false;
-  @Input() type: 'button' | 'submit' | 'reset' = 'button';
+  public readonly variant: InputSignal<'primary' | 'secondary' | 'outline'> = input<'primary' | 'secondary' | 'outline'>('primary');
+  public readonly size: InputSignal<'sm' | 'md' | 'lg'> = input<'sm' | 'md' | 'lg'>('md');
+  public readonly disabled: InputSignal<boolean> = input<boolean>(false);
+  public readonly type: InputSignal<'button' | 'submit' | 'reset'> = input<'button' | 'submit' | 'reset'>('button');
 
-  get buttonClasses(): string {
-    return `${this.variant} ${this.size}`;
+  public get buttonClasses(): string {
+    return `${this.variant()} ${this.size()}`;
   }
 }

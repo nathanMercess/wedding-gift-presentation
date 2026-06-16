@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node verify-screenshot.mjs)",
+      "Bash(git checkout *)",
+      "Bash(tasklist)",
+      "Bash(netstat -ano)",
+      "Bash(taskkill //PID 23204 //F)"
+    ]
+  }
+}

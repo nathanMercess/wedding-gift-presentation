@@ -1,14 +1,14 @@
 <div class="gift-card" [class.hovered]="isHovered" (mouseenter)="isHovered = true" (mouseleave)="isHovered = false"
   (click)="onPresent()">
   <div class="image-wrap">
-    <img [src]="image" [alt]="name" [class.scaled]="isHovered" (error)="onImgError($event)" />
+    <img [src]="image()" [alt]="name()" [class.scaled]="isHovered" (error)="onImgError($event)" />
   </div>
   <div class="content">
-    <h3>{{ name }}</h3>
+    <h3>{{ name() }}</h3>
     <div class="progress-section">
       <div class="progress-labels">
         <span class="label">Arrecadado</span>
-        <span class="values">R$ {{ raised.toFixed(2) }} de R$ {{ total.toFixed(2) }}</span>
+        <span class="values">R$ {{ raised().toFixed(2) }} de R$ {{ total().toFixed(2) }}</span>
       </div>
       <div class="progress-bar">
         <div class="progress-fill" [style.width.%]="progressPercent"></div>

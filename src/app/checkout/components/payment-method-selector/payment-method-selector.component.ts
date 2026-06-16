@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, OutputEmitterRef, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -10,10 +10,9 @@ import { CommonModule } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PaymentMethodSelectorComponent implements OnInit {
-  @Output() methodSelected = new EventEmitter<'credit_card' | 'debit_card' | 'pix'>();
+  public readonly methodSelected: OutputEmitterRef<'credit_card' | 'debit_card' | 'pix'> = output<'credit_card' | 'debit_card' | 'pix'>();
 
   public activeMethod: 'credit_card' | 'debit_card' | 'pix' = 'credit_card';
-
 
   public ngOnInit(): void {
     this.methodSelected.emit(this.activeMethod);
