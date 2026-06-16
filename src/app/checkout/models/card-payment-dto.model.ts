@@ -3,9 +3,8 @@ export interface CardPaymentDto {
   amount: number;
   cardToken: string;
   paymentMethodId: string;
-  issuerId?: string;
   installments: number;
-  cardType: 'credit_card' | 'debit_card';
+  method: 'credit_card' | 'debit_card'; 
   payerEmail: string;
   payerDocType: string;
   payerDocNumber: string;

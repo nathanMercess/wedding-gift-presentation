@@ -1,5 +1,5 @@
 export interface PaymentResponse {
-  status: 'approved' | 'rejected' | 'pending' | 'in_process' | 'error';
+  status: 'approved' | 'rejected' | 'pending' | 'in_process' | 'error'| 'processed';
   statusDetail?: string;
   mpOrderId?: string;
   qrCode?: string;

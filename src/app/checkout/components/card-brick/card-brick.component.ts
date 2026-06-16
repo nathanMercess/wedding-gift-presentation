@@ -1,12 +1,4 @@
-import {
-    AfterViewInit,
-    ChangeDetectionStrategy,
-    ChangeDetectorRef,
-    Component,
-    inject,
-    Input,
-    OnDestroy
-} from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, inject, Input, NgZone, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { loadMercadoPago } from '@mercadopago/sdk-js';
@@ -19,13 +11,13 @@ import { CardPaymentDto } from '../../models/card-payment-dto.model';
     standalone: true,
     imports: [CommonModule],
     templateUrl: './card-brick.component.html',
-    styleUrl: './card-brick.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    styleUrl: './card-brick.component.scss'
 })
 export class CardBrickComponent implements AfterViewInit, OnDestroy {
     @Input() amount = 0;
     @Input() orderId = '';
     @Input() cardType: 'credit_card' | 'debit_card' = 'credit_card';
+    @Input() payerEmail = '';
 
     brickReady = false;
     error = '';
@@ -33,6 +25,7 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
     private brickController: any = null;
 
     private readonly cdr = inject(ChangeDetectorRef);
+    private readonly ngZone = inject(NgZone);
 
     constructor(
         private readonly paymentService: PaymentService,
@@ -53,7 +46,10 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
                 'cardPaymentBrick_container',
                 {
                     initialization: {
-                        amount: this.amount
+                        amount: this.amount,
+                        payer: {
+                            email: this.payerEmail
+                        }
                     },
                     customization: {
                         visual: {
@@ -61,48 +57,49 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
                             style: {
                                 theme: 'flat',
                                 customVariables: {
-                                    // Colors
-                                    colorBackground:       '#FFFFFF',
-                                    colorText:             '#6B6B6B',
-                                    colorSecondary:        '#F7F0EA',
-                                    colorActionPrimary:    '#C79A6D',
-                                    colorBorderHover:      '#C79A6D',
-                                    colorBorderFocus:      '#C79A6D',
-                                    // Inputs
-                                    inputFocusedBorderColor: '#C79A6D',
-                                    inputFocusedBoxShadow:   '0 0 0 3px rgba(199,154,109,0.18)',
-                                    // Radii
-                                    borderRadiusSmall:  '6px',
+                                    textPrimaryColor: '#6B6B6B',
+                                    textSecondaryColor: '#9A9A9A',
+                                    inputBackgroundColor: '#FFFFFF',
+                                    formBackgroundColor: '#FFFFFF',
+                                    baseColor: '#C79A6D',
+                                    baseColorFirstVariant: '#d4aa83',
+                                    baseColorSecondVariant: '#b08050',
+                                    outlinePrimaryColor: '#C79A6D',
+                                    outlineSecondaryColor: 'rgba(107,107,107,0.15)',
+                                    buttonTextColor: '#FFFFFF',
+                                    borderRadiusSmall: '6px',
                                     borderRadiusMedium: '10px',
-                                    borderRadiusLarge:  '14px',
-                                    borderRadiusFull:   '9999px',
-                                    // Button
-                                    buttonHeight: '48px'
+                                    borderRadiusLarge: '10px',
+                                    borderRadiusFull: '9999px',
+                                    payButtonHeight: '48px',
+                                    formInputsTextTransform: 'none'
                                 }
                             }
                         },
                         paymentMethods: {
+                            creditCard: 'all',
+                            debitCard: 'all',
                             maxInstallments: this.cardType === 'credit_card' ? 12 : 1
                         }
                     },
                     callbacks: {
                         onReady: () => {
-                            this.brickReady = true;
-                            this.cdr.markForCheck();
+                            this.ngZone.run(() => {
+                                this.brickReady = true;
+                            });
                         },
-                        // onSubmit must return a Promise so the Brick controls its loading state
                         onSubmit: (formData: unknown) => this.onSubmit(formData),
                         onError: (err: unknown) => {
                             console.error('Card Brick error:', err);
-                            this.error = 'Erro ao carregar o formulário de pagamento. Recarregue a página e tente novamente.';
-                            this.cdr.markForCheck();
+                            this.ngZone.run(() => {
+                                this.error = 'Erro ao carregar o formulário de pagamento. Recarregue a página e tente novamente.';
+                            });
                         }
                     }
                 }
             );
         } catch {
             this.error = 'Falha ao carregar o formulário de pagamento. Verifique sua conexão e tente novamente.';
-            this.cdr.markForCheck();
         }
     }
 
@@ -117,33 +114,33 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
                 amount: this.amount,
                 cardToken: formData.token,
                 paymentMethodId: formData.payment_method_id,
-                issuerId: formData.issuer_id,
                 installments: formData.installments ?? 1,
-                cardType: this.cardType,
-                payerEmail: payer.email ?? '',
+                method: this.cardType,
+                payerEmail: payer.email ?? this.payerEmail,
                 payerDocType: identification.type ?? 'CPF',
                 payerDocNumber: identification.number ?? ''
             };
 
             this.paymentService.payWithCard(dto).subscribe({
                 next: (res) => {
-                    if (res.status === 'approved') {
-                        resolve();
-                        this.router.navigate(['/sucesso']);
-                    } else if (res.status === 'in_process' || res.status === 'pending') {
-                        resolve();
-                        this.error = 'Pagamento em análise. Você será notificado assim que for confirmado.';
-                        this.cdr.markForCheck();
-                    } else {
-                        reject(new Error(res.statusDetail ?? 'declined'));
-                        this.error = 'Pagamento recusado: ' + (res.statusDetail ?? 'tente outro cartão.');
-                        this.cdr.markForCheck();
-                    }
+                    this.ngZone.run(() => {
+                        if (res.status === 'approved' || res.status === 'processed') {
+                            resolve();
+                            this.router.navigate(['/sucesso']);
+                        } else if (res.status === 'in_process' || res.status === 'pending') {
+                            resolve();
+                            this.error = 'Pagamento em análise. Você será notificado assim que for confirmado.';
+                        } else {
+                            reject(new Error(res.statusDetail ?? 'declined'));
+                            this.error = 'Pagamento recusado: ' + (res.statusDetail ?? 'tente outro cartão.');
+                        }
+                    });
                 },
                 error: () => {
-                    reject(new Error('network_error'));
-                    this.error = 'Erro ao processar o pagamento. Tente novamente.';
-                    this.cdr.markForCheck();
+                    this.ngZone.run(() => {
+                        reject(new Error('network_error'));
+                        this.error = 'Erro ao processar o pagamento. Tente novamente.';
+                    });
                 }
             });
         });
