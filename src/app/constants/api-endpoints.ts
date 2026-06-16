@@ -41,6 +41,10 @@ export class EndpointsUrls {
         return `${this.apiUrl}/admin/gifts/${id}`;
     }
 
+    public get adminUploadImage(): string {
+        return `${this.apiUrl}/admin/uploads/image`;
+    }
+
     public get paymentCard(): string {
         return `${this.apiUrl}/payment/card`;
     }

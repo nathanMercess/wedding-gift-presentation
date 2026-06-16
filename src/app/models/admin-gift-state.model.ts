@@ -7,4 +7,6 @@ export interface AdminGiftState {
   giftSaving: boolean;
   giftError: string;
   giftSaved: boolean;
+  imageUploading: boolean;
+  imageUploadError: string;
 }

@@ -7,6 +7,7 @@ import { AdminGiftState } from '../models/admin-gift-state.model';
 import { GuestGiftState } from '../models/guest-gift-state.model';
 import { GiftContributionState } from '../models/gift-contribution-state.model';
 import { Gift } from '../models/gift.model';
+import { ImageUploadResponse } from '../models/image-upload-response.model';
 
 @Injectable({ providedIn: 'root' })
 export class GiftService {
@@ -17,6 +18,8 @@ export class GiftService {
     giftSaving: false,
     giftError: '',
     giftSaved: false,
+    imageUploading: false,
+    imageUploadError: '',
   });
   public readonly guestState: WritableSignal<GuestGiftState> = signal<GuestGiftState>({
     gifts: [],
@@ -103,6 +106,25 @@ export class GiftService {
 
   public clearAdminGiftError(): void {
     this.patchAdminState({ giftError: '' });
+  }
+
+  public uploadGiftImage(file: File, onSuccess: (url: string) => void, onError?: () => void): void {
+    this.patchAdminState({ imageUploading: true, imageUploadError: '' });
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    this.http.post<ImageUploadResponse>(this.endpointsUrls.adminUploadImage, formData)
+      .pipe(finalize((): void => this.patchAdminState({ imageUploading: false })))
+      .subscribe({
+        next: (response: ImageUploadResponse): void => {
+          onSuccess(response.url);
+        },
+        error: (): void => {
+          this.patchAdminState({ imageUploadError: 'Erro ao enviar a imagem. Tente novamente.' });
+          if (onError) onError();
+        }
+      });
   }
 
   public resetAdminGiftSaved(): void {

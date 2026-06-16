@@ -6,11 +6,15 @@ import { Couple } from '../../../models/couple.model';
 import { GiftService } from '../../../services/gift.service';
 import { CoupleService } from '../../../services/couple.service';
 import { AuthService } from '../../../services/auth.service';
+import { ConfirmDialogComponent } from '../../confirm-dialog/confirm-dialog.component';
+
+const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ConfirmDialogComponent],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss'
 })
@@ -20,6 +24,7 @@ export class AdminDashboardComponent implements OnInit {
   public showGiftForm: boolean = false;
   public editingGift: Gift | null = null;
   public giftForm: Partial<Gift> = {};
+  public giftPendingDeletion: Gift | null = null;
   public readonly categories: Array<{ id: string; label: string }> = [
     { id: 'cozinha', label: 'Cozinha' },
     { id: 'eletro', label: 'Eletrodomésticos' },
@@ -88,9 +93,48 @@ export class AdminDashboardComponent implements OnInit {
     this.giftService.saveAdminGift(giftId, this.giftForm);
   }
 
-  public deleteGift(id: string): void {
-    if (!confirm('Tem certeza que deseja remover este presente?')) return;
-    this.giftService.deleteAdminGift(id);
+  public onImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      this.giftService.patchAdminState({ imageUploadError: 'Envie uma imagem JPG, PNG ou WEBP.' });
+      return;
+    }
+    if (file.size > MAX_IMAGE_SIZE_BYTES) {
+      this.giftService.patchAdminState({ imageUploadError: 'O tamanho máximo permitido é 5MB.' });
+      return;
+    }
+
+    const previousImage = this.giftForm.image ?? '';
+    this.giftForm = { ...this.giftForm, image: URL.createObjectURL(file) };
+
+    this.giftService.uploadGiftImage(
+      file,
+      (url: string): void => {
+        this.giftForm = { ...this.giftForm, image: url };
+      },
+      (): void => {
+        this.giftForm = { ...this.giftForm, image: previousImage };
+      }
+    );
+  }
+
+  public requestDeleteGift(gift: Gift): void {
+    this.giftPendingDeletion = gift;
+  }
+
+  public confirmDeleteGift(): void {
+    if (this.giftPendingDeletion) {
+      this.giftService.deleteAdminGift(this.giftPendingDeletion.id);
+    }
+    this.giftPendingDeletion = null;
+  }
+
+  public cancelDeleteGift(): void {
+    this.giftPendingDeletion = null;
   }
 
   public saveCouple(): void {

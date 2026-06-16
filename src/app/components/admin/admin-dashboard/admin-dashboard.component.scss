@@ -68,6 +68,37 @@
 
 .tab-section { width: 100%; }
 
+@media (max-width: 640px) {
+  .dash-header {
+    flex-wrap: wrap;
+    height: auto;
+    padding: .75rem 1rem;
+    gap: .5rem;
+  }
+
+  .dash-header .dash-nav {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .dash-header .dash-nav button {
+    flex: 1;
+    text-align: center;
+    padding: .5rem .25rem;
+  }
+
+  .dash-main { padding: 1rem; }
+
+  .section-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: .75rem;
+  }
+
+  .section-header .btn-primary { width: 100%; }
+}
+
 .section-header {
   display: flex;
   justify-content: space-between;
@@ -168,6 +199,55 @@
 
 .action-btns { display: flex; gap: .4rem; }
 
+.btn-icon-label { display: none; }
+
+.image-upload {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.image-preview {
+  width: 96px;
+  height: 96px;
+  flex-shrink: 0;
+  border-radius: .5rem;
+  overflow: hidden;
+  background: #F7F0EA;
+  border: 1.5px solid #E8DDD5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-preview-placeholder {
+  font-size: .7rem;
+  color: #8B7B6B;
+  text-align: center;
+  padding: .5rem;
+}
+
+.image-upload-actions {
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+}
+
+.upload-btn {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
 .table-wrap {
   background: #fff;
   border-radius: 1rem;
@@ -229,6 +309,84 @@
 }
 
 .progress-label { font-size: .75rem; color: #8B7B6B; }
+
+@media (max-width: 640px) {
+  .table-wrap { overflow: visible; background: none; box-shadow: none; }
+
+  .gifts-table {
+    display: block;
+
+    thead { display: none; }
+
+    tbody {
+      display: flex;
+      flex-direction: column;
+      gap: .75rem;
+    }
+
+    tr {
+      display: block;
+      background: #fff;
+      border-radius: .75rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+      padding: .25rem 1rem;
+    }
+
+    td {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .75rem;
+      padding: .55rem 0;
+      border-bottom: 1px solid #F7F0EA;
+    }
+
+    tr td:last-child { border-bottom: none; }
+
+    td::before {
+      content: attr(data-label);
+      font-size: .75rem;
+      font-weight: 600;
+      color: #8B7B6B;
+      flex-shrink: 0;
+    }
+
+    td[data-label="Presente"] {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: .5rem;
+
+      &::before { display: none; }
+    }
+
+    td[data-label="Progresso"] {
+      flex-direction: column;
+      align-items: stretch;
+
+      .progress-bar { width: 100%; margin-top: .35rem; }
+    }
+
+    td[data-label="Ações"] {
+      &::before { display: none; }
+
+      .action-btns { width: 100%; }
+
+      .btn-icon {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: .55rem;
+      }
+
+      .btn-icon-label {
+        display: inline;
+        margin-left: .4rem;
+        font-size: .8rem;
+      }
+    }
+  }
+}
 
 .status-msg { color: #8B7B6B; padding: 1rem 0; }
 
