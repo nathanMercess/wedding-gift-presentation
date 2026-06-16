@@ -61,7 +61,7 @@
         </div>
 
         <!-- Right: Form -->
-        <div class="form-side">
+        <div class="form-side" *ngIf="!isCompleted; else completedActions">
           <div>
             <h3 class="serif">Como deseja presentear?</h3>
             <p class="subtitle">Presenteie {{ coupleName() }} com este item especial</p>
@@ -69,7 +69,7 @@
 
           <form (ngSubmit)="onSubmit()" class="gift-form">
             <!-- Contribution Type -->
-            <div *ngIf="!isCompleted" class="form-group">
+            <div class="form-group">
               <label>Tipo de contribuição</label>
               <div class="contrib-grid">
                 <button
@@ -100,7 +100,7 @@
             </div>
 
             <!-- Custom Amount -->
-            <div *ngIf="contributionType === 'partial' && !isCompleted" class="form-group">
+            <div *ngIf="contributionType === 'partial'" class="form-group">
               <label>Valor da contribuição</label>
               <div class="quick-amounts" *ngIf="availableQuickAmounts.length">
                 <button
@@ -154,7 +154,7 @@
             </div>
 
             <!-- Summary -->
-            <div *ngIf="!isCompleted" class="summary-box">
+            <div class="summary-box">
               <div class="summary-row">
                 <span>Valor do presente</span>
                 <span class="value">R$ {{ getContributionAmount().toFixed(2) }}</span>
@@ -180,9 +180,9 @@
               <app-button
                 variant="primary"
                 type="submit"
-                [disabled]="isCompleted || (contributionType === 'partial' && !customAmount)"
+                [disabled]="contributionType === 'partial' && !customAmount"
               >
-                {{ isCompleted ? 'Presente completo' : 'Confirmar presente' }}
+                Confirmar presente
               </app-button>
             </div>
 
@@ -191,6 +191,14 @@
             </p>
           </form>
         </div>
+
+        <ng-template #completedActions>
+          <div class="form-side">
+            <div class="actions">
+              <app-button variant="primary" type="button" (click)="close.emit()">Fechar</app-button>
+            </div>
+          </div>
+        </ng-template>
       </div>
 
       <!-- PASSO 2: Pagamento -->
