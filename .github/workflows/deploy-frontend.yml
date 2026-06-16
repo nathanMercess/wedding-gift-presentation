@@ -10,6 +10,10 @@ jobs:
     name: Build, Push and Deploy Frontend
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      id-token: write  # required for Workload Identity Federation
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -17,7 +21,8 @@ jobs:
       - name: Authenticate with Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          workload_identity_provider: "projects/528711077873/locations/global/workloadIdentityPools/github-pool/providers/github-provider"
+          service_account: "github-actions@weddinggift.iam.gserviceaccount.com"
 
       - name: Configure Docker for Artifact Registry
         run: gcloud auth configure-docker southamerica-east1-docker.pkg.dev --quiet
