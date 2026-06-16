@@ -8,21 +8,17 @@ import { PaymentResponse } from '../models/payment-response.model';
 
 @Injectable({ providedIn: 'root' })
 export class PaymentService {
+  public constructor(public readonly http: HttpClient, public readonly endpoints: EndpointsUrls) { }
 
-  constructor(
-    private readonly http: HttpClient,
-    private readonly endpoints: EndpointsUrls
-  ) {}
-
-  payWithCard(dto: CardPaymentDto): Observable<PaymentResponse> {
+  public payWithCard(dto: CardPaymentDto): Observable<PaymentResponse> {
     return this.http.post<PaymentResponse>(this.endpoints.paymentCard, dto);
   }
 
-  payWithPix(dto: PixPaymentDto): Observable<PaymentResponse> {
+  public payWithPix(dto: PixPaymentDto): Observable<PaymentResponse> {
     return this.http.post<PaymentResponse>(this.endpoints.paymentPix, dto);
   }
 
-  getStatus(mpOrderId: string): Observable<PaymentResponse> {
+  public getStatus(mpOrderId: string): Observable<PaymentResponse> {
     return this.http.get<PaymentResponse>(this.endpoints.paymentStatus(mpOrderId));
   }
 }
