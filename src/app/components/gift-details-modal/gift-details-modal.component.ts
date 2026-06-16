@@ -1,4 +1,4 @@
-import { Component, InputSignal, OutputEmitterRef, input, output } from '@angular/core';
+import { Component, InputSignal, OnDestroy, OnInit, OutputEmitterRef, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Gift } from '../../models/gift.model';
@@ -15,7 +15,7 @@ import { PixDisplayComponent } from '../../checkout/components/pix-display/pix-d
   templateUrl: './gift-details-modal.component.html',
   styleUrl: './gift-details-modal.component.scss'
 })
-export class GiftDetailsModalComponent {
+export class GiftDetailsModalComponent implements OnInit, OnDestroy {
   public readonly gift: InputSignal<Gift> = input.required<Gift>();
   public readonly coupleName: InputSignal<string> = input<string>('');
   public readonly close: OutputEmitterRef<void> = output<void>();
@@ -32,6 +32,18 @@ export class GiftDetailsModalComponent {
 
   public constructor(public readonly giftService: GiftService) {
     this.giftService.resetContributionState();
+  }
+
+  public ngOnInit(): void {
+    document.body.classList.add('modal-open');
+  }
+
+  public ngOnDestroy(): void {
+    document.body.classList.remove('modal-open');
+  }
+
+  public get hasUnsavedInput(): boolean {
+    return this.step === 'contribution' && (this.guestName.trim().length > 0 || this.customAmount.trim().length > 0);
   }
 
   public get remaining(): number {
@@ -53,8 +65,16 @@ export class GiftDetailsModalComponent {
 
   public onBackdropClick(event: MouseEvent): void {
     if ((event.target as HTMLElement).classList.contains('modal-backdrop')) {
-      this.close.emit();
+      this.requestClose();
     }
+  }
+
+  public requestClose(): void {
+    if (this.hasUnsavedInput && !confirm('Você tem dados preenchidos. Deseja realmente fechar sem concluir o presente?')) {
+      return;
+    }
+
+    this.close.emit();
   }
 
   public onSubmit(): void {

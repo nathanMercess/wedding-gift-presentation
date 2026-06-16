@@ -1,7 +1,6 @@
-<div class="gift-card" [class.hovered]="isHovered" (mouseenter)="isHovered = true" (mouseleave)="isHovered = false"
-  (click)="onPresent()">
+<div class="gift-card" (click)="onPresent()">
   <div class="image-wrap">
-    <img [src]="image()" [alt]="name()" [class.scaled]="isHovered" (error)="onImgError($event)" />
+    <img [src]="image()" [alt]="name()" (error)="onImgError($event)" />
   </div>
   <div class="content">
     <h3>{{ name() }}</h3>

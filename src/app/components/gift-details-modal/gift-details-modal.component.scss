@@ -147,6 +147,9 @@ h3 {
 .contrib-label { font-weight: 500; color: var(--foreground); font-size: 0.875rem; }
 .contrib-value { font-size: 0.8rem; color: var(--muted-foreground); margin-top: 0.1rem; }
 .quick-amounts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-bottom: 0.75rem; }
+@media (max-width: 420px) {
+  .quick-amounts { grid-template-columns: repeat(2, 1fr); }
+}
 .quick-btn {
   padding: 0.5rem 0.75rem;
   border-radius: var(--radius);

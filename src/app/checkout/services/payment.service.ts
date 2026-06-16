@@ -1,5 +1,5 @@
 import { Injectable, WritableSignal, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { finalize } from 'rxjs';
 import { EndpointsUrls } from '../../constants/api-endpoints';
 import { CardPaymentDto } from '../models/card-payment-dto.model';
@@ -30,8 +30,11 @@ export class PaymentService {
       next: (response: PaymentResponse): void => {
         this.patchPaymentState({ response });
       },
-      error: (): void => {
-        this.patchPaymentState({ error: 'Erro ao processar o pagamento. Tente novamente.' });
+      error: (err: HttpErrorResponse): void => {
+        const error = err.status === 0
+          ? 'Não foi possível conectar. Verifique sua internet e tente novamente.'
+          : 'Erro ao processar o pagamento. Tente novamente.';
+        this.patchPaymentState({ error });
       }
     });
   }
@@ -43,8 +46,11 @@ export class PaymentService {
       next: (response: PaymentResponse): void => {
         this.patchPaymentState({ response });
       },
-      error: (): void => {
-        this.patchPaymentState({ error: 'Erro ao gerar o PIX. Tente novamente.' });
+      error: (err: HttpErrorResponse): void => {
+        const error = err.status === 0
+          ? 'Não foi possível conectar. Verifique sua internet e tente novamente.'
+          : 'Erro ao gerar o PIX. Tente novamente.';
+        this.patchPaymentState({ error });
       }
     });
   }
@@ -54,8 +60,11 @@ export class PaymentService {
       next: (response: PaymentResponse): void => {
         this.patchStatusState({ response, error: '' });
       },
-      error: (): void => {
-        this.patchStatusState({ error: 'Erro ao consultar status do pagamento.' });
+      error: (err: HttpErrorResponse): void => {
+        const error = err.status === 0
+          ? 'Sem conexão para consultar o status. Tentando novamente...'
+          : 'Erro ao consultar status do pagamento.';
+        this.patchStatusState({ error });
       }
     });
   }

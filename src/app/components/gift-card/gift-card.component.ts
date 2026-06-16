@@ -17,8 +17,6 @@ export class GiftCardComponent {
   public readonly total: InputSignal<number> = input<number>(0);
   public readonly presentClick: OutputEmitterRef<void> = output<void>();
 
-  public isHovered: boolean = false;
-
   public get progressPercent(): number {
     return Math.min((this.raised() / this.total()) * 100, 100);
   }

@@ -26,6 +26,7 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
     private brickController: any = null;
     private pendingResolve: (() => void) | null = null;
     private pendingReject: ((reason?: unknown) => void) | null = null;
+    private loadTimeoutHandle: ReturnType<typeof setTimeout> | null = null;
 
     private readonly ngZone: NgZone = inject(NgZone);
 
@@ -33,7 +34,25 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
         effect((): void => this.handlePaymentState(this.paymentService.paymentState()));
     }
 
-    public async ngAfterViewInit(): Promise<void> {
+    public ngAfterViewInit(): void {
+        this.loadBrick();
+    }
+
+    public retryLoad(): void {
+        this.brickController?.unmount();
+        this.brickController = null;
+        this.error = '';
+        this.brickReady = false;
+        this.loadBrick();
+    }
+
+    private async loadBrick(): Promise<void> {
+        this.loadTimeoutHandle = setTimeout(() => {
+            this.ngZone.run(() => {
+                this.error = 'O formulário de pagamento está demorando para carregar. Verifique sua conexão.';
+            });
+        }, 15000);
+
         try {
             await loadMercadoPago();
             const mp = new (window as any)['MercadoPago'](
@@ -85,6 +104,7 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
                     },
                     callbacks: {
                         onReady: () => {
+                            this.clearLoadTimeout();
                             this.ngZone.run(() => {
                                 this.brickReady = true;
                             });
@@ -92,15 +112,24 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
                         onSubmit: (formData: unknown) => this.onSubmit(formData),
                         onError: (err: unknown) => {
                             console.error('Card Brick error:', err);
+                            this.clearLoadTimeout();
                             this.ngZone.run(() => {
-                                this.error = 'Erro ao carregar o formulário de pagamento. Recarregue a página e tente novamente.';
+                                this.error = 'Erro ao carregar o formulário de pagamento. Tente novamente.';
                             });
                         }
                     }
                 }
             );
         } catch {
+            this.clearLoadTimeout();
             this.error = 'Falha ao carregar o formulário de pagamento. Verifique sua conexão e tente novamente.';
+        }
+    }
+
+    private clearLoadTimeout(): void {
+        if (this.loadTimeoutHandle !== null) {
+            clearTimeout(this.loadTimeoutHandle);
+            this.loadTimeoutHandle = null;
         }
     }
 
@@ -147,7 +176,7 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
                 }
             } else if (state.error) {
                 this.pendingReject?.(new Error('network_error'));
-                this.error = 'Erro ao processar o pagamento. Tente novamente.';
+                this.error = state.error;
             }
 
             this.pendingResolve = null;
@@ -156,6 +185,7 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
     }
 
     public ngOnDestroy(): void {
+        this.clearLoadTimeout();
         this.brickController?.unmount();
     }
 }

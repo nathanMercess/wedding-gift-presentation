@@ -7,7 +7,7 @@
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
 }
 
-.checkout-titulo {
+.checkout-title {
   font-family: 'Playfair Display', serif;
   font-size: 24px;
   font-weight: 600;
@@ -21,6 +21,21 @@
   color: #b8860b;
   font-weight: 600;
   margin: 0 0 24px;
+}
+
+@media (max-width: 480px) {
+  .checkout-container {
+    max-width: 100%;
+    margin: 0;
+    padding: 20px 16px;
+    border-radius: 0;
+    box-shadow: none;
+    min-height: 100vh;
+  }
+
+  .checkout-title {
+    font-size: 20px;
+  }
 }
 
 .checkout-form {

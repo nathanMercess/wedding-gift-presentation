@@ -16,8 +16,13 @@
   display: flex;
   flex-direction: column;
 }
-.gift-card.hovered {
-  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+@media (hover: hover) and (pointer: fine) {
+  .gift-card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+  }
+  .gift-card:hover .image-wrap img {
+    transform: scale(1.06);
+  }
 }
 .image-wrap {
   position: relative;
@@ -32,9 +37,6 @@
   object-fit: cover;
   object-position: center;
   transition: transform 0.5s ease;
-}
-.image-wrap img.scaled {
-  transform: scale(1.06);
 }
 .content {
   padding: 0.875rem;

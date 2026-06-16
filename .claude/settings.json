@@ -5,7 +5,17 @@
       "Bash(git checkout *)",
       "Bash(tasklist)",
       "Bash(netstat -ano)",
-      "Bash(taskkill //PID 23204 //F)"
+      "Bash(taskkill //PID 23204 //F)",
+      "Bash(npx serve -s dist/wedding-gift-presentation/browser -l 4455 > /tmp/serve.log 2>&1 & *)",
+      "Bash(node verify-mobile.mjs)",
+      "Bash(node verify-pix-mobile.mjs)",
+      "Bash(kill %1)",
+      "Bash(pkill -f \"serve -s dist\")",
+      "Bash(rm -f /c/meus-projetos/wedding-gift-presentation/mobile-*.png)",
+      "Bash(npm uninstall *)"
+    ],
+    "additionalDirectories": [
+      "\\tmp"
     ]
   }
 }

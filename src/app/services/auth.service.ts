@@ -1,5 +1,5 @@
 import { Injectable, WritableSignal, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { EndpointsUrls } from '../constants/api-endpoints';
@@ -35,8 +35,11 @@ export class AuthService {
         localStorage.setItem(this.tokenKey, token);
         this.patchLoginState({ success: true });
       },
-      error: (): void => {
-        this.patchLoginState({ error: 'E-mail ou senha inválidos.' });
+      error: (err: HttpErrorResponse): void => {
+        const error = err.status === 0
+          ? 'Não foi possível conectar. Verifique sua internet e tente novamente.'
+          : 'E-mail ou senha inválidos.';
+        this.patchLoginState({ error });
       }
     });
   }

@@ -6,6 +6,8 @@ import { PaymentState } from '../../models/payment-state.model';
 import { PaymentStatusState } from '../../models/payment-status-state.model';
 import { PixPaymentDto } from '../../models/pix-payment-dto.model';
 
+const PIX_EXPIRATION_SECONDS = 10 * 60;
+
 function cpfValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     const digits = (control.value as string)?.replace(/\D/g, '') ?? '';
@@ -35,11 +37,12 @@ export class PixDisplayComponent implements OnDestroy {
   public error: string = '';
   public expired: boolean = false;
   public copied: boolean = false;
+  public remainingSeconds: number = PIX_EXPIRATION_SECONDS;
 
   public readonly payerForm: FormGroup;
 
   private pollingInterval: ReturnType<typeof setInterval> | null = null;
-  private expirationTimeout: ReturnType<typeof setTimeout> | null = null;
+  private countdownInterval: ReturnType<typeof setInterval> | null = null;
   private awaitingPixResponse: boolean = false;
   private awaitingStatusCheck: boolean = false;
 
@@ -106,14 +109,14 @@ export class PixDisplayComponent implements OnDestroy {
         this.pixStep = 'qr';
         this.cdr.markForCheck();
         this.startPolling();
-        this.startExpirationTimeout();
+        this.startCountdown();
       } else {
         this.error = response.message ?? 'Erro ao gerar o PIX. Tente novamente.';
         this.pixStep = 'form';
         this.cdr.markForCheck();
       }
     } else if (state.error) {
-      this.error = 'Erro ao gerar o PIX. Tente novamente.';
+      this.error = state.error;
       this.pixStep = 'form';
       this.cdr.markForCheck();
     }
@@ -141,12 +144,32 @@ export class PixDisplayComponent implements OnDestroy {
     }, 5000);
   }
 
-  private startExpirationTimeout(): void {
-    this.expirationTimeout = setTimeout(() => {
-      this.stopPolling();
-      this.expired = true;
+  private startCountdown(): void {
+    this.remainingSeconds = PIX_EXPIRATION_SECONDS;
+    this.countdownInterval = setInterval(() => {
+      this.remainingSeconds -= 1;
+      if (this.remainingSeconds <= 0) {
+        this.stopPolling();
+        this.expired = true;
+      }
       this.cdr.markForCheck();
-    }, 10 * 60 * 1000);
+    }, 1000);
+  }
+
+  public get formattedCountdown(): string {
+    const minutes = Math.floor(Math.max(this.remainingSeconds, 0) / 60);
+    const seconds = Math.max(this.remainingSeconds, 0) % 60;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  public retryPix(): void {
+    this.pixStep = 'form';
+    this.expired = false;
+    this.error = '';
+    this.qrCode = '';
+    this.qrCodeBase64 = '';
+    this.mpOrderId = '';
+    this.cdr.markForCheck();
   }
 
   private stopPolling(): void {
@@ -154,9 +177,9 @@ export class PixDisplayComponent implements OnDestroy {
       clearInterval(this.pollingInterval);
       this.pollingInterval = null;
     }
-    if (this.expirationTimeout !== null) {
-      clearTimeout(this.expirationTimeout);
-      this.expirationTimeout = null;
+    if (this.countdownInterval !== null) {
+      clearInterval(this.countdownInterval);
+      this.countdownInterval = null;
     }
   }
 
