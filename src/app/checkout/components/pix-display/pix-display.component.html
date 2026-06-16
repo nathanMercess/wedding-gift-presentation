@@ -40,7 +40,12 @@
         </span>
       </div>
 
-      <div *ngIf="error()" class="error-banner" role="alert">{{ error() }}</div>
+      <div *ngIf="error()" class="error-banner" role="alert">
+        @switch (error()) {
+          @case (PAYMENT_ERROR_CODES.PROVIDER_ERROR) { Erro de comunicação. Tente novamente. }
+          @default { Ocorreu um erro. Tente novamente. }
+        }
+      </div>
 
       <button type="submit" class="btn-primary" [disabled]="payerForm.invalid">
         Gerar código PIX
@@ -91,6 +96,13 @@
     <button type="button" class="btn-retry" (click)="retryPix()">Gerar novo código</button>
   </div>
 
-  <div *ngIf="pixStep() === PixStep.Qr && error()" class="error-banner" role="alert">{{ error() }}</div>
+  <div *ngIf="pixStep() === PixStep.Qr && error()" class="error-banner" role="alert">
+    @switch (error()) {
+      @case (PAYMENT_ERROR_CODES.PIX_REJECTED) { Pagamento PIX rejeitado. Tente novamente. }
+      @case (PAYMENT_ERROR_CODES.PIX_EXPIRED) { PIX expirado. Gere um novo código. }
+      @case (PAYMENT_ERROR_CODES.PROVIDER_ERROR) { Erro de comunicação. Tente novamente. }
+      @default { Ocorreu um erro no pagamento. }
+    }
+  </div>
 
 </div>

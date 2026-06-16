@@ -8,6 +8,7 @@ import { PixPaymentDto } from '../../models/pix-payment-dto.model';
 import { CpfValidators } from '../../utils/cpf-validators';
 import { PixStep } from '../../enums/pix-step.enum';
 import { PaymentStatus } from '../../enums/payment-status.enum';
+import { PAYMENT_ERROR_CODES } from '../../constants/payment-error-codes.constant';
 
 const PIX_EXPIRATION_SECONDS = 10 * 60;
 
@@ -27,6 +28,7 @@ export class PixDisplayComponent implements OnDestroy {
   public readonly paymentApproved: OutputEmitterRef<void> = output<void>();
 
   public readonly PixStep: typeof PixStep = PixStep;
+  public readonly PAYMENT_ERROR_CODES: typeof PAYMENT_ERROR_CODES = PAYMENT_ERROR_CODES;
 
   public readonly pixStep: WritableSignal<PixStep> = signal(PixStep.Form);
   public readonly qrCode: WritableSignal<string> = signal('');
@@ -113,7 +115,7 @@ export class PixDisplayComponent implements OnDestroy {
     this.awaitingPixResponse = false;
 
     if (state.error) {
-      this.error.set(state.error);
+      this.error.set(PAYMENT_ERROR_CODES.PROVIDER_ERROR);
       this.pixStep.set(PixStep.Form);
       return;
     }
@@ -133,7 +135,7 @@ export class PixDisplayComponent implements OnDestroy {
       return;
     }
 
-    this.error.set(response.message ?? 'Erro ao gerar o PIX. Tente novamente.');
+    this.error.set(response.errorCode ?? PAYMENT_ERROR_CODES.PROVIDER_ERROR);
     this.pixStep.set(PixStep.Form);
   }
 
@@ -151,7 +153,7 @@ export class PixDisplayComponent implements OnDestroy {
 
     if (state.response?.status === PaymentStatus.Rejected) {
       this.stopPolling();
-      this.error.set(state.response.message ?? 'Pagamento rejeitado.');
+      this.error.set(state.response.errorCode ?? PAYMENT_ERROR_CODES.PIX_REJECTED);
     }
   }
 

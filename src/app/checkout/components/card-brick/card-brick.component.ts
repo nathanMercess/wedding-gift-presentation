@@ -9,6 +9,7 @@ import { CardBrickConfig } from '../../models/card-brick-config.model';
 import { PaymentMethod } from '../../enums/payment-method.enum';
 import { PaymentStatus } from '../../enums/payment-status.enum';
 import { MP_CARD_BRICK_CUSTOMIZATION } from '../../constants/mp-card-brick-style.constant';
+import { PAYMENT_ERROR_CODES } from '../../constants/payment-error-codes.constant';
 
 @Component({
   standalone: true,
@@ -21,6 +22,7 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
   public readonly config: InputSignal<CardBrickConfig> = input.required<CardBrickConfig>();
   public readonly paymentApproved: OutputEmitterRef<void> = output<void>();
 
+  public readonly PAYMENT_ERROR_CODES: typeof PAYMENT_ERROR_CODES = PAYMENT_ERROR_CODES;
   public brickReady: boolean = false;
   public error: string = '';
 
@@ -141,7 +143,7 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
     this.ngZone.run(() => {
       if (state.error) {
         this.pendingReject?.(new Error('network_error'));
-        this.error = state.error;
+        this.error = PAYMENT_ERROR_CODES.PROVIDER_ERROR;
         this.clearPending();
         return;
       }
@@ -162,13 +164,13 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
 
       if (response.status === PaymentStatus.InProcess || response.status === PaymentStatus.Pending) {
         this.pendingResolve?.();
-        this.error = 'Pagamento em análise. Você será notificado assim que for confirmado.';
+        this.error = PAYMENT_ERROR_CODES.PAYMENT_DECLINED;
         this.clearPending();
         return;
       }
 
       this.pendingReject?.(new Error(response.statusDetail ?? 'declined'));
-      this.error = 'Pagamento recusado: ' + (response.statusDetail ?? 'tente outro cartão.');
+      this.error = response.errorCode ?? PAYMENT_ERROR_CODES.PAYMENT_DECLINED;
       this.clearPending();
     });
   }
