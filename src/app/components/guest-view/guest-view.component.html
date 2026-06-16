@@ -164,5 +164,6 @@
     [gift]="selectedGift"
     [coupleName]="coupleService.state().couple.names"
     (close)="selectedGift = null"
+    (paymentCompleted)="onGiftPaymentCompleted()"
   ></app-gift-details-modal>
 </div>

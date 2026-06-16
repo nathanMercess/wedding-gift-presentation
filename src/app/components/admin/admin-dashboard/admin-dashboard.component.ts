@@ -84,11 +84,11 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   public saveGift(): void {
-    const giftId: number | null = this.editingGift ? this.editingGift.id : null;
+    const giftId: string | null = this.editingGift ? this.editingGift.id : null;
     this.giftService.saveAdminGift(giftId, this.giftForm);
   }
 
-  public deleteGift(id: number): void {
+  public deleteGift(id: string): void {
     if (!confirm('Tem certeza que deseja remover este presente?')) return;
     this.giftService.deleteAdminGift(id);
   }

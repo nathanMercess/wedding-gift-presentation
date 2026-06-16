@@ -26,6 +26,9 @@ function cpfValidator(): ValidatorFn {
 export class PixDisplayComponent implements OnDestroy {
   public readonly orderId: InputSignal<string> = input<string>('');
   public readonly amount: InputSignal<number> = input<number>(0);
+  public readonly giftId: InputSignal<string> = input<string>('');
+  public readonly contributorName: InputSignal<string> = input<string>('');
+  public readonly message: InputSignal<string> = input<string>('');
   public readonly paymentApproved: OutputEmitterRef<void> = output<void>();
 
   /** Internal step: collect payer data first, then show QR */
@@ -85,6 +88,9 @@ export class PixDisplayComponent implements OnDestroy {
     const rawCpf = (this.payerForm.value.cpf as string).replace(/\D/g, '');
 
     const dto: PixPaymentDto = {
+      giftId: this.giftId(),
+      contributorName: this.contributorName(),
+      message: this.message(),
       orderId: this.orderId(),
       amount: this.amount(),
       payerEmail: this.payerForm.value.email as string,

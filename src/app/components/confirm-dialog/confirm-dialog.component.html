@@ -1,0 +1,10 @@
+<div class="confirm-backdrop" (click)="onBackdropClick($event)">
+  <div class="confirm-container" role="alertdialog" aria-modal="true">
+    <h3>{{ title() }}</h3>
+    <p *ngIf="message()">{{ message() }}</p>
+    <div class="confirm-actions">
+      <app-button variant="outline" type="button" (click)="cancelled.emit()">{{ cancelLabel() }}</app-button>
+      <app-button variant="primary" type="button" (click)="confirmed.emit()">{{ confirmLabel() }}</app-button>
+    </div>
+  </div>
+</div>

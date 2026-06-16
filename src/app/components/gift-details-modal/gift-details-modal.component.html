@@ -102,9 +102,9 @@
             <!-- Custom Amount -->
             <div *ngIf="contributionType === 'partial' && !isCompleted" class="form-group">
               <label>Valor da contribuição</label>
-              <div class="quick-amounts">
+              <div class="quick-amounts" *ngIf="availableQuickAmounts.length">
                 <button
-                  *ngFor="let amount of quickAmounts"
+                  *ngFor="let amount of availableQuickAmounts"
                   type="button"
                   class="quick-btn"
                   (click)="customAmount = amount.toString()"
@@ -117,7 +117,7 @@
                 <input
                   type="number"
                   step="0.01"
-                  min="10"
+                  [min]="minAmount"
                   [max]="remaining"
                   [(ngModel)]="customAmount"
                   name="customAmount"
@@ -126,7 +126,7 @@
                   class="text-input padded"
                 />
               </div>
-              <p class="hint">Valor mínimo: R$ 10,00 • Valor máximo: R$ {{ remaining.toFixed(2) }}</p>
+              <p class="hint">Valor mínimo: R$ {{ minAmount.toFixed(2) }} • Valor máximo: R$ {{ remaining.toFixed(2) }}</p>
             </div>
 
             <!-- Guest Info -->
@@ -208,15 +208,20 @@
           <app-card-brick
             *ngIf="activeMethod === 'credit_card' || activeMethod === 'debit_card'"
             [cardType]="activeMethod"
-            [orderId]="gift().id.toString()"
+            [orderId]="orderId"
+            [giftId]="gift().id"
+            [contributorName]="guestName"
+            [message]="guestMessage"
             [amount]="getContributionAmount()"
-            [payerEmail]="guestName"
             (paymentApproved)="onPaymentApproved()">
           </app-card-brick>
 
           <app-pix-display
             *ngIf="activeMethod === 'pix'"
-            [orderId]="gift().id.toString()"
+            [orderId]="orderId"
+            [giftId]="gift().id"
+            [contributorName]="guestName"
+            [message]="guestMessage"
             [amount]="getContributionAmount()"
             (paymentApproved)="onPaymentApproved()">
           </app-pix-display>
@@ -254,4 +259,14 @@
 
     </div>
   </div>
+
+  <app-confirm-dialog
+    *ngIf="showExitConfirm"
+    title="Sair sem concluir?"
+    message="Você tem dados preenchidos. Deseja realmente fechar sem concluir o presente?"
+    confirmLabel="Fechar mesmo assim"
+    cancelLabel="Continuar presenteando"
+    (confirmed)="confirmExit()"
+    (cancelled)="cancelExit()">
+  </app-confirm-dialog>
 </div>

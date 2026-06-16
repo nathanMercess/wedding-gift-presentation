@@ -29,15 +29,15 @@ export class EndpointsUrls {
         return `${this.apiUrl}/admin/couple`;
     }
 
-    public giftsById(id: number): string {
+    public giftsById(id: string): string {
         return `${this.apiUrl}/gifts/${id}`;
     }
 
-    public giftsContribute(giftId: number): string {
+    public giftsContribute(giftId: string): string {
         return `${this.apiUrl}/gifts/${giftId}/contribute`;
     }
 
-    public adminGiftsById(id: number): string {
+    public adminGiftsById(id: string): string {
         return `${this.apiUrl}/admin/gifts/${id}`;
     }
 

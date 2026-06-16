@@ -61,7 +61,7 @@ export class GiftService {
     });
   }
 
-  public saveAdminGift(giftId: number | null, gift: Partial<Gift>): void {
+  public saveAdminGift(giftId: string | null, gift: Partial<Gift>): void {
     this.patchAdminState({ giftSaving: true, giftError: '', giftSaved: false });
 
     if (giftId === null) {
@@ -88,7 +88,7 @@ export class GiftService {
     });
   }
 
-  public deleteAdminGift(id: number): void {
+  public deleteAdminGift(id: string): void {
     this.patchAdminState({ giftsError: '' });
 
     this.http.delete<void>(this.endpointsUrls.adminGiftsById(id)).subscribe({
@@ -109,7 +109,7 @@ export class GiftService {
     this.patchAdminState({ giftSaved: false });
   }
 
-  public contributeToGift(giftId: number, payload: ContributionRequest, onSuccess?: () => void): void {
+  public contributeToGift(giftId: string, payload: ContributionRequest, onSuccess?: () => void): void {
     this.patchContributionState({ submitting: true, success: false, error: '' });
 
     this.http.post<void>(this.endpointsUrls.giftsContribute(giftId), payload).pipe(finalize((): void => this.patchContributionState({ submitting: false }))).subscribe({

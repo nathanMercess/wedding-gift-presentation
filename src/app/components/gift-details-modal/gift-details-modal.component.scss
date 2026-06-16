@@ -191,7 +191,21 @@ h3 {
   gap: 0.75rem;
   padding-top: 1rem;
 }
-.actions app-button { flex: 1; }
+.actions app-button {
+  flex: 1;
+  min-width: 0;
+}
+.actions app-button ::ng-deep button {
+  width: 100%;
+  white-space: nowrap;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+@media (max-width: 360px) {
+  .actions app-button ::ng-deep button {
+    font-size: 0.875rem;
+  }
+}
 .legal-text { font-size: 0.75rem; color: var(--muted-foreground); text-align: center; margin: 0; }
 
 /* Header com botão Voltar */

@@ -98,7 +98,7 @@ export class GuestViewComponent implements OnInit {
   }
 
   public get completedGifts(): number {
-    return this.giftService.guestState().gifts.filter((g: Gift): boolean => g.raised >= g.total).length;
+    return this.giftService.guestState().gifts.filter((g: Gift): boolean => !g.available).length;
   }
 
   public get totalRaised(): number {
@@ -156,6 +156,10 @@ export class GuestViewComponent implements OnInit {
     this.filteredGiftsCacheSource = null;
   }
 
+  public onGiftPaymentCompleted(): void {
+    this.loadGifts();
+  }
+
   public normalizeText(value: string): string {
     return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
   }
@@ -168,7 +172,7 @@ export class GuestViewComponent implements OnInit {
     return normalized;
   }
 
-  public trackByGiftId(_: number, gift: Gift): number {
+  public trackByGiftId(_: number, gift: Gift): string {
     return gift.id;
   }
 

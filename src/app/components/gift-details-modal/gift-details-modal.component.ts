@@ -7,11 +7,12 @@ import { GiftService } from '../../services/gift.service';
 import { PaymentMethodSelectorComponent } from '../../checkout/components/payment-method-selector/payment-method-selector.component';
 import { CardBrickComponent } from '../../checkout/components/card-brick/card-brick.component';
 import { PixDisplayComponent } from '../../checkout/components/pix-display/pix-display.component';
+import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-gift-details-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonComponent, PaymentMethodSelectorComponent, CardBrickComponent, PixDisplayComponent],
+  imports: [CommonModule, FormsModule, ButtonComponent, PaymentMethodSelectorComponent, CardBrickComponent, PixDisplayComponent, ConfirmDialogComponent],
   templateUrl: './gift-details-modal.component.html',
   styleUrl: './gift-details-modal.component.scss'
 })
@@ -19,9 +20,11 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy {
   public readonly gift: InputSignal<Gift> = input.required<Gift>();
   public readonly coupleName: InputSignal<string> = input<string>('');
   public readonly close: OutputEmitterRef<void> = output<void>();
+  public readonly paymentCompleted: OutputEmitterRef<void> = output<void>();
 
   public step: 'contribution' | 'payment' | 'success' = 'contribution';
   public activeMethod: 'credit_card' | 'debit_card' | 'pix' | null = null;
+  public orderId: string = '';
 
   public contributionType: 'full' | 'partial' = 'full';
   public customAmount: string = '';
@@ -29,6 +32,7 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy {
   public guestMessage: string = '';
   public quickAmounts: number[] = [50, 100, 200, 300];
   public validationError: string = '';
+  public showExitConfirm: boolean = false;
 
   public constructor(public readonly giftService: GiftService) {
     this.giftService.resetContributionState();
@@ -55,7 +59,15 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy {
   }
 
   public get isCompleted(): boolean {
-    return this.gift().raised >= this.gift().total;
+    return !this.gift().available;
+  }
+
+  public get minAmount(): number {
+    return Math.min(10, this.remaining);
+  }
+
+  public get availableQuickAmounts(): number[] {
+    return this.quickAmounts.filter((amount: number): boolean => amount <= this.remaining);
   }
 
   public getContributionAmount(): number {
@@ -70,11 +82,21 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy {
   }
 
   public requestClose(): void {
-    if (this.hasUnsavedInput && !confirm('Você tem dados preenchidos. Deseja realmente fechar sem concluir o presente?')) {
+    if (this.hasUnsavedInput) {
+      this.showExitConfirm = true;
       return;
     }
 
     this.close.emit();
+  }
+
+  public confirmExit(): void {
+    this.showExitConfirm = false;
+    this.close.emit();
+  }
+
+  public cancelExit(): void {
+    this.showExitConfirm = false;
   }
 
   public onSubmit(): void {
@@ -88,8 +110,13 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy {
       this.validationError = 'Informe um valor de contribuição válido.';
       return;
     }
+    if (amount > this.remaining) {
+      this.validationError = `O valor não pode ser maior que R$ ${this.remaining.toFixed(2)}.`;
+      return;
+    }
 
     this.validationError = '';
+    this.orderId = crypto.randomUUID();
     this.step = 'payment';
   }
 
@@ -101,5 +128,6 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy {
   public onPaymentApproved(): void {
     this.activeMethod = null;
     this.step = 'success';
+    this.paymentCompleted.emit();
   }
 }

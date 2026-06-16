@@ -1,4 +1,7 @@
 export interface CardPaymentDto {
+  giftId: string;
+  contributorName: string;
+  message?: string;
   orderId: string;
   amount: number;
   cardToken: string;

@@ -16,6 +16,9 @@ import { CardPaymentDto } from '../../models/card-payment-dto.model';
 export class CardBrickComponent implements AfterViewInit, OnDestroy {
     public readonly amount: InputSignal<number> = input<number>(0);
     public readonly orderId: InputSignal<string> = input<string>('');
+    public readonly giftId: InputSignal<string> = input<string>('');
+    public readonly contributorName: InputSignal<string> = input<string>('');
+    public readonly message: InputSignal<string> = input<string>('');
     public readonly cardType: InputSignal<'credit_card' | 'debit_card'> = input<'credit_card' | 'debit_card'>('credit_card');
     public readonly payerEmail: InputSignal<string> = input<string>('');
     public readonly paymentApproved: OutputEmitterRef<void> = output<void>();
@@ -143,6 +146,9 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
             const identification = payer.identification ?? {};
 
             const dto: CardPaymentDto = {
+                giftId: this.giftId(),
+                contributorName: this.contributorName(),
+                message: this.message(),
                 orderId: this.orderId(),
                 amount: this.amount(),
                 cardToken: formData.token,
