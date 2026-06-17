@@ -45,7 +45,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         this.editingGift = null;
         this.giftService.resetAdminGiftSaved();
       }
-    });
+    }, { allowSignalWrites: true });
 
     this.searchSubject.pipe(
       debounceTime(300),

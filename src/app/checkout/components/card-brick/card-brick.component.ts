@@ -37,7 +37,7 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
   private readonly messageService: MessageService = inject(MessageService);
 
   public constructor(public readonly paymentService: PaymentService) {
-    effect((): void => this.handlePaymentState(this.paymentService.paymentState()));
+    effect((): void => this.handlePaymentState(this.paymentService.paymentState()), { allowSignalWrites: true });
   }
 
   public ngAfterViewInit(): void {

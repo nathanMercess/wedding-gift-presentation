@@ -21,7 +21,7 @@ export class AdminLoginComponent {
         this.router.navigate(['/admin']);
         this.auth.resetLoginState();
       }
-    });
+    }, { allowSignalWrites: true });
   }
 
   public onSubmit(): void {

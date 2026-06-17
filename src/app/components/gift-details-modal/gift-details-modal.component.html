@@ -28,33 +28,35 @@
 
       <!-- PASSO 1: Detalhes e contribuição -->
       <div *ngIf="step === ModalStep.Contribution" class="modal-grid" [class.single-column]="isCompleted">
-        <!-- Left: Gift Info -->
+        <!-- Left: Gift Info (foto-card estilo carousel) -->
         <div class="gift-info">
-          <div class="gift-image">
-            <img [src]="gift().image" [alt]="gift().name" decoding="async" />
-          </div>
-          <div>
-            <h3>{{ gift().name }}</h3>
-            <p class="description">{{ gift().description }}</p>
-          </div>
-          <div class="summary-box">
-            <div class="summary-row">
-              <span class="label">Valor total</span>
-              <span class="value">R$ {{ gift().total.toFixed(2) }}</span>
+          <div class="gift-photo-card">
+            <img [src]="gift().image" [alt]="gift().name" class="gift-photo-img" decoding="async" />
+            <div class="gift-photo-overlay"></div>
+            <div class="gift-photo-content">
+              <p class="gift-photo-tag">{{ gift().category }}</p>
+              <h3 class="gift-photo-title">{{ gift().name }}</h3>
             </div>
-            <div class="summary-row">
-              <span class="label">Arrecadado</span>
-              <span class="value primary">R$ {{ gift().raised.toFixed(2) }}</span>
-            </div>
-            <div class="summary-row">
-              <span class="label">Faltam</span>
-              <span class="value">R$ {{ remaining.toFixed(2) }}</span>
-            </div>
-            <div class="progress-wrap">
-              <div class="progress-bar">
-                <div class="progress-fill" [style.width.%]="progress"></div>
+
+            <!-- Box flutuante: descrição + valores sobre a foto -->
+            <div class="gift-photo-stats">
+              <p class="description" *ngIf="gift().description">{{ gift().description }}</p>
+              <div class="mini-stats">
+                <div class="mini-stat">
+                  <span class="mini-stat-label">Valor total</span>
+                  <span class="mini-stat-value">R$ {{ gift().total.toFixed(2) }}</span>
+                </div>
+                <div class="mini-stat">
+                  <span class="mini-stat-label">Faltam</span>
+                  <span class="mini-stat-value primary">R$ {{ remaining.toFixed(2) }}</span>
+                </div>
               </div>
-              <p class="progress-text">{{ progress.toFixed(0) }}% arrecadado</p>
+              <div class="progress-wrap">
+                <div class="progress-bar">
+                  <div class="progress-fill" [style.width.%]="progress"></div>
+                </div>
+                <p class="progress-text">{{ progress.toFixed(0) }}% arrecadado</p>
+              </div>
             </div>
           </div>
           <div *ngIf="isCompleted" class="completed-notice">
@@ -71,14 +73,15 @@
           </div>
         </div>
 
-        <!-- Right: Form -->
+        <!-- Right: Form (scroll + sticky footer) -->
         <div class="form-side" *ngIf="!isCompleted">
-          <div>
-            <h3 class="serif">Como deseja presentear?</h3>
-            <p class="subtitle">Presenteie {{ coupleName() }} com este item especial</p>
-          </div>
-
           <form (ngSubmit)="onSubmit()" class="gift-form">
+            <div class="form-scroll">
+            <div class="form-heading">
+              <h3 class="serif">Como deseja presentear?</h3>
+              <p class="subtitle">Presenteie {{ coupleName() }} com este item especial</p>
+            </div>
+
             <!-- Contribution Type -->
             <div class="form-group" *ngIf="gift().allowPartialContribution">
               <label>Tipo de contribuição</label>
@@ -139,35 +142,23 @@
                 rows="3" class="text-input" style="resize:none"></textarea>
             </div>
 
-            <!-- Summary -->
-            <div class="summary-box">
-              <div class="summary-row">
-                <span>Valor do presente</span>
-                <span class="value">R$ {{ getContributionAmount().toFixed(2) }}</span>
-              </div>
-              <div class="summary-row">
-                <span class="label">Taxa de processamento</span>
-                <span class="label">R$ 0,00</span>
-              </div>
-              <div class="summary-row total-row">
-                <span >Total</span>
-                <span class="value">R$ {{ getContributionAmount().toFixed(2) }}</span>
-              </div>
             </div>
 
-            <!-- Actions -->
-            <div class="actions">
-              <app-button [variant]="ButtonVariant.Outline" [type]="ButtonType.Button"
-                (click)="requestClose()">Cancelar</app-button>
-              <app-button [variant]="ButtonVariant.Primary" [type]="ButtonType.Submit"
-                [disabled]="contributionType === 'partial' && !customAmount">
-                Confirmar presente
-              </app-button>
+            <!-- Sticky footer: total + actions -->
+            <div class="form-footer">
+              <div class="footer-total">
+                <span class="footer-total-label">Total</span>
+                <span class="footer-total-value">R$ {{ getContributionAmount().toFixed(2) }}</span>
+              </div>
+              <div class="actions">
+                <app-button [variant]="ButtonVariant.Outline" [type]="ButtonType.Button"
+                  (click)="requestClose()">Cancelar</app-button>
+                <app-button [variant]="ButtonVariant.Primary" [type]="ButtonType.Submit"
+                  [disabled]="contributionType === 'partial' && !customAmount">
+                  Confirmar
+                </app-button>
+              </div>
             </div>
-
-            <p class="legal-text">
-              Ao continuar, você concorda com nossos termos de uso e política de privacidade. Pagamento 100% seguro.
-            </p>
           </form>
         </div>
       </div>

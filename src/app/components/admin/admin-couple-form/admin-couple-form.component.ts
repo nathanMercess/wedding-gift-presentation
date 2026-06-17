@@ -36,7 +36,7 @@ export class AdminCoupleFormComponent {
         secondaryColor: loaded.secondaryColor || ColorUtil.lighten(primaryColor, 0.85),
         carouselPhotos: loaded.carouselPhotos ?? [],
       };
-    });
+    }, { allowSignalWrites: true });
   }
 
   public suggestSecondaryFromPrimary(): void {

@@ -8,5 +8,5 @@
   <rect width="600" height="600" fill="url(#g)"/>
   <circle cx="300" cy="220" r="86" fill="#c79a6d" opacity="0.22"/>
   <rect x="140" y="340" width="320" height="130" rx="65" fill="#c79a6d" opacity="0.22"/>
-  <text x="300" y="535" text-anchor="middle" fill="#8f6f4c" font-family="Lato, Arial, sans-serif" font-size="24">Adicione assets/images/couple-photo.jpg</text>
+  <text x="300" y="535" text-anchor="middle" fill="#8f6f4c" font-family="Inter, system-ui, sans-serif" font-size="24">Adicione assets/images/couple-photo.jpg</text>
 </svg>

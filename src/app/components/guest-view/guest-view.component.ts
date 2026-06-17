@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, effect, signal, WritableSignal } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild, effect, signal, WritableSignal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
@@ -39,7 +39,78 @@ export class GuestViewComponent implements OnInit, OnDestroy {
   private carouselInterval: ReturnType<typeof setInterval> | null = null;
   private touchStartX: number = 0;
 
+  @ViewChild('carouselTrack') public carouselTrack?: ElementRef<HTMLDivElement>;
+
+  private loopCenteringSettled: boolean = false;
+  private wrapPending: boolean = false;
+
+  public get loopedPhotos(): string[] {
+    const photos = this.carouselPhotos;
+    if (photos.length === 0) return [];
+    return [...photos, ...photos, ...photos];
+  }
+
+  public scrollCarousel(direction: 1 | -1): void {
+    const el = this.carouselTrack?.nativeElement;
+    if (!el) return;
+    const step = this.cardStep(el);
+    el.scrollBy({ left: direction * step, behavior: 'smooth' });
+  }
+
+  private cardStep(el: HTMLDivElement): number {
+    const cards = el.querySelectorAll('.carousel-card');
+
+    if (cards.length < 2) {
+      return (cards[0] as HTMLElement)?.offsetWidth ?? 0;
+    }
+
+    const first = cards[0] as HTMLElement;
+    const second = cards[1] as HTMLElement;
+
+    return second.offsetLeft - first.offsetLeft;
+  }
+  public onCarouselScroll(_event: Event): void {
+    const el = this.carouselTrack?.nativeElement;
+    if (!el || this.carouselPhotos.length === 0) return;
+
+    const step = this.cardStep(el);
+    const blockWidth = step * this.carouselPhotos.length;
+    const left = el.scrollLeft;
+
+    if (this.wrapPending) return;
+
+    if (left < blockWidth * 0.5) {
+      this.wrapPending = true;
+      el.scrollTo({ left: left + blockWidth, behavior: 'instant' as ScrollBehavior });
+      requestAnimationFrame(() => { this.wrapPending = false; });
+    } else if (left > blockWidth * 1.9) {
+      this.wrapPending = true;
+      el.scrollTo({ left: left - blockWidth, behavior: 'instant' as ScrollBehavior });
+      requestAnimationFrame(() => { this.wrapPending = false; });
+    }
+  }
+
+  private centerLoop(): void {
+    const el = this.carouselTrack?.nativeElement;
+    if (!el || this.carouselPhotos.length === 0) return;
+    const step = this.cardStep(el);
+    el.scrollTo({ left: step * this.carouselPhotos.length, behavior: 'instant' as ScrollBehavior });
+    this.loopCenteringSettled = true;
+  }
+
   public readonly skeletonItems: number[] = [1, 2, 3, 4, 5, 6];
+  
+  public readonly photoCaptions: Array<{ tag: string; title: string }> = [
+    { tag: 'Momentos', title: 'Memórias especiais' },
+    { tag: 'Histórias', title: 'Cada foto conta uma história' },
+    { tag: 'Lembranças', title: 'Recordações que permanecem' },
+    { tag: 'Experiências', title: 'Momentos que marcaram nossa trajetória' },
+    { tag: 'Conquistas', title: 'Passos importantes da jornada' },
+    { tag: 'Pessoas', title: 'Quem faz parte dessa história' },
+    { tag: 'Inspiração', title: 'Razões para celebrar' },
+    { tag: 'Futuro', title: 'O que ainda está por vir' },
+  ];
+
   public readonly quickCategories: Array<{ id: string; label: string }> = [
     { id: 'todos', label: 'Todos' },
     ...GIFT_CATEGORIES,
@@ -62,8 +133,8 @@ export class GuestViewComponent implements OnInit, OnDestroy {
       this.hasTriedApiCouplePhoto = false;
       this.displayCouplePhoto = this.localCouplePhoto;
       this.carouselIndex.set(0);
-      this.startCarousel();
-    });
+      this.startCarousel(); // allowSignalWrites required: carouselIndex is a WritableSignal
+    }, { allowSignalWrites: true });
 
     this.searchSubject.pipe(
       debounceTime(300),
@@ -118,9 +189,12 @@ export class GuestViewComponent implements OnInit, OnDestroy {
   public startCarousel(): void {
     if (this.carouselPhotos.length <= 1) return;
     this.stopCarousel();
+    if (!this.loopCenteringSettled) {
+      setTimeout(() => this.centerLoop(), 300);
+    }
     this.carouselInterval = setInterval((): void => {
-      this.carouselIndex.update(i => (i + 1) % this.carouselPhotos.length);
-    }, 5000);
+      this.scrollCarousel(1);
+    }, 4500);
   }
 
   public stopCarousel(): void {
@@ -136,14 +210,11 @@ export class GuestViewComponent implements OnInit, OnDestroy {
   }
 
   public prevSlide(): void {
-    const len = this.carouselPhotos.length;
-    this.carouselIndex.update(i => (i - 1 + len) % len);
-    this.startCarousel();
+    this.scrollCarousel(-1);
   }
 
   public nextSlide(): void {
-    this.carouselIndex.update(i => (i + 1) % this.carouselPhotos.length);
-    this.startCarousel();
+    this.scrollCarousel(1);
   }
 
   public loadCouple(): void {

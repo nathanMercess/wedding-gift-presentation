@@ -8,19 +8,20 @@
 }
 
 .checkout-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 24px;
-  font-weight: 600;
-  color: #333;
-  margin: 0 0 8px;
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #111;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.5rem;
 }
 
 .checkout-total {
-  font-family: 'Lato', sans-serif;
-  font-size: 16px;
-  color: #b8860b;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  color: var(--primary);
   font-weight: 600;
-  margin: 0 0 24px;
+  margin: 0 0 1.5rem;
 }
 
 @media (max-width: 480px) {

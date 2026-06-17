@@ -60,8 +60,8 @@ export class PixDisplayComponent implements OnDestroy {
       cpf: ['', [Validators.required, CpfValidators.validator()]],
     });
 
-    effect((): void => this.handlePaymentState(this.paymentService.paymentState()));
-    effect((): void => this.handleStatusState(this.paymentService.statusState()));
+    effect((): void => this.handlePaymentState(this.paymentService.paymentState()), { allowSignalWrites: true });
+    effect((): void => this.handleStatusState(this.paymentService.statusState()), { allowSignalWrites: true });
   }
 
   private showError(code: string, detail: string): void {

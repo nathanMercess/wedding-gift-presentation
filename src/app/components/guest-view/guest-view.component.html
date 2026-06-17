@@ -25,94 +25,78 @@
 
   <ng-container *ngIf="!giftService.guestState().loading && !coupleService.state().loading">
 
-    <!-- Hero / Carousel -->
-    <section class="hero"
-      (mouseenter)="stopCarousel()"
-      (mouseleave)="startCarousel()"
-      (touchstart)="onTouchStart($event)"
-      (touchend)="onTouchEnd($event)">
+    <!-- Hero block: header + mensagem + carousel + stats -->
+    <section class="hero-block">
 
-      <!-- Slides track: horizontal translateX -->
-      <div class="hero-slides-viewport">
-        <div class="hero-slides-track" [style.transform]="'translateX(-' + carouselIndex() * 100 + '%)'">
+      <!-- Header com nomes/data -->
+      <div class="hero-header container">
+        <p class="hero-date">{{ formattedWeddingDate || coupleService.state().couple.weddingDate }}</p>
+        <h1 class="hero-names">{{ coupleService.state().couple.names }}</h1>
+      </div>
 
-          <!-- Multiple photos carousel -->
-          <ng-container *ngIf="carouselPhotos.length > 1">
-            <div *ngFor="let photo of carouselPhotos; let i = index" class="hero-slide">
-              <img [src]="photo" [alt]="coupleService.state().couple.names" class="hero-slide-img" decoding="async" />
-              <div class="hero-overlay"></div>
-              <div class="hero-content">
-                <p class="hero-date">{{ formattedWeddingDate || coupleService.state().couple.weddingDate }}</p>
-                <h1 class="hero-names">{{ coupleService.state().couple.names }}</h1>
-                <div class="hero-stats">
-                  <div class="hero-stat">
-                    <span class="hero-stat-value">{{ completedGifts }}/{{ totalGifts }}</span>
-                    <span class="hero-stat-label">Presentes completos</span>
-                  </div>
-                  <div class="hero-stat-divider"></div>
-                  <div class="hero-stat">
-                    <span class="hero-stat-value">{{ progressPercentage.toFixed(0) }}%</span>
-                    <span class="hero-stat-label">Do objetivo alcançado</span>
-                  </div>
-                </div>
+      <!-- Mensagem do casal (acima do carousel) -->
+      <div class="couple-quote-wrap" *ngIf="coupleService.state().couple.message">
+        <blockquote class="couple-quote">
+          "{{ coupleService.state().couple.message }}"
+        </blockquote>
+      </div>
+
+      <!-- Multi-card horizontal carousel -->
+      <div class="carousel-section"
+        (mouseenter)="stopCarousel()"
+        (mouseleave)="startCarousel()">
+        <div #carouselTrack class="carousel-track" (scroll)="onCarouselScroll($event)">
+
+          <!-- Multiple photos (tripled for infinite loop) -->
+          <ng-container *ngIf="carouselPhotos.length > 0">
+            <div *ngFor="let photo of loopedPhotos; let i = index" class="carousel-card">
+              <img [src]="photo" [alt]="coupleService.state().couple.names" class="carousel-card-img" decoding="async" />
+              <div class="carousel-card-overlay"></div>
+              <div class="carousel-card-content">
+                <p class="carousel-card-tag">{{ photoCaptions[(i % carouselPhotos.length) % photoCaptions.length].tag }}</p>
+                <h3 class="carousel-card-title">{{ photoCaptions[(i % carouselPhotos.length) % photoCaptions.length].title }}</h3>
               </div>
             </div>
           </ng-container>
 
-          <!-- Single photo -->
-          <ng-container *ngIf="carouselPhotos.length <= 1">
-            <div class="hero-slide">
-              <img [src]="displayCouplePhoto" [alt]="coupleService.state().couple.names" (error)="onCouplePhotoError()" class="hero-slide-img" />
-              <div class="hero-overlay"></div>
-              <div class="hero-content">
-                <p class="hero-date">{{ formattedWeddingDate || coupleService.state().couple.weddingDate }}</p>
-                <h1 class="hero-names">{{ coupleService.state().couple.names }}</h1>
-                <div class="hero-stats">
-                  <div class="hero-stat">
-                    <span class="hero-stat-value">{{ completedGifts }}/{{ totalGifts }}</span>
-                    <span class="hero-stat-label">Presentes completos</span>
-                  </div>
-                  <div class="hero-stat-divider"></div>
-                  <div class="hero-stat">
-                    <span class="hero-stat-value">{{ progressPercentage.toFixed(0) }}%</span>
-                    <span class="hero-stat-label">Do objetivo alcançado</span>
-                  </div>
-                </div>
+          <!-- Single (fallback) photo -->
+          <ng-container *ngIf="carouselPhotos.length === 0">
+            <div class="carousel-card">
+              <img [src]="displayCouplePhoto" [alt]="coupleService.state().couple.names" (error)="onCouplePhotoError()" class="carousel-card-img" />
+              <div class="carousel-card-overlay"></div>
+              <div class="carousel-card-content">
+                <p class="carousel-card-tag">{{ photoCaptions[0].tag }}</p>
+                <h3 class="carousel-card-title">{{ photoCaptions[0].title }}</h3>
               </div>
             </div>
           </ng-container>
+        </div>
 
+        <!-- Arrows -->
+        <button *ngIf="carouselPhotos.length > 1" class="carousel-arrow carousel-prev" (click)="scrollCarousel(-1)" aria-label="Anterior">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button *ngIf="carouselPhotos.length > 1" class="carousel-arrow carousel-next" (click)="scrollCarousel(1)" aria-label="Próxima">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+
+      <!-- Stats embaixo do carousel -->
+      <div class="hero-stats-wrap container">
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <span class="hero-stat-value">{{ completedGifts }}/{{ totalGifts }}</span>
+            <span class="hero-stat-label">Presentes completos</span>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat">
+            <span class="hero-stat-value">{{ progressPercentage.toFixed(0) }}%</span>
+            <span class="hero-stat-label">Objetivo alcançado</span>
+          </div>
         </div>
       </div>
 
-      <!-- Controles (só com múltiplas fotos) -->
-      <ng-container *ngIf="carouselPhotos.length > 1">
-        <button class="carousel-arrow carousel-prev" (click)="prevSlide()" aria-label="Foto anterior">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-        </button>
-        <button class="carousel-arrow carousel-next" (click)="nextSlide()" aria-label="Próxima foto">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
-        <div class="carousel-dots">
-          <button
-            *ngFor="let photo of carouselPhotos; let i = index"
-            class="carousel-dot"
-            [class.active]="i === carouselIndex()"
-            (click)="goToSlide(i)"
-            [attr.aria-label]="'Foto ' + (i + 1)"
-          ></button>
-        </div>
-      </ng-container>
-
     </section>
-
-    <!-- Mensagem do casal -->
-       <!-- =CLAUDE= COLOCAR COMO BASE C:\Users\natha\Desktop\ux\carousel, FOTO E UNS TEXTOS FOFOS -->
-    <div class="couple-quote-wrap" *ngIf="coupleService.state().couple.message">
-      <blockquote class="couple-quote">
-        "{{ coupleService.state().couple.message }}"
-      </blockquote>
-    </div>
 
     <!-- Filtros (desktop: inline; mobile: barra com botão + bottom sheet) -->
     <div class="filters-bar">
