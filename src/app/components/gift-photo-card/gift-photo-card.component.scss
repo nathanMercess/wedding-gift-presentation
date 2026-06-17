@@ -12,11 +12,29 @@
 @media (max-width: 767px) {
   .gift-photo-card {
     margin: 0;
-    border-radius: 0 0 16px 16px;
+    border-radius: 0;
     aspect-ratio: unset;
-    height: 150px;
+    height: 100%;
     box-shadow: none;
   }
+
+  /* Hero: nome/categoria embaixo, gradiente escuro embaixo */
+  .gift-photo-content {
+    top: auto;
+    bottom: 0;
+    padding: 0 1.1rem 1rem;
+  }
+
+  .gift-photo-overlay {
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.62) 0%,
+      rgba(0, 0, 0, 0.12) 48%,
+      rgba(0, 0, 0, 0) 100%
+    );
+  }
+
+  .gift-photo-title { font-size: 1.3rem; }
 }
 
 .gift-photo-img {

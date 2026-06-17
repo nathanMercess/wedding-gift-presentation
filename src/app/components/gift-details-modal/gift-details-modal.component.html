@@ -40,6 +40,19 @@
           </app-gift-photo-card>
         </div>
 
+        <!-- Faixa de progresso (mobile): contexto do produto abaixo da foto -->
+        <div class="gift-progress-strip" *ngIf="!isCompleted && step !== ModalStep.Success">
+          <div class="gps-top">
+            <span class="gps-label">Arrecadado</span>
+            <span class="gps-pct">{{ progress.toFixed(0) }}%</span>
+          </div>
+          <div class="gps-bar"><div class="gps-fill" [style.width.%]="progress"></div></div>
+          <div class="gps-bottom">
+            <span class="gps-raised">{{ gift().raised | currency:'BRL':'symbol':'1.2-2' }}</span>
+            <span class="gps-remaining">faltam {{ remaining | currency:'BRL':'symbol':'1.2-2' }}</span>
+          </div>
+        </div>
+
         <!-- Direita: muda conforme step / disponibilidade -->
         <div class="right-side">
 

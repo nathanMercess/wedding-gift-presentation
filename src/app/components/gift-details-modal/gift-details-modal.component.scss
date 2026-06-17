@@ -226,11 +226,92 @@
   }
 }
 
-/* mobile: foto como banner fixo 200px, form com scroll interno */
+/* ── Faixa de progresso (apenas mobile, abaixo da foto hero) ── */
+.gift-progress-strip { display: none; }
+
 @media (max-width: 767px) {
   .modal-container {
     max-height: calc(100dvh - env(safe-area-inset-bottom, 0px));
     border-radius: 24px 24px 0 0;
+    position: relative;
   }
-  .gift-info { flex-shrink: 0; height: 150px; overflow: hidden; }
+
+  /* Foto vira hero */
+  .gift-info { flex-shrink: 0; height: 210px; overflow: hidden; }
+
+  /* Header sem barra: botões flutuam sobre a foto */
+  .modal-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 5;
+    padding: 0.85rem 0.9rem;
+    border-bottom: none;
+    background: transparent;
+    pointer-events: none;
+  }
+  .modal-header h2 { display: none; }
+  .modal-header-left { gap: 0; }
+
+  .back-btn,
+  .close-btn {
+    pointer-events: auto;
+    background: rgba(255, 255, 255, 0.92);
+    color: #2a2a2a;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+    backdrop-filter: blur(4px);
+  }
+  .close-btn:hover { background: #fff; color: #000; }
+  .back-btn {
+    border-radius: 99px;
+    padding: 0.4rem 0.8rem;
+  }
+
+  /* Faixa de progresso visível no mobile */
+  .gift-progress-strip {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    padding: 0.85rem 1.1rem 0.95rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  .gps-top,
+  .gps-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .gps-label,
+  .gps-pct,
+  .gps-remaining {
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    color: var(--muted-foreground);
+  }
+
+  .gps-raised {
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--foreground);
+  }
+
+  .gps-bar {
+    height: 7px;
+    background: rgba(0, 0, 0, 0.08);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .gps-fill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 99px;
+    max-width: 100%;
+    transition: width 0.5s ease;
+  }
 }
