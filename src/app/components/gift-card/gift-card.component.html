@@ -1,18 +1,19 @@
-<div class="gift-card" (click)="onPresent()">
-  <div class="image-wrap">
+<div class="gift-card">
+  <div class="card-image">
     <img [src]="gift().image" [alt]="gift().name" (error)="onImgError($event)" />
+    <div class="card-badge" *ngIf="!gift().available">Completo</div>
+    <div class="card-hover-btn" (click)="onPresent()">Presentear</div>
   </div>
-  <div class="content">
-    <h3>{{ gift().name }}</h3>
-    <div class="progress-section">
-      <div class="progress-labels">
-        <span class="label">Arrecadado</span>
-        <span class="values">R$ {{ gift().raised.toFixed(2) }} de R$ {{ gift().total.toFixed(2) }}</span>
-      </div>
-      <div class="progress-bar">
+  <div class="card-body">
+    <p class="card-category" *ngIf="gift().category">{{ gift().category }}</p>
+    <h3 class="card-name">{{ gift().name }}</h3>
+    <div class="card-price">R$ {{ gift().total.toFixed(2) }}</div>
+    <div class="card-progress">
+      <div class="progress-track">
         <div class="progress-fill" [style.width.%]="progressPercent"></div>
       </div>
+      <span class="progress-pct">{{ progressPercent.toFixed(0) }}%</span>
     </div>
-    <app-button [variant]="ButtonVariant.Primary" [size]="ButtonSize.Sm" style="width:100%">Presentear</app-button>
+    <button class="card-btn-mobile" (click)="onPresent()">Presentear</button>
   </div>
 </div>
