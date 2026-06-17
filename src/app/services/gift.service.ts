@@ -21,6 +21,13 @@ export interface GiftQueryParams {
   pageSize?: number;
 }
 
+export interface GiftStats {
+  total: number;
+  completed: number;
+  raised: number;
+  goal: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class GiftService {
   public readonly adminState: WritableSignal<AdminGiftState> = signal<AdminGiftState>({
@@ -204,15 +211,13 @@ export class GiftService {
   }
 
   public loadGuestStats(): void {
-    this.http.get<PagedResult<Gift>>(this.endpointsUrls.giftsList, {
-      params: new HttpParams().set('pageSize', '9999'),
-    }).subscribe({
-      next: (result: PagedResult<Gift>): void => {
+    this.http.get<GiftStats>(this.endpointsUrls.giftsStats).subscribe({
+      next: (stats: GiftStats): void => {
         this.patchGuestState({
-          overallTotal: result.totalCount,
-          overallCompleted: result.items.filter((g: Gift): boolean => !g.available).length,
-          overallRaised: result.items.reduce((s: number, g: Gift): number => s + g.raised, 0),
-          overallGoal: result.items.reduce((s: number, g: Gift): number => s + g.total, 0),
+          overallTotal: stats.total,
+          overallCompleted: stats.completed,
+          overallRaised: stats.raised,
+          overallGoal: stats.goal,
         });
       },
     });

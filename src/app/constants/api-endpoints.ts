@@ -17,6 +17,10 @@ export class EndpointsUrls {
         return `${this.apiUrl}/gifts`;
     }
 
+    public get giftsStats(): string {
+        return `${this.apiUrl}/gifts/stats`;
+    }
+
     public get adminGiftsList(): string {
         return `${this.apiUrl}/admin/gifts`;
     }
