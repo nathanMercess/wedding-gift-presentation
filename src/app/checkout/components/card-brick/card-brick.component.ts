@@ -10,6 +10,7 @@ import { PaymentMethod } from '../../enums/payment-method.enum';
 import { PaymentStatus } from '../../enums/payment-status.enum';
 import { MP_CARD_BRICK_CUSTOMIZATION } from '../../constants/mp-card-brick-style.constant';
 import { PAYMENT_ERROR_CODES } from '../../constants/payment-error-codes.constant';
+import { ColorUtil } from '../../../utils/color.util';
 
 @Component({
   standalone: true,
@@ -69,6 +70,16 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
         },
         customization: {
           ...MP_CARD_BRICK_CUSTOMIZATION,
+          visual: {
+            ...MP_CARD_BRICK_CUSTOMIZATION.visual,
+            style: {
+              ...MP_CARD_BRICK_CUSTOMIZATION.visual.style,
+              customVariables: {
+                ...MP_CARD_BRICK_CUSTOMIZATION.visual.style.customVariables,
+                ...this.brandColorOverrides(),
+              },
+            },
+          },
           paymentMethods: {
             creditCard: 'all',
             debitCard: 'all',
@@ -101,6 +112,21 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
       clearTimeout(this.loadTimeoutHandle);
       this.loadTimeoutHandle = null;
     }
+  }
+
+  private brandColorOverrides(): Record<string, string> {
+    const primary = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
+    const rgb = ColorUtil.parseHex(primary);
+
+    if (!rgb)
+      return {};
+
+    return {
+      baseColor: primary,
+      baseColorFirstVariant: ColorUtil.lighten(primary, 0.15),
+      baseColorSecondVariant: ColorUtil.darken(primary, 0.15),
+      outlinePrimaryColor: primary,
+    };
   }
 
   private onSubmit(formData: any): Promise<void> {

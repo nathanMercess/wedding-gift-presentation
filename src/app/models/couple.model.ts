@@ -4,4 +4,5 @@ export interface Couple {
   photo: string;
   message: string;
   primaryColor: string;
+  secondaryColor: string;
 }

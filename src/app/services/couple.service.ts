@@ -4,6 +4,7 @@ import { finalize } from 'rxjs';
 import { EndpointsUrls } from '../constants/api-endpoints';
 import { Couple } from '../models/couple.model';
 import { CoupleState } from '../models/couple-state.model';
+import { ThemeService } from './theme.service';
 import { HttpErrorUtil } from '../utils/http-error';
 
 interface ImageUploadResponse {
@@ -13,7 +14,7 @@ interface ImageUploadResponse {
 @Injectable({ providedIn: 'root' })
 export class CoupleService {
   public readonly state: WritableSignal<CoupleState> = signal<CoupleState>({
-    couple: { names: '', weddingDate: '', photo: '', message: '', primaryColor: '#C79A6D' },
+    couple: { names: '', weddingDate: '', photo: '', message: '', primaryColor: '#C79A6D', secondaryColor: '#F7F0EA' },
     loading: false,
     saving: false,
     success: false,
@@ -22,7 +23,11 @@ export class CoupleService {
     photoUploadError: '',
   });
 
-  public constructor(public readonly http: HttpClient, public readonly endpointsUrls: EndpointsUrls) {}
+  public constructor(
+    public readonly http: HttpClient,
+    public readonly endpointsUrls: EndpointsUrls,
+    private readonly theme: ThemeService,
+  ) {}
 
   public loadCouple(): void {
     this.patchState({ loading: true, error: '' });
@@ -30,6 +35,7 @@ export class CoupleService {
     this.http.get<Couple>(this.endpointsUrls.coupleGet).pipe(finalize((): void => this.patchState({ loading: false }))).subscribe({
       next: (couple: Couple): void => {
         this.patchState({ couple });
+        this.theme.apply(couple.primaryColor, couple.secondaryColor);
       },
       error: (err: HttpErrorResponse): void => {
         this.patchState({ error: HttpErrorUtil.extract(err, 'Erro ao carregar informações do casal.') });
@@ -43,6 +49,7 @@ export class CoupleService {
     this.http.put<Couple>(this.endpointsUrls.coupleAdminUpdate, couple).pipe(finalize((): void => this.patchState({ saving: false }))).subscribe({
       next: (updatedCouple: Couple): void => {
         this.patchState({ couple: updatedCouple, success: true });
+        this.theme.apply(updatedCouple.primaryColor, updatedCouple.secondaryColor);
       },
       error: (err: HttpErrorResponse): void => {
         this.patchState({ error: HttpErrorUtil.extract(err, 'Erro ao salvar informações do casal.') });

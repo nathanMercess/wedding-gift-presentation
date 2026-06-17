@@ -1,56 +1,86 @@
 <div *ngIf="coupleService.state().loading" class="status-msg">Carregando...</div>
 
-<div *ngIf="!coupleService.state().loading" class="form-card">
-  <div class="form-grid">
-    <div class="form-group">
-      <label>Nomes do casal</label>
-      <input type="text" [(ngModel)]="couple.names" name="cnames" class="text-input" placeholder="Ex: Ana & Pedro" />
-    </div>
-    <div class="form-group">
-      <label>Data do casamento</label>
-      <input type="text" [(ngModel)]="couple.weddingDate" name="cwdate" class="text-input" placeholder="Ex: 2026-09-15" />
-    </div>
-    <div class="form-group full-width">
-      <label>Foto do casal</label>
-      <div class="image-upload">
-        <div class="image-preview">
-          <img *ngIf="couple.photo" [src]="couple.photo" alt="Foto do casal" />
-          <span *ngIf="!couple.photo" class="image-preview-placeholder">Sem foto</span>
-        </div>
-        <div class="image-upload-actions">
-          <label class="btn-outline upload-btn">
-            {{ coupleService.state().photoUploading ? 'Enviando...' : 'Escolher foto' }}
-            <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onCouplePhotoSelected($event)"
-              [disabled]="coupleService.state().photoUploading" hidden />
-          </label>
-          <p class="hint">JPG, PNG ou WEBP • até 20MB</p>
-        </div>
+<div *ngIf="!coupleService.state().loading" class="couple-form">
+
+  <!-- Foto + dados principais -->
+  <section class="cf-card cf-hero">
+    <div class="cf-photo">
+      <div class="cf-photo-preview">
+        <img *ngIf="couple.photo" [src]="couple.photo" alt="Foto do casal" />
+        <span *ngIf="!couple.photo" class="cf-photo-placeholder">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+          </svg>
+        </span>
       </div>
+      <label class="cf-photo-btn">
+        {{ coupleService.state().photoUploading ? 'Enviando...' : 'Trocar foto' }}
+        <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onCouplePhotoSelected($event)"
+          [disabled]="coupleService.state().photoUploading" hidden />
+      </label>
+      <p class="cf-hint">JPG, PNG ou WEBP • até 20MB</p>
       <div *ngIf="coupleService.state().photoUploadError" class="error-msg">
         {{ coupleService.state().photoUploadError }}
       </div>
     </div>
-    <div class="form-group">
-      <label>Cor primária</label>
-      <div style="display:flex;align-items:center;gap:8px">
-        <input type="color" [(ngModel)]="couple.primaryColor" name="cprimarycolor"
-          style="width:48px;height:36px;cursor:pointer;border:none;padding:0" />
-        <input type="text" [(ngModel)]="couple.primaryColor" name="cprimarycolortext" class="text-input"
-          placeholder="#C79A6D" style="flex:1" />
+
+    <div class="cf-fields">
+      <div class="cf-group">
+        <label>Nomes do casal</label>
+        <input type="text" [(ngModel)]="couple.names" name="cnames" class="cf-input" placeholder="Ex: Ana & Pedro" />
+      </div>
+      <div class="cf-group">
+        <label>Data do casamento</label>
+        <input type="text" [(ngModel)]="couple.weddingDate" name="cwdate" class="cf-input" placeholder="Ex: 2026-09-15" />
+      </div>
+      <div class="cf-group">
+        <label>Mensagem para os convidados</label>
+        <textarea [(ngModel)]="couple.message" name="cmessage" class="cf-input" rows="3"></textarea>
       </div>
     </div>
-    <div class="form-group full-width">
-      <label>Mensagem para os convidados</label>
-      <textarea [(ngModel)]="couple.message" name="cmessage" class="text-input" rows="4"
-        style="resize:vertical"></textarea>
+  </section>
+
+  <!-- Aparência / cores -->
+  <section class="cf-card">
+    <div class="cf-section-head">
+      <h3>Aparência</h3>
+      <p>As cores aplicam ao site dos convidados em tempo real conforme você ajusta.</p>
     </div>
-  </div>
+
+    <div class="cf-colors">
+      <div class="cf-color">
+        <span class="cf-color-label">Cor primária</span>
+        <div class="cf-color-control">
+          <span class="cf-swatch" [style.background]="couple.primaryColor"></span>
+          <input type="color" class="cf-color-native" [(ngModel)]="couple.primaryColor" name="cprimarycolor" (ngModelChange)="previewTheme()" />
+          <input type="text" class="cf-input cf-hex" [(ngModel)]="couple.primaryColor" name="cprimarycolortext" (ngModelChange)="previewTheme()" placeholder="#C79A6D" />
+        </div>
+      </div>
+
+      <div class="cf-color">
+        <span class="cf-color-label">
+          Cor secundária
+          <button type="button" class="cf-link" (click)="suggestSecondaryFromPrimary()">derivar da primária</button>
+        </span>
+        <div class="cf-color-control">
+          <span class="cf-swatch" [style.background]="couple.secondaryColor"></span>
+          <input type="color" class="cf-color-native" [(ngModel)]="couple.secondaryColor" name="csecondarycolor" (ngModelChange)="previewTheme()" />
+          <input type="text" class="cf-input cf-hex" [(ngModel)]="couple.secondaryColor" name="csecondarycolortext" (ngModelChange)="previewTheme()" placeholder="#F7F0EA" />
+        </div>
+      </div>
+    </div>
+
+    <div class="cf-preview">
+      <span class="cf-preview-chip" [style.background]="couple.secondaryColor" [style.color]="couple.primaryColor">Secundária</span>
+      <button type="button" class="cf-preview-btn" [style.background]="couple.primaryColor">Botão primário</button>
+    </div>
+  </section>
 
   <div *ngIf="coupleService.state().success" class="success-msg">Informações salvas com sucesso!</div>
   <div *ngIf="coupleService.state().error" class="error-msg">{{ coupleService.state().error }}</div>
 
-  <div class="form-actions">
-    <button class="btn-primary" (click)="save()" [disabled]="coupleService.state().saving">
+  <div class="cf-actions">
+    <button class="cf-save" (click)="save()" [disabled]="coupleService.state().saving">
       {{ coupleService.state().saving ? 'Salvando...' : 'Salvar alterações' }}
     </button>
   </div>

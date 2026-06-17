@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Couple } from '../../../models/couple.model';
 import { CoupleService } from '../../../services/couple.service';
+import { ThemeService } from '../../../services/theme.service';
+import { ColorUtil } from '../../../utils/color.util';
 
 @Component({
   standalone: true,
@@ -12,21 +14,35 @@ import { CoupleService } from '../../../services/couple.service';
   imports: [CommonModule, FormsModule],
 })
 export class AdminCoupleFormComponent {
-  public couple: Couple = { names: '', weddingDate: '', photo: '', message: '', primaryColor: '#C79A6D' };
+  public couple: Couple = { names: '', weddingDate: '', photo: '', message: '', primaryColor: '#C79A6D', secondaryColor: '#F7F0EA' };
 
   private coupleSignature: string = '';
 
-  public constructor(public readonly coupleService: CoupleService) {
+  public constructor(public readonly coupleService: CoupleService, private readonly theme: ThemeService) {
     effect((): void => {
       const loaded: Couple = this.coupleService.state().couple;
-      const signature: string = `${loaded.names}|${loaded.weddingDate}|${loaded.photo}|${loaded.message}|${loaded.primaryColor}`;
+      const signature: string = `${loaded.names}|${loaded.weddingDate}|${loaded.photo}|${loaded.message}|${loaded.primaryColor}|${loaded.secondaryColor}`;
 
       if (this.coupleSignature === signature)
         return;
 
       this.coupleSignature = signature;
-      this.couple = { ...loaded, primaryColor: loaded.primaryColor || '#C79A6D' };
+      const primaryColor: string = loaded.primaryColor || '#C79A6D';
+      this.couple = {
+        ...loaded,
+        primaryColor,
+        secondaryColor: loaded.secondaryColor || ColorUtil.lighten(primaryColor, 0.85),
+      };
     });
+  }
+
+  public suggestSecondaryFromPrimary(): void {
+    this.couple = { ...this.couple, secondaryColor: ColorUtil.lighten(this.couple.primaryColor, 0.85) };
+    this.previewTheme();
+  }
+
+  public previewTheme(): void {
+    this.theme.apply(this.couple.primaryColor, this.couple.secondaryColor);
   }
 
   public onCouplePhotoSelected(event: Event): void {

@@ -40,4 +40,19 @@ export abstract class ColorUtil {
       rgb.b + (255 - rgb.b) * ratio,
     );
   }
+
+  public static darken(hex: string, amount: number): string {
+    const rgb = this.parseHex(hex);
+
+    if (!rgb)
+      return hex;
+
+    const ratio = Math.max(0, Math.min(1, amount));
+
+    return this.toHex(
+      rgb.r * (1 - ratio),
+      rgb.g * (1 - ratio),
+      rgb.b * (1 - ratio),
+    );
+  }
 }
