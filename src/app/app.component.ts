@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { Toast } from 'primeng/toast';
+import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 
 @Component({
@@ -10,7 +10,7 @@ import { MessageService } from 'primeng/api';
     <p-toast position="top-right" />
     <router-outlet />
   `,
-  imports: [RouterOutlet, Toast],
+  imports: [RouterOutlet, ToastModule],
   providers: [MessageService],
 })
 export class AppComponent {}

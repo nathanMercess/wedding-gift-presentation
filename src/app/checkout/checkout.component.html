@@ -9,10 +9,8 @@
 
   <div class="checkout-form" *ngIf="activeMethod && !paymentApproved">
     <app-card-brick
-      *ngIf="activeMethod === PaymentMethod.CreditCard || activeMethod === PaymentMethod.DebitCard"
-      [cardType]="activeMethod"
-      [orderId]="orderId"
-      [amount]="totalAmount"
+      *ngIf="cardConfig && (activeMethod === PaymentMethod.CreditCard || activeMethod === PaymentMethod.DebitCard)"
+      [config]="cardConfig"
       (paymentApproved)="onPaymentApproved()">
     </app-card-brick>
 
@@ -28,4 +26,3 @@
     Pagamento aprovado com sucesso.
   </div>
 </div>
-
