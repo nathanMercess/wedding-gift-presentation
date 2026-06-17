@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, effect, signal, WritableSignal } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, effect, signal, WritableSignal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
@@ -19,7 +19,7 @@ import { DateUtil } from '../../utils/date.util';
   styleUrl: './guest-view.component.scss',
   imports: [CommonModule, FormsModule, GiftCardComponent, GiftDetailsModalComponent],
 })
-export class GuestViewComponent implements OnInit, OnDestroy {
+export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   public searchTerm: string = '';
   public selectedCategory: string = 'todos';
   public showQuickControls: boolean = false;
@@ -35,6 +35,7 @@ export class GuestViewComponent implements OnInit, OnDestroy {
   public filterSheetOpen: boolean = false;
 
   public readonly carouselIndex: WritableSignal<number> = signal(0);
+  public readonly carouselReady: WritableSignal<boolean> = signal(false);
   private carouselInterval: ReturnType<typeof setInterval> | null = null;
   private touchStartX: number = 0;
 
@@ -115,9 +116,22 @@ export class GuestViewComponent implements OnInit, OnDestroy {
   private centerLoop(): void {
     const el = this.carouselTrack?.nativeElement;
     if (!el || this.carouselPhotos.length === 0) return;
+
     const step = this.cardStep(el);
+    if (step === 0) return;
+
     el.scrollTo({ left: step * this.carouselPhotos.length, behavior: 'instant' as ScrollBehavior });
     this.loopCenteringSettled = true;
+    this.carouselReady.set(true);
+  }
+
+  public ngAfterViewChecked(): void {
+    if (this.loopCenteringSettled || this.carouselPhotos.length <= 1)
+      return;
+
+    const el = this.carouselTrack?.nativeElement;
+    if (el && this.cardStep(el) > 0)
+      this.centerLoop();
   }
 
   public readonly skeletonItems: number[] = [1, 2, 3, 4, 5, 6];
@@ -200,11 +214,13 @@ export class GuestViewComponent implements OnInit, OnDestroy {
   }
 
   public startCarousel(): void {
-    if (this.carouselPhotos.length <= 1) return;
-    this.stopCarousel();
-    if (!this.loopCenteringSettled) {
-      setTimeout(() => this.centerLoop(), 300);
+    if (this.carouselPhotos.length <= 1) {
+      this.carouselReady.set(true);
+      return;
     }
+    if (!this.loopCenteringSettled)
+      this.carouselReady.set(false);
+    this.stopCarousel();
     this.carouselInterval = setInterval((): void => {
       this.scrollCarousel(1);
     }, 4500);

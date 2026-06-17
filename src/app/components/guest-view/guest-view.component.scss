@@ -230,6 +230,12 @@
   -webkit-overflow-scrolling: touch;
   padding: 0.5rem max(1.5rem, calc((100vw - 80rem) / 2 + 1.5rem)) 0.5rem max(1.5rem, calc((100vw - 80rem) / 2 + 1.5rem));
   scrollbar-width: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+
+  &.is-ready {
+    opacity: 1;
+  }
 
   &::-webkit-scrollbar {
     display: none;

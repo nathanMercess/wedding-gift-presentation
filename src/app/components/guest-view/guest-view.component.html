@@ -44,7 +44,7 @@
         (mouseleave)="startCarousel()"
         (touchstart)="onTouchStart($event)"
         (touchend)="onTouchEnd($event)">
-        <div #carouselTrack class="carousel-track" (scroll)="onCarouselScroll($event)">
+        <div #carouselTrack class="carousel-track" [class.is-ready]="carouselReady()" (scroll)="onCarouselScroll($event)">
 
           <!-- Multiple photos (tripled for infinite loop) -->
           <ng-container *ngIf="carouselPhotos.length > 0">
