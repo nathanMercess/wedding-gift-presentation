@@ -8,6 +8,7 @@ import { CoupleService } from '../../../services/couple.service';
   standalone: true,
   selector: 'app-admin-couple-form',
   templateUrl: './admin-couple-form.component.html',
+  styleUrl: './admin-couple-form.component.scss',
   imports: [CommonModule, FormsModule],
 })
 export class AdminCoupleFormComponent implements OnInit {

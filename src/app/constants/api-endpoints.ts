@@ -41,6 +41,10 @@ export class EndpointsUrls {
         return `${this.apiUrl}/admin/gifts/${id}`;
     }
 
+    public get adminGiftsEnrich(): string {
+        return `${this.apiUrl}/admin/gifts/enrich`;
+    }
+
     public get adminUploadImage(): string {
         return `${this.apiUrl}/admin/uploads/image`;
     }

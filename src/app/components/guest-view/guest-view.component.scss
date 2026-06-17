@@ -379,6 +379,30 @@ h1 { font-family: var(--font-serif); font-size: clamp(1.75rem, 4vw, 2.25rem); co
 
 .gifts-section { padding: 1rem 0 2rem; }
 .results-count { color: var(--muted-foreground); font-size: 0.95rem; margin-bottom: 0.5rem; }
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.5rem 0 0.5rem;
+}
+
+.page-btn {
+  padding: 0.45rem 1.1rem;
+  border: 1px solid var(--border);
+  background: var(--background);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--foreground);
+  transition: background 0.15s;
+
+  &:hover:not(:disabled) { background: var(--surface-hover, #f5f5f5); }
+  &:disabled { opacity: 0.4; cursor: default; }
+}
+
+.page-info { font-size: 0.875rem; color: var(--muted-foreground); }
 .gifts-grid {
   display: grid;
   gap: 1rem;
