@@ -11,6 +11,5 @@ import { MessageService } from 'primeng/api';
     <router-outlet />
   `,
   imports: [RouterOutlet, ToastModule],
-  providers: [MessageService],
 })
 export class AppComponent {}

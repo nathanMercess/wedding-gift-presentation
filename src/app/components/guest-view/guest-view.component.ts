@@ -33,9 +33,11 @@ export class GuestViewComponent implements OnInit, OnDestroy {
   public sortDir: string = 'asc';
   public onlyAvailable: boolean = false;
   public selectedGift: Gift | null = null;
+  public filterSheetOpen: boolean = false;
 
   public readonly carouselIndex: WritableSignal<number> = signal(0);
   private carouselInterval: ReturnType<typeof setInterval> | null = null;
+  private touchStartX: number = 0;
 
   public readonly skeletonItems: number[] = [1, 2, 3, 4, 5, 6];
   public readonly quickCategories: Array<{ id: string; label: string }> = [
@@ -205,5 +207,40 @@ export class GuestViewComponent implements OnInit, OnDestroy {
 
   public trackByNumber(_: number, value: number): number {
     return value;
+  }
+
+  public onTouchStart(event: TouchEvent): void {
+    this.touchStartX = event.touches[0].clientX;
+  }
+
+  public onTouchEnd(event: TouchEvent): void {
+    const delta = event.changedTouches[0].clientX - this.touchStartX;
+    if (Math.abs(delta) < 50) return;
+    if (delta < 0) this.nextSlide();
+    else this.prevSlide();
+  }
+
+  public openFilterSheet(): void {
+    this.filterSheetOpen = true;
+    document.body.classList.add('modal-open');
+  }
+
+  public closeFilterSheet(): void {
+    this.filterSheetOpen = false;
+    document.body.classList.remove('modal-open');
+  }
+
+  public applyFilterSheet(): void {
+    this.closeFilterSheet();
+    this.loadGifts(1);
+  }
+
+  public resetFilters(): void {
+    this.searchTerm = '';
+    this.selectedCategory = 'todos';
+    this.sortBy = 'name';
+    this.onlyAvailable = false;
+    this.closeFilterSheet();
+    this.loadGifts(1);
   }
 }

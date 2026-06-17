@@ -1,5 +1,7 @@
 <div class="gv-root">
-
+  <!-- =CLAUDE= SEPARAR EM COMPONENTES MENORES -->
+  <!-- =CLAUDE= AJUSTAR RESPONSIVO, ESTÁ TUDO FEIO, COLADO -->
+   
   <!-- Loading skeleton -->
   <div *ngIf="giftService.guestState().loading || coupleService.state().loading" class="sk-root" aria-live="polite" aria-busy="true">
     <div class="sk-hero-block"></div>
@@ -24,43 +26,66 @@
   <ng-container *ngIf="!giftService.guestState().loading && !coupleService.state().loading">
 
     <!-- Hero / Carousel -->
-    <section class="hero" (mouseenter)="stopCarousel()" (mouseleave)="startCarousel()">
+    <section class="hero"
+      (mouseenter)="stopCarousel()"
+      (mouseleave)="startCarousel()"
+      (touchstart)="onTouchStart($event)"
+      (touchend)="onTouchEnd($event)">
 
-      <!-- Fundo: carousel com múltiplas fotos ou foto única -->
-      <div class="hero-bg">
-        <ng-container *ngIf="carouselPhotos.length > 1; else singlePhoto">
-          <img
-            *ngFor="let photo of carouselPhotos; let i = index"
-            [src]="photo"
-            [alt]="coupleService.state().couple.names"
-            class="hero-img carousel-slide"
-            [class.active]="i === carouselIndex()"
-          />
-        </ng-container>
-        <ng-template #singlePhoto>
-          <img [src]="displayCouplePhoto" [alt]="coupleService.state().couple.names" (error)="onCouplePhotoError()" class="hero-img active" />
-        </ng-template>
-        <div class="hero-overlay"></div>
-      </div>
+      <!-- Slides track: horizontal translateX -->
+      <div class="hero-slides-viewport">
+        <div class="hero-slides-track" [style.transform]="'translateX(-' + carouselIndex() * 100 + '%)'">
 
-      <!-- Conteúdo centralizado -->
-      <div class="hero-content">
-        <p class="hero-date">{{ formattedWeddingDate || coupleService.state().couple.weddingDate }}</p>
-        <h1 class="hero-names">{{ coupleService.state().couple.names }}</h1>
-        <div class="hero-stats">
-          <div class="hero-stat">
-            <span class="hero-stat-value">{{ completedGifts }}/{{ totalGifts }}</span>
-            <span class="hero-stat-label">Presentes completos</span>
-          </div>
-          <div class="hero-stat-divider"></div>
-          <div class="hero-stat">
-            <span class="hero-stat-value">{{ progressPercentage.toFixed(0) }}%</span>
-            <span class="hero-stat-label">Do objetivo alcançado</span>
-          </div>
+          <!-- Multiple photos carousel -->
+          <ng-container *ngIf="carouselPhotos.length > 1">
+            <div *ngFor="let photo of carouselPhotos; let i = index" class="hero-slide">
+              <img [src]="photo" [alt]="coupleService.state().couple.names" class="hero-slide-img" decoding="async" />
+              <div class="hero-overlay"></div>
+              <div class="hero-content">
+                <p class="hero-date">{{ formattedWeddingDate || coupleService.state().couple.weddingDate }}</p>
+                <h1 class="hero-names">{{ coupleService.state().couple.names }}</h1>
+                <div class="hero-stats">
+                  <div class="hero-stat">
+                    <span class="hero-stat-value">{{ completedGifts }}/{{ totalGifts }}</span>
+                    <span class="hero-stat-label">Presentes completos</span>
+                  </div>
+                  <div class="hero-stat-divider"></div>
+                  <div class="hero-stat">
+                    <span class="hero-stat-value">{{ progressPercentage.toFixed(0) }}%</span>
+                    <span class="hero-stat-label">Do objetivo alcançado</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- Single photo -->
+          <ng-container *ngIf="carouselPhotos.length <= 1">
+            <div class="hero-slide">
+              <img [src]="displayCouplePhoto" [alt]="coupleService.state().couple.names" (error)="onCouplePhotoError()" class="hero-slide-img" />
+              <div class="hero-overlay"></div>
+              <div class="hero-content">
+                <p class="hero-date">{{ formattedWeddingDate || coupleService.state().couple.weddingDate }}</p>
+                <h1 class="hero-names">{{ coupleService.state().couple.names }}</h1>
+                <div class="hero-stats">
+                  <div class="hero-stat">
+                    <span class="hero-stat-value">{{ completedGifts }}/{{ totalGifts }}</span>
+                    <span class="hero-stat-label">Presentes completos</span>
+                  </div>
+                  <div class="hero-stat-divider"></div>
+                  <div class="hero-stat">
+                    <span class="hero-stat-value">{{ progressPercentage.toFixed(0) }}%</span>
+                    <span class="hero-stat-label">Do objetivo alcançado</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+
         </div>
       </div>
 
-      <!-- Controles do carousel (só aparece com múltiplas fotos) -->
+      <!-- Controles (só com múltiplas fotos) -->
       <ng-container *ngIf="carouselPhotos.length > 1">
         <button class="carousel-arrow carousel-prev" (click)="prevSlide()" aria-label="Foto anterior">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
@@ -82,13 +107,14 @@
     </section>
 
     <!-- Mensagem do casal -->
+       <!-- =CLAUDE= COLOCAR COMO BASE C:\Users\natha\Desktop\ux\carousel, FOTO E UNS TEXTOS FOFOS -->
     <div class="couple-quote-wrap" *ngIf="coupleService.state().couple.message">
       <blockquote class="couple-quote">
         "{{ coupleService.state().couple.message }}"
       </blockquote>
     </div>
 
-    <!-- Filtros -->
+    <!-- Filtros (desktop: inline; mobile: barra com botão + bottom sheet) -->
     <div class="filters-bar">
       <div class="container filters-inner">
         <div class="search-wrap">
@@ -98,7 +124,8 @@
           <input type="text" placeholder="Buscar presente..." [(ngModel)]="searchTerm" name="search" class="search-input" (input)="onSearchChange()" />
         </div>
 
-        <div class="filter-row">
+        <!-- Desktop: chips + sort + avail inline -->
+        <div class="filter-row desktop-only">
           <div class="chips-scroll">
             <button
               *ngFor="let cat of quickCategories; trackBy: trackByOptionId"
@@ -122,6 +149,54 @@
             Disponíveis
           </button>
         </div>
+
+        <!-- Mobile: botão Filtrar -->
+        <div class="filter-row mobile-only">
+          <div class="chips-scroll">
+            <button
+              *ngFor="let cat of quickCategories; trackBy: trackByOptionId"
+              class="chip"
+              [class.active]="selectedCategory === cat.id"
+              (click)="selectedCategory = cat.id; onFilterChange()">
+              {{ cat.label }}
+            </button>
+          </div>
+          <button class="filter-sheet-btn" (click)="openFilterSheet()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
+            </svg>
+            Filtrar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter bottom sheet (mobile) -->
+    <div class="filter-sheet-backdrop" *ngIf="filterSheetOpen" (click)="closeFilterSheet()"></div>
+    <div class="filter-sheet" [class.open]="filterSheetOpen">
+      <div class="filter-sheet-handle"></div>
+      <h3 class="filter-sheet-title">Filtros</h3>
+
+      <div class="filter-sheet-section">
+        <p class="filter-sheet-label">Ordenar por</p>
+        <div class="filter-sheet-chips">
+          <button *ngFor="let s of sortOptions; trackBy: trackByOptionId"
+            class="chip" [class.active]="sortBy === s.id"
+            (click)="sortBy = s.id">{{ s.label }}</button>
+        </div>
+      </div>
+
+      <div class="filter-sheet-section">
+        <p class="filter-sheet-label">Disponibilidade</p>
+        <div class="filter-sheet-chips">
+          <button class="chip" [class.active]="!onlyAvailable" (click)="onlyAvailable = false">Todos</button>
+          <button class="chip" [class.active]="onlyAvailable" (click)="onlyAvailable = true">Disponíveis</button>
+        </div>
+      </div>
+
+      <div class="filter-sheet-actions">
+        <button class="filter-sheet-reset" (click)="resetFilters()">Limpar</button>
+        <button class="filter-sheet-apply" (click)="applyFilterSheet()">Aplicar</button>
       </div>
     </div>
 

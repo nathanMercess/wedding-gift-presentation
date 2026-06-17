@@ -2,11 +2,13 @@ import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { MessageService } from 'primeng/api';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { authGuard } from './guards/auth.guard';
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    MessageService,
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     provideHttpClient(withInterceptorsFromDi()),
     provideAnimationsAsync(),

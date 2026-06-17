@@ -1,6 +1,7 @@
 import { Component, InputSignal, OnDestroy, OutputEmitterRef, WritableSignal, computed, effect, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MessageService } from 'primeng/api';
 import { PaymentService } from '../../services/payment.service';
 import { PaymentState } from '../../models/payment-state.model';
 import { PaymentStatusState } from '../../models/payment-status-state.model';
@@ -53,7 +54,7 @@ export class PixDisplayComponent implements OnDestroy {
   private awaitingPixResponse: boolean = false;
   private awaitingStatusCheck: boolean = false;
 
-  public constructor(public readonly paymentService: PaymentService, public readonly fb: FormBuilder) {
+  public constructor(public readonly paymentService: PaymentService, public readonly fb: FormBuilder, private readonly messageService: MessageService) {
     this.payerForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       cpf: ['', [Validators.required, CpfValidators.validator()]],
@@ -61,6 +62,11 @@ export class PixDisplayComponent implements OnDestroy {
 
     effect((): void => this.handlePaymentState(this.paymentService.paymentState()));
     effect((): void => this.handleStatusState(this.paymentService.statusState()));
+  }
+
+  private showError(code: string, detail: string): void {
+    this.error.set(code);
+    this.messageService.add({ severity: 'error', summary: 'Erro no pagamento', detail });
   }
 
   public onCpfInput(event: Event): void {
@@ -115,7 +121,7 @@ export class PixDisplayComponent implements OnDestroy {
     this.awaitingPixResponse = false;
 
     if (state.error) {
-      this.error.set(PAYMENT_ERROR_CODES.PROVIDER_ERROR);
+      this.showError(PAYMENT_ERROR_CODES.PROVIDER_ERROR, 'Erro de comunicação. Tente novamente.');
       this.pixStep.set(PixStep.Form);
       return;
     }
@@ -135,7 +141,7 @@ export class PixDisplayComponent implements OnDestroy {
       return;
     }
 
-    this.error.set(response.errorCode ?? PAYMENT_ERROR_CODES.PROVIDER_ERROR);
+    this.showError(response.errorCode ?? PAYMENT_ERROR_CODES.PROVIDER_ERROR, 'Erro ao gerar o PIX. Tente novamente.');
     this.pixStep.set(PixStep.Form);
   }
 
@@ -153,7 +159,7 @@ export class PixDisplayComponent implements OnDestroy {
 
     if (state.response?.status === PaymentStatus.Rejected) {
       this.stopPolling();
-      this.error.set(state.response.errorCode ?? PAYMENT_ERROR_CODES.PIX_REJECTED);
+      this.showError(state.response.errorCode ?? PAYMENT_ERROR_CODES.PIX_REJECTED, 'Pagamento PIX rejeitado. Tente novamente.');
     }
   }
 

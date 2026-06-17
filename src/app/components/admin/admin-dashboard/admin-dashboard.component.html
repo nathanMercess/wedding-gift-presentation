@@ -1,8 +1,11 @@
+@if (!giftService.adminState().giftsLoading && coupleService.state().couple.names !== '') {
+  <!-- =CLAUDE= USAR AS COISAS MODERNAS DO GUEST AQUI TAMBÉM-->
 <div class="dash-root">
   <header class="dash-header">
     <div class="dash-brand">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+        <path
+          d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
       </svg>
       <span>Admin</span>
     </div>
@@ -12,7 +15,7 @@
     </nav>
     <button class="logout-btn" (click)="logout()">Sair</button>
   </header>
-
+    <!-- =CLAUDE= SEPARAR EM COMPONENTES MENORES -->
   <main class="dash-main">
 
     <!-- GIFTS TAB -->
@@ -26,9 +29,10 @@
       <div *ngIf="giftService.adminState().giftsError" class="error-msg">{{ giftService.adminState().giftsError }}</div>
 
       <!-- Filtros -->
+      <!--  =CLAUDE= melhorar estilo dos filtros para acompanhar o design moderno -->
       <div class="admin-filters">
-        <input type="text" class="text-input" placeholder="Buscar presente..." [(ngModel)]="searchTerm"
-          name="asearch" (input)="onSearchChange()" />
+        <input type="text" class="text-input" placeholder="Buscar presente..." [(ngModel)]="searchTerm" name="asearch"
+          (input)="onSearchChange()" />
         <select class="text-input" [(ngModel)]="selectedCategory" name="acat" (change)="onFilterChange()">
           <option value="todos">Todas as categorias</option>
           <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.label }}</option>
@@ -43,26 +47,26 @@
         (cancel)="closeGiftForm()"></app-admin-gift-form>
 
       <!-- Cards de presentes -->
-      <div *ngIf="!giftService.adminState().giftsLoading && giftService.adminState().gifts.length > 0" class="gifts-cards-grid">
-        <app-admin-gift-card
-          *ngFor="let gift of giftService.adminState().gifts"
-          [gift]="gift"
-          [isEditing]="editingGift?.id === gift.id"
-          (edit)="openEditGift($event)"
-          (delete)="requestDeleteGift($event)">
+      <div *ngIf="!giftService.adminState().giftsLoading && giftService.adminState().gifts.length > 0"
+        class="gifts-cards-grid">
+        <app-admin-gift-card *ngFor="let gift of giftService.adminState().gifts" [gift]="gift"
+          [isEditing]="editingGift?.id === gift.id" (edit)="openEditGift($event)" (delete)="requestDeleteGift($event)">
         </app-admin-gift-card>
       </div>
 
-      <div *ngIf="!giftService.adminState().giftsLoading && !giftService.adminState().giftsError && giftService.adminState().gifts.length === 0 && !showGiftForm"
+      <div
+        *ngIf="!giftService.adminState().giftsLoading && !giftService.adminState().giftsError && giftService.adminState().gifts.length === 0 && !showGiftForm"
         class="empty-state">
         <p>Nenhum presente cadastrado ainda.</p>
       </div>
 
       <!-- Paginação -->
       <div *ngIf="totalPages > 1" class="pagination">
-        <button class="page-btn" [disabled]="currentPage <= 1" (click)="onPageChange(currentPage - 1)">&lsaquo; Anterior</button>
+        <button class="page-btn" [disabled]="currentPage <= 1" (click)="onPageChange(currentPage - 1)">&lsaquo;
+          Anterior</button>
         <span class="page-info">Página {{ currentPage }} de {{ totalPages }}</span>
-        <button class="page-btn" [disabled]="currentPage >= totalPages" (click)="onPageChange(currentPage + 1)">Próxima &rsaquo;</button>
+        <button class="page-btn" [disabled]="currentPage >= totalPages" (click)="onPageChange(currentPage + 1)">Próxima
+          &rsaquo;</button>
       </div>
     </section>
 
@@ -81,3 +85,4 @@
     confirmLabel="Remover" cancelLabel="Cancelar" (confirmed)="confirmDeleteGift()" (cancelled)="cancelDeleteGift()">
   </app-confirm-dialog>
 </div>
+}

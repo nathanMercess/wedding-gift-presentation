@@ -1,4 +1,5 @@
 <div class="modal-backdrop" (click)="onBackdropClick($event)">
+  <!-- =CLAUDE= SEPARAR EM COMPONENTES MENORES -->
   <div class="modal-container">
     <!-- Header -->
     <div class="modal-header">
@@ -149,14 +150,9 @@
                 <span class="label">R$ 0,00</span>
               </div>
               <div class="summary-row total-row">
-                <span class="value">Total</span>
-                <span class="total-amount">R$ {{ getContributionAmount().toFixed(2) }}</span>
+                <span >Total</span>
+                <span class="value">R$ {{ getContributionAmount().toFixed(2) }}</span>
               </div>
-            </div>
-
-            <!-- Validation error -->
-            <div *ngIf="validationError" class="completed-notice" style="background:#fef2f2;color:#dc2626" role="alert">
-              <p>{{ validationError }}</p>
             </div>
 
             <!-- Actions -->

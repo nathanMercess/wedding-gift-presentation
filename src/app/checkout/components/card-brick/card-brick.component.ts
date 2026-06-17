@@ -1,5 +1,6 @@
 import { AfterViewInit, Component, InputSignal, NgZone, OnDestroy, OutputEmitterRef, effect, inject, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MessageService } from 'primeng/api';
 import { loadMercadoPago } from '@mercadopago/sdk-js';
 import { environment } from '../../../../environments/environment';
 import { PaymentService } from '../../services/payment.service';
@@ -33,6 +34,7 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
   private loadTimeoutHandle: ReturnType<typeof setTimeout> | null = null;
 
   private readonly ngZone: NgZone = inject(NgZone);
+  private readonly messageService: MessageService = inject(MessageService);
 
   public constructor(public readonly paymentService: PaymentService) {
     effect((): void => this.handlePaymentState(this.paymentService.paymentState()));
@@ -40,6 +42,11 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
 
   public ngAfterViewInit(): void {
     this.loadBrick();
+  }
+
+  private showError(code: string, detail: string): void {
+    this.error = code;
+    this.messageService.add({ severity: 'error', summary: 'Erro no pagamento', detail });
   }
 
   public retryLoad(): void {
@@ -96,14 +103,14 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
             console.error('Card Brick error:', err);
             this.clearLoadTimeout();
             this.ngZone.run(() => {
-              this.error = 'Erro ao carregar o formulário de pagamento. Tente novamente.';
+              this.showError('brick_error', 'Erro ao carregar o formulário de pagamento. Tente novamente.');
             });
           },
         },
       });
     } catch {
       this.clearLoadTimeout();
-      this.error = 'Falha ao carregar o formulário de pagamento. Verifique sua conexão e tente novamente.';
+      this.showError('brick_load_error', 'Falha ao carregar o formulário de pagamento. Verifique sua conexão e tente novamente.');
     }
   }
 
@@ -169,7 +176,7 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
     this.ngZone.run(() => {
       if (state.error) {
         this.pendingReject?.(new Error('network_error'));
-        this.error = PAYMENT_ERROR_CODES.PROVIDER_ERROR;
+        this.showError(PAYMENT_ERROR_CODES.PROVIDER_ERROR, 'Erro de comunicação com o provedor de pagamento. Tente novamente.');
         this.clearPending();
         return;
       }
@@ -190,13 +197,13 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
 
       if (response.status === PaymentStatus.InProcess || response.status === PaymentStatus.Pending) {
         this.pendingResolve?.();
-        this.error = PAYMENT_ERROR_CODES.PAYMENT_DECLINED;
+        this.showError(PAYMENT_ERROR_CODES.PAYMENT_DECLINED, 'Pagamento recusado. Verifique os dados do cartão e tente novamente.');
         this.clearPending();
         return;
       }
 
       this.pendingReject?.(new Error(response.statusDetail ?? 'declined'));
-      this.error = response.errorCode ?? PAYMENT_ERROR_CODES.PAYMENT_DECLINED;
+      this.showError(response.errorCode ?? PAYMENT_ERROR_CODES.PAYMENT_DECLINED, 'Pagamento recusado. Verifique os dados e tente novamente.');
       this.clearPending();
     });
   }

@@ -1,5 +1,5 @@
 <div class="brick-wrapper">
-
+  <!-- =CLAUDE= SEPARAR EM COMPONENTES MENORES -->
   <div *ngIf="!brickReady && !error" class="brick-loading" aria-hidden="true">
     <div class="skeleton skeleton-title"></div>
     <div class="skeleton skeleton-icons"></div>
@@ -14,23 +14,8 @@
   </div>
 
   <div id="cardPaymentBrick_container" class="brick-container" [class.brick-hidden]="!brickReady"></div>
-
-  <div *ngIf="error" class="error-message" role="alert">
-    @switch (error) {
-      @case (PAYMENT_ERROR_CODES.PAYMENT_DECLINED) {
-        <p>Pagamento recusado. Verifique os dados do cartão e tente novamente.</p>
-      }
-      @case (PAYMENT_ERROR_CODES.INVALID_CARD_TOKEN) {
-        <p>Cartão inválido ou bloqueado. Tente com outro cartão.</p>
-      }
-      @case (PAYMENT_ERROR_CODES.PROVIDER_ERROR) {
-        <p>Erro de comunicação com o provedor de pagamento. Tente novamente.</p>
-      }
-      @default {
-        <p>Ocorreu um erro no pagamento. Tente novamente.</p>
-      }
-    }
-    <button *ngIf="!brickReady" type="button" class="btn-retry" (click)="retryLoad()">Tentar novamente</button>
+  <div *ngIf="error && !brickReady" class="retry-wrap">
+    <button type="button" class="btn-retry" (click)="retryLoad()">Tentar novamente</button>
   </div>
 
 </div>
