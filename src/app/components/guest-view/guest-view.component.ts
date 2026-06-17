@@ -11,6 +11,7 @@ import { CoupleService } from '../../services/couple.service';
 import { GIFT_CATEGORIES } from '../../constants/gift-categories.constant';
 import { SORT_OPTIONS } from '../../constants/sort-options.constant';
 import { DateUtil } from '../../utils/date.util';
+import { ColorUtil } from '../../utils/color.util';
 
 @Component({
   standalone: true,
@@ -47,7 +48,7 @@ export class GuestViewComponent implements OnInit, OnDestroy {
   public constructor(public readonly giftService: GiftService, public readonly coupleService: CoupleService) {
     effect((): void => {
       const stateCouple: Couple = this.coupleService.state().couple;
-      const nextSignature: string = `${stateCouple.names}|${stateCouple.weddingDate}|${stateCouple.photo}|${stateCouple.message}`;
+      const nextSignature: string = `${stateCouple.names}|${stateCouple.weddingDate}|${stateCouple.photo}|${stateCouple.message}|${stateCouple.primaryColor}`;
 
       if (this.coupleSignature === nextSignature)
         return;
@@ -58,7 +59,7 @@ export class GuestViewComponent implements OnInit, OnDestroy {
       this.displayCouplePhoto = this.localCouplePhoto;
 
       if (stateCouple.primaryColor)
-        document.documentElement.style.setProperty('--primary', stateCouple.primaryColor);
+        this.applyTheme(stateCouple.primaryColor);
     });
 
     this.searchSubject.pipe(
@@ -108,6 +109,16 @@ export class GuestViewComponent implements OnInit, OnDestroy {
 
   public loadCouple(): void {
     this.coupleService.loadCouple();
+  }
+
+  private applyTheme(primaryColor: string): void {
+    const root = document.documentElement.style;
+    const secondary: string = ColorUtil.lighten(primaryColor, 0.85);
+
+    root.setProperty('--primary', primaryColor);
+    root.setProperty('--ring', primaryColor);
+    root.setProperty('--secondary', secondary);
+    root.setProperty('--muted', secondary);
   }
 
   public loadGifts(page: number = 1): void {
