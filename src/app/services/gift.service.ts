@@ -205,7 +205,7 @@ export class GiftService {
 
   public loadGuestStats(): void {
     this.http.get<PagedResult<Gift>>(this.endpointsUrls.giftsList, {
-      params: new HttpParams().set('pageSize', '500'),
+      params: new HttpParams().set('pageSize', '100'),
     }).subscribe({
       next: (result: PagedResult<Gift>): void => {
         this.patchGuestState({

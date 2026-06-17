@@ -47,11 +47,11 @@
           <!-- Multiple photos (tripled for infinite loop) -->
           <ng-container *ngIf="carouselPhotos.length > 0">
             <div *ngFor="let photo of loopedPhotos; let i = index" class="carousel-card">
-              <img [src]="photo" [alt]="coupleService.state().couple.names" class="carousel-card-img" decoding="async" />
+              <img [src]="photo.url" [alt]="coupleService.state().couple.names" class="carousel-card-img" decoding="async" />
               <div class="carousel-card-overlay"></div>
               <div class="carousel-card-content">
-                <p class="carousel-card-tag">{{ photoCaptions[(i % carouselPhotos.length) % photoCaptions.length].tag }}</p>
-                <h3 class="carousel-card-title">{{ photoCaptions[(i % carouselPhotos.length) % photoCaptions.length].title }}</h3>
+                <p class="carousel-card-tag">{{ getPhotoCaption(photo, i).tag }}</p>
+                <h3 class="carousel-card-title">{{ getPhotoCaption(photo, i).title }}</h3>
               </div>
             </div>
           </ng-container>
@@ -62,8 +62,8 @@
               <img [src]="displayCouplePhoto" [alt]="coupleService.state().couple.names" (error)="onCouplePhotoError()" class="carousel-card-img" />
               <div class="carousel-card-overlay"></div>
               <div class="carousel-card-content">
-                <p class="carousel-card-tag">{{ photoCaptions[0].tag }}</p>
-                <h3 class="carousel-card-title">{{ photoCaptions[0].title }}</h3>
+                <p class="carousel-card-tag">Momentos</p>
+                <h3 class="carousel-card-title">{{ coupleService.state().couple.names }}</h3>
               </div>
             </div>
           </ng-container>
@@ -131,24 +131,13 @@
           </button>
         </div>
 
-        <!-- Mobile: botão Filtrar -->
-        <div class="filter-row mobile-only">
-          <div class="chips-scroll">
-            <button
-              *ngFor="let cat of quickCategories; trackBy: trackByOptionId"
-              class="chip"
-              [class.active]="selectedCategory === cat.id"
-              (click)="selectedCategory = cat.id; onFilterChange()">
-              {{ cat.label }}
-            </button>
-          </div>
-          <button class="filter-sheet-btn" (click)="openFilterSheet()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
-            </svg>
-            Filtrar
-          </button>
-        </div>
+        <!-- Mobile: botão Filtrar (inline com o search) -->
+        <button class="filter-sheet-btn mobile-only" (click)="openFilterSheet()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
+          </svg>
+          Filtrar
+        </button>
       </div>
     </div>
 
@@ -157,6 +146,15 @@
     <div class="filter-sheet" [class.open]="filterSheetOpen">
       <div class="filter-sheet-handle"></div>
       <h3 class="filter-sheet-title">Filtros</h3>
+
+      <div class="filter-sheet-section">
+        <p class="filter-sheet-label">Categoria</p>
+        <div class="filter-sheet-chips">
+          <button *ngFor="let cat of quickCategories; trackBy: trackByOptionId"
+            class="chip" [class.active]="selectedCategory === cat.id"
+            (click)="selectedCategory = cat.id">{{ cat.label }}</button>
+        </div>
+      </div>
 
       <div class="filter-sheet-section">
         <p class="filter-sheet-label">Ordenar por</p>

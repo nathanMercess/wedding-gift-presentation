@@ -5,7 +5,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { GiftCardComponent } from '../gift-card/gift-card.component';
 import { GiftDetailsModalComponent } from '../gift-details-modal/gift-details-modal.component';
 import { Gift } from '../../models/gift.model';
-import { Couple } from '../../models/couple.model';
+import { CarouselPhoto, Couple } from '../../models/couple.model';
 import { GiftService } from '../../services/gift.service';
 import { CoupleService } from '../../services/couple.service';
 import { GIFT_CATEGORIES } from '../../constants/gift-categories.constant';
@@ -44,7 +44,27 @@ export class GuestViewComponent implements OnInit, OnDestroy {
   private loopCenteringSettled: boolean = false;
   private wrapPending: boolean = false;
 
-  public get loopedPhotos(): string[] {
+  private readonly defaultCaptions: Array<{ tag: string; title: string }> = [
+    { tag: 'Momentos', title: 'Memórias que ficam para sempre' },
+    { tag: 'Histórias', title: 'Nossa jornada juntos' },
+    { tag: 'Amor', title: 'Uma vida ao seu lado' },
+    { tag: 'Celebração', title: 'Compartilhando alegrias' },
+    { tag: 'Cumplicidade', title: 'Dois corações, uma história' },
+    { tag: 'Conquistas', title: 'Cada passo que demos juntos' },
+    { tag: 'Futuro', title: 'O melhor ainda está por vir' },
+    { tag: 'Gratidão', title: 'Por cada pessoa especial' },
+  ];
+
+  public getPhotoCaption(photo: CarouselPhoto, loopIndex: number): { tag: string; title: string } {
+    const photoIndex = loopIndex % Math.max(this.carouselPhotos.length, 1);
+    const fallback = this.defaultCaptions[photoIndex % this.defaultCaptions.length];
+    return {
+      tag: photo.tag || fallback.tag,
+      title: photo.title || fallback.title,
+    };
+  }
+
+  public get loopedPhotos(): CarouselPhoto[] {
     const photos = this.carouselPhotos;
     if (photos.length === 0) return [];
     return [...photos, ...photos, ...photos];
@@ -103,16 +123,6 @@ export class GuestViewComponent implements OnInit, OnDestroy {
 
   public readonly skeletonItems: number[] = [1, 2, 3, 4, 5, 6];
   
-  public readonly photoCaptions: Array<{ tag: string; title: string }> = [
-    { tag: 'Momentos', title: 'Memórias especiais' },
-    { tag: 'Histórias', title: 'Cada foto conta uma história' },
-    { tag: 'Lembranças', title: 'Recordações que permanecem' },
-    { tag: 'Experiências', title: 'Momentos que marcaram nossa trajetória' },
-    { tag: 'Conquistas', title: 'Passos importantes da jornada' },
-    { tag: 'Pessoas', title: 'Quem faz parte dessa história' },
-    { tag: 'Inspiração', title: 'Razões para celebrar' },
-    { tag: 'Futuro', title: 'O que ainda está por vir' },
-  ];
 
   public readonly quickCategories: Array<{ id: string; label: string }> = [
     { id: 'todos', label: 'Todos' },
@@ -186,7 +196,7 @@ export class GuestViewComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  public get carouselPhotos(): string[] {
+  public get carouselPhotos(): CarouselPhoto[] {
     return this.coupleService.state().couple.carouselPhotos ?? [];
   }
 

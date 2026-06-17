@@ -38,14 +38,14 @@
   p {
     font-family: var(--font-sans);
     font-size: 0.875rem;
-    color: #555;
+    color: var(--muted-foreground);
     margin: 0;
   }
 }
 
 .summary-box {
-  background: #fafafa;
-  border: 1px solid rgba(0, 0, 0, 0.07);
+  background: var(--secondary);
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 1rem 1.25rem;
   display: flex;
@@ -60,7 +60,7 @@
 }
 
 .total-row {
-  border-top: 1px solid rgba(0, 0, 0, 0.07);
+  border-top: 1px solid var(--border);
   padding-top: 0.65rem;
   margin-top: 0.1rem;
 }
@@ -68,14 +68,14 @@
 .label {
   font-family: var(--font-sans);
   font-size: 0.85rem;
-  color: #999;
+  color: var(--muted-foreground);
 }
 
 .value {
   font-family: var(--font-sans);
   font-size: 0.9rem;
   font-weight: 500;
-  color: #222;
+  color: var(--foreground);
 }
 
 .total-amount {
