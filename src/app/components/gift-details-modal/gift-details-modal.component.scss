@@ -224,8 +224,10 @@
   }
 }
 
-/* mobile: scroll do conteúdo todo */
+/* mobile: foto como banner horizontal no topo, steps abaixo */
 @media (max-width: 767px) {
   .modal-content { overflow-y: auto; -webkit-overflow-scrolling: touch; }
-  .right-side    { overflow: visible; }
+  .modal-grid    { overflow: visible; }
+  .gift-info     { flex-shrink: 0; }
+  .right-side    { overflow: visible; flex: none; }
 }

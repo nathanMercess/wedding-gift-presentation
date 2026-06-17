@@ -655,6 +655,7 @@
   display: flex;
   gap: 0.75rem;
   padding-top: 0.5rem;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 .filter-sheet-reset {

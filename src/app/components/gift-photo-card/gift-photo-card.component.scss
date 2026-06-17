@@ -9,6 +9,16 @@
   background: var(--secondary);
 }
 
+@media (max-width: 767px) {
+  .gift-photo-card {
+    margin: 0;
+    border-radius: 0;
+    aspect-ratio: unset;
+    height: 200px;
+    box-shadow: none;
+  }
+}
+
 .gift-photo-img {
   position: absolute;
   inset: 0;
