@@ -14,7 +14,9 @@ import { ColorUtil } from '../../../utils/color.util';
   imports: [CommonModule, FormsModule],
 })
 export class AdminCoupleFormComponent {
-  public couple: Couple = { names: '', weddingDate: '', photo: '', message: '', primaryColor: '#C79A6D', secondaryColor: '#F7F0EA' };
+  public couple: Couple = { names: '', weddingDate: '', photo: '', message: '', primaryColor: '#C79A6D', secondaryColor: '#F7F0EA', carouselPhotos: [] };
+  public carouselUploading: boolean = false;
+  public carouselUploadError: string = '';
 
   private coupleSignature: string = '';
 
@@ -32,6 +34,7 @@ export class AdminCoupleFormComponent {
         ...loaded,
         primaryColor,
         secondaryColor: loaded.secondaryColor || ColorUtil.lighten(primaryColor, 0.85),
+        carouselPhotos: loaded.carouselPhotos ?? [],
       };
     });
   }
@@ -61,6 +64,40 @@ export class AdminCoupleFormComponent {
       (url: string): void => { this.couple = { ...this.couple, photo: url }; },
       (): void => { this.couple = { ...this.couple, photo: previousPhoto }; },
     );
+  }
+
+  public onCarouselPhotoSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const files = Array.from(input.files ?? []);
+    input.value = '';
+    if (!files.length) return;
+
+    this.carouselUploading = true;
+    this.carouselUploadError = '';
+
+    let remaining = files.length;
+
+    files.forEach((file: File): void => {
+      this.coupleService.uploadCouplePhoto(
+        file,
+        (url: string): void => {
+          this.couple = { ...this.couple, carouselPhotos: [...(this.couple.carouselPhotos ?? []), url] };
+          remaining--;
+          if (remaining === 0) this.carouselUploading = false;
+        },
+        (): void => {
+          this.carouselUploadError = 'Erro ao enviar uma ou mais fotos.';
+          remaining--;
+          if (remaining === 0) this.carouselUploading = false;
+        },
+      );
+    });
+  }
+
+  public removeCarouselPhoto(index: number): void {
+    const photos = [...(this.couple.carouselPhotos ?? [])];
+    photos.splice(index, 1);
+    this.couple = { ...this.couple, carouselPhotos: photos };
   }
 
   public save(): void {

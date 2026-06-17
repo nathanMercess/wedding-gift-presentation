@@ -23,12 +23,27 @@
 
   <ng-container *ngIf="!giftService.guestState().loading && !coupleService.state().loading">
 
-    <!-- Hero -->
-    <section class="hero">
+    <!-- Hero / Carousel -->
+    <section class="hero" (mouseenter)="stopCarousel()" (mouseleave)="startCarousel()">
+
+      <!-- Fundo: carousel com múltiplas fotos ou foto única -->
       <div class="hero-bg">
-        <img [src]="displayCouplePhoto" [alt]="coupleService.state().couple.names" (error)="onCouplePhotoError()" class="hero-img" />
+        <ng-container *ngIf="carouselPhotos.length > 1; else singlePhoto">
+          <img
+            *ngFor="let photo of carouselPhotos; let i = index"
+            [src]="photo"
+            [alt]="coupleService.state().couple.names"
+            class="hero-img carousel-slide"
+            [class.active]="i === carouselIndex()"
+          />
+        </ng-container>
+        <ng-template #singlePhoto>
+          <img [src]="displayCouplePhoto" [alt]="coupleService.state().couple.names" (error)="onCouplePhotoError()" class="hero-img active" />
+        </ng-template>
         <div class="hero-overlay"></div>
       </div>
+
+      <!-- Conteúdo centralizado -->
       <div class="hero-content">
         <p class="hero-date">{{ formattedWeddingDate || coupleService.state().couple.weddingDate }}</p>
         <h1 class="hero-names">{{ coupleService.state().couple.names }}</h1>
@@ -44,6 +59,26 @@
           </div>
         </div>
       </div>
+
+      <!-- Controles do carousel (só aparece com múltiplas fotos) -->
+      <ng-container *ngIf="carouselPhotos.length > 1">
+        <button class="carousel-arrow carousel-prev" (click)="prevSlide()" aria-label="Foto anterior">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="carousel-arrow carousel-next" (click)="nextSlide()" aria-label="Próxima foto">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <div class="carousel-dots">
+          <button
+            *ngFor="let photo of carouselPhotos; let i = index"
+            class="carousel-dot"
+            [class.active]="i === carouselIndex()"
+            (click)="goToSlide(i)"
+            [attr.aria-label]="'Foto ' + (i + 1)"
+          ></button>
+        </div>
+      </ng-container>
+
     </section>
 
     <!-- Mensagem do casal -->

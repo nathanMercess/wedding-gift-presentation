@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, effect } from '@angular/core';
+import { Component, OnDestroy, OnInit, effect, signal, WritableSignal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
@@ -34,6 +34,9 @@ export class GuestViewComponent implements OnInit, OnDestroy {
   public onlyAvailable: boolean = false;
   public selectedGift: Gift | null = null;
 
+  public readonly carouselIndex: WritableSignal<number> = signal(0);
+  private carouselInterval: ReturnType<typeof setInterval> | null = null;
+
   public readonly skeletonItems: number[] = [1, 2, 3, 4, 5, 6];
   public readonly quickCategories: Array<{ id: string; label: string }> = [
     { id: 'todos', label: 'Todos' },
@@ -56,6 +59,8 @@ export class GuestViewComponent implements OnInit, OnDestroy {
       this.formattedWeddingDate = DateUtil.formatWeddingDate(stateCouple.weddingDate);
       this.hasTriedApiCouplePhoto = false;
       this.displayCouplePhoto = this.localCouplePhoto;
+      this.carouselIndex.set(0);
+      this.startCarousel();
     });
 
     this.searchSubject.pipe(
@@ -99,8 +104,44 @@ export class GuestViewComponent implements OnInit, OnDestroy {
   }
 
   public ngOnDestroy(): void {
+    this.stopCarousel();
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  public get carouselPhotos(): string[] {
+    return this.coupleService.state().couple.carouselPhotos ?? [];
+  }
+
+  public startCarousel(): void {
+    if (this.carouselPhotos.length <= 1) return;
+    this.stopCarousel();
+    this.carouselInterval = setInterval((): void => {
+      this.carouselIndex.update(i => (i + 1) % this.carouselPhotos.length);
+    }, 5000);
+  }
+
+  public stopCarousel(): void {
+    if (this.carouselInterval) {
+      clearInterval(this.carouselInterval);
+      this.carouselInterval = null;
+    }
+  }
+
+  public goToSlide(index: number): void {
+    this.carouselIndex.set(index);
+    this.startCarousel();
+  }
+
+  public prevSlide(): void {
+    const len = this.carouselPhotos.length;
+    this.carouselIndex.update(i => (i - 1 + len) % len);
+    this.startCarousel();
+  }
+
+  public nextSlide(): void {
+    this.carouselIndex.update(i => (i + 1) % this.carouselPhotos.length);
+    this.startCarousel();
   }
 
   public loadCouple(): void {

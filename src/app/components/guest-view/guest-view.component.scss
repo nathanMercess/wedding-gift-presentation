@@ -206,6 +206,67 @@
   background: rgba(255,255,255,0.3);
 }
 
+/* ── Carousel slides ── */
+.carousel-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &.active { opacity: 1; z-index: 1; }
+}
+
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: background 0.2s;
+
+  &:hover { background: rgba(255,255,255,0.3); }
+}
+
+.carousel-prev { left: 1.25rem; }
+.carousel-next { right: 1.25rem; }
+
+.carousel-dots {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.carousel-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.45);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.25s;
+
+  &.active {
+    background: #fff;
+    width: 20px;
+    border-radius: 3px;
+  }
+}
+
 /* ── Citação ── */
 .couple-quote-wrap {
   max-width: 80rem;

@@ -14,7 +14,7 @@ interface ImageUploadResponse {
 @Injectable({ providedIn: 'root' })
 export class CoupleService {
   public readonly state: WritableSignal<CoupleState> = signal<CoupleState>({
-    couple: { names: '', weddingDate: '', photo: '', message: '', primaryColor: '#C79A6D', secondaryColor: '#F7F0EA' },
+    couple: { names: '', weddingDate: '', photo: '', message: '', primaryColor: '#C79A6D', secondaryColor: '#F7F0EA', carouselPhotos: [] },
     loading: false,
     saving: false,
     success: false,

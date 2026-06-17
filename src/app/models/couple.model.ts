@@ -5,4 +5,5 @@ export interface Couple {
   message: string;
   primaryColor: string;
   secondaryColor: string;
+  carouselPhotos: string[];
 }
