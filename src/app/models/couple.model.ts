@@ -1,7 +1,7 @@
 export interface Couple {
   names: string;
   weddingDate: string;
-  photo: string;
+  photoUrl: string;
   message: string;
   primaryColor: string;
   secondaryColor: string;

@@ -14,7 +14,7 @@ import { ColorUtil } from '../../../utils/color.util';
   imports: [CommonModule, FormsModule],
 })
 export class AdminCoupleFormComponent {
-  public couple: Couple = { names: '', weddingDate: '', photo: '', message: '', primaryColor: '#C79A6D', secondaryColor: '#F7F0EA', carouselPhotos: [] };
+  public couple: Couple = { names: '', weddingDate: '', photoUrl: '', message: '', primaryColor: '#C79A6D', secondaryColor: '#F7F0EA', carouselPhotos: [] };
   public carouselUploading: boolean = false;
   public carouselUploadError: string = '';
 
@@ -23,7 +23,7 @@ export class AdminCoupleFormComponent {
   public constructor(public readonly coupleService: CoupleService, private readonly theme: ThemeService) {
     effect((): void => {
       const loaded: Couple = this.coupleService.state().couple;
-      const signature: string = `${loaded.names}|${loaded.weddingDate}|${loaded.photo}|${loaded.message}|${loaded.primaryColor}|${loaded.secondaryColor}`;
+      const signature: string = `${loaded.names}|${loaded.weddingDate}|${loaded.photoUrl}|${loaded.message}|${loaded.primaryColor}|${loaded.secondaryColor}`;
 
       if (this.coupleSignature === signature)
         return;
@@ -56,13 +56,13 @@ export class AdminCoupleFormComponent {
     if (!file)
       return;
 
-    const previousPhoto = this.couple.photo;
-    this.couple = { ...this.couple, photo: URL.createObjectURL(file) };
+    const previousPhoto = this.couple.photoUrl;
+    this.couple = { ...this.couple, photoUrl: URL.createObjectURL(file) };
 
     this.coupleService.uploadCouplePhoto(
       file,
-      (url: string): void => { this.couple = { ...this.couple, photo: url }; },
-      (): void => { this.couple = { ...this.couple, photo: previousPhoto }; },
+      (url: string): void => { this.couple = { ...this.couple, photoUrl: url }; },
+      (): void => { this.couple = { ...this.couple, photoUrl: previousPhoto }; },
     );
   }
 

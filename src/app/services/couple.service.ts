@@ -14,7 +14,7 @@ interface ImageUploadResponse {
 @Injectable({ providedIn: 'root' })
 export class CoupleService {
   public readonly state: WritableSignal<CoupleState> = signal<CoupleState>({
-    couple: { names: '', weddingDate: '', photo: '', message: '', primaryColor: '#C79A6D', secondaryColor: '#F7F0EA', carouselPhotos: [] },
+    couple: { names: '', weddingDate: '', photoUrl: '', message: '', primaryColor: '#C79A6D', secondaryColor: '#F7F0EA', carouselPhotos: [] },
     loading: false,
     saving: false,
     success: false,
@@ -36,7 +36,7 @@ export class CoupleService {
       next: (raw: any): void => {
         const couple: Couple = {
           ...raw,
-          photo: raw.photo ?? raw.photoUrl ?? '',
+          photoUrl: raw.photo ?? raw.photoUrl ?? '',
           carouselPhotos: raw.carouselPhotos ?? [],
         };
         this.patchState({ couple });
@@ -51,12 +51,13 @@ export class CoupleService {
   public saveCouple(couple: Partial<Couple>): void {
     this.patchState({ saving: true, success: false, error: '' });
 
-    const payload = { ...couple, photoUrl: couple.photo };
+    const payload = { ...couple, photoUrl: couple.photoUrl };
+
     this.http.put<any>(this.endpointsUrls.coupleAdminUpdate, payload).pipe(finalize((): void => this.patchState({ saving: false }))).subscribe({
       next: (raw: any): void => {
         const updatedCouple: Couple = {
           ...raw,
-          photo: raw.photo ?? raw.photoUrl ?? '',
+          photoUrl: raw.photo ?? raw.photoUrl ?? '',
           carouselPhotos: raw.carouselPhotos ?? [],
         };
         this.patchState({ couple: updatedCouple, success: true });

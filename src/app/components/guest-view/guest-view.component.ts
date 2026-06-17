@@ -50,7 +50,7 @@ export class GuestViewComponent implements OnInit, OnDestroy {
   public constructor(public readonly giftService: GiftService, public readonly coupleService: CoupleService) {
     effect((): void => {
       const stateCouple: Couple = this.coupleService.state().couple;
-      const nextSignature: string = `${stateCouple.names}|${stateCouple.weddingDate}|${stateCouple.photo}|${stateCouple.message}|${stateCouple.primaryColor}|${stateCouple.secondaryColor}`;
+      const nextSignature: string = `${stateCouple.names}|${stateCouple.weddingDate}|${stateCouple.photoUrl}|${stateCouple.message}|${stateCouple.primaryColor}|${stateCouple.secondaryColor}`;
 
       if (this.coupleSignature === nextSignature)
         return;
@@ -174,7 +174,7 @@ export class GuestViewComponent implements OnInit, OnDestroy {
   }
 
   public onCouplePhotoError(): void {
-    const apiPhoto = this.coupleService.state().couple.photo?.trim();
+    const apiPhoto = this.coupleService.state().couple.photoUrl?.trim();
 
     if (!this.hasTriedApiCouplePhoto && apiPhoto && apiPhoto !== this.displayCouplePhoto) {
       this.hasTriedApiCouplePhoto = true;
