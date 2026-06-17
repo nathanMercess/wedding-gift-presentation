@@ -14,7 +14,7 @@
     margin: 0;
     border-radius: 0 0 16px 16px;
     aspect-ratio: unset;
-    height: 200px;
+    height: 150px;
     box-shadow: none;
   }
 }
@@ -152,4 +152,11 @@
   font-size: 0.75rem;
   color: var(--muted-foreground);
   margin: 0;
+}
+
+/* Mobile: banner limpo so com titulo; stats vao para o formulario abaixo */
+@media (max-width: 767px) {
+  .gift-photo-stats {
+    display: none;
+  }
 }

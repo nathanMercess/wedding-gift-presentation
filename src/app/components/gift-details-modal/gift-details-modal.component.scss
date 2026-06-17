@@ -232,5 +232,5 @@
     max-height: calc(100dvh - env(safe-area-inset-bottom, 0px));
     border-radius: 24px 24px 0 0;
   }
-  .gift-info { flex-shrink: 0; height: 200px; overflow: hidden; }
+  .gift-info { flex-shrink: 0; height: 150px; overflow: hidden; }
 }
