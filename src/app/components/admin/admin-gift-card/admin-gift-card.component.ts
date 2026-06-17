@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, InputSignal, OutputEmitterRef, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Gift } from '../../../models/gift.model';
 
@@ -10,15 +10,15 @@ import { Gift } from '../../../models/gift.model';
   imports: [CommonModule],
 })
 export class AdminGiftCardComponent {
-  @Input() public gift!: Gift;
-  @Input() public isEditing: boolean = false;
-  @Output() public readonly edit = new EventEmitter<Gift>();
-  @Output() public readonly delete = new EventEmitter<Gift>();
+  public readonly gift: InputSignal<Gift> = input.required<Gift>();
+  public readonly isEditing: InputSignal<boolean> = input<boolean>(false);
+  public readonly edit: OutputEmitterRef<Gift> = output<Gift>();
+  public readonly delete: OutputEmitterRef<Gift> = output<Gift>();
 
   public getProgressPercent(): number {
-    if (this.gift.total <= 0)
+    if (this.gift().total <= 0)
       return 0;
 
-    return Math.min((this.gift.raised / this.gift.total) * 100, 100);
+    return Math.min((this.gift().raised / this.gift().total) * 100, 100);
   }
 }

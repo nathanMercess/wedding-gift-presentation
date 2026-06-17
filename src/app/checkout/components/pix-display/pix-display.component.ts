@@ -1,7 +1,6 @@
 import { Component, InputSignal, OnDestroy, OutputEmitterRef, WritableSignal, computed, effect, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MessageService } from 'primeng/api';
 import { PaymentService } from '../../services/payment.service';
 import { PaymentState } from '../../models/payment-state.model';
 import { PaymentStatusState } from '../../models/payment-status-state.model';
@@ -10,6 +9,8 @@ import { CpfValidators } from '../../utils/cpf-validators';
 import { PixStep } from '../../enums/pix-step.enum';
 import { PaymentStatus } from '../../enums/payment-status.enum';
 import { PAYMENT_ERROR_CODES } from '../../constants/payment-error-codes.constant';
+import { ToastService } from '../../../services/toast.service';
+import { FormFieldErrorComponent } from '../../../components/form-field-error/form-field-error.component';
 
 const PIX_EXPIRATION_SECONDS = 10 * 60;
 
@@ -18,7 +19,7 @@ const PIX_EXPIRATION_SECONDS = 10 * 60;
   selector: 'app-pix-display',
   templateUrl: './pix-display.component.html',
   styleUrl: './pix-display.component.scss',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormFieldErrorComponent],
 })
 export class PixDisplayComponent implements OnDestroy {
   public readonly orderId: InputSignal<string> = input<string>('');
@@ -54,7 +55,7 @@ export class PixDisplayComponent implements OnDestroy {
   private awaitingPixResponse: boolean = false;
   private awaitingStatusCheck: boolean = false;
 
-  public constructor(public readonly paymentService: PaymentService, public readonly fb: FormBuilder, private readonly messageService: MessageService) {
+  public constructor(public readonly paymentService: PaymentService, public readonly fb: FormBuilder, public readonly toastService: ToastService) {
     this.payerForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       cpf: ['', [Validators.required, CpfValidators.validator()]],
@@ -66,7 +67,7 @@ export class PixDisplayComponent implements OnDestroy {
 
   private showError(code: string, detail: string): void {
     this.error.set(code);
-    this.messageService.add({ severity: 'error', summary: 'Erro no pagamento', detail });
+    this.toastService.error(detail, 'Erro no pagamento');
   }
 
   public onCpfInput(event: Event): void {

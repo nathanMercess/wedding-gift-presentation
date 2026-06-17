@@ -83,7 +83,10 @@ export class GuestViewComponent implements OnInit, OnDestroy {
       this.wrapPending = true;
       el.scrollTo({ left: left + blockWidth, behavior: 'instant' as ScrollBehavior });
       requestAnimationFrame(() => { this.wrapPending = false; });
-    } else if (left > blockWidth * 1.9) {
+      return;
+    }
+
+    if (left > blockWidth * 1.9) {
       this.wrapPending = true;
       el.scrollTo({ left: left - blockWidth, behavior: 'instant' as ScrollBehavior });
       requestAnimationFrame(() => { this.wrapPending = false; });

@@ -20,11 +20,10 @@
           formControlName="email"
           placeholder="seu@email.com"
           autocomplete="email">
-          <!-- =CLAUDE= ISSO É PARA SER AQUELE COMPONENTE GENERICO QUE USA O TOAST USAR MESMO COMPONENTE GENERICO EM TODOS OS COMENTARIOS DESSE-->
-          <span class="field-error" *ngIf="payerForm.get('email')?.invalid && payerForm.get('email')?.touched">
-            Informe um e-mail válido.
-          </span>
-        </div>
+        <app-form-field-error
+          message="Informe um e-mail válido."
+          [visible]="!!(payerForm.get('email')?.invalid && payerForm.get('email')?.touched)" />
+      </div>
 
       <div class="form-field">
         <label for="pixCpf">CPF do pagador</label>
@@ -36,10 +35,9 @@
           maxlength="14"
           inputmode="numeric"
           (input)="onCpfInput($event)">
-          <!-- =CLAUDE= ISSO É PARA SER AQUELE COMPONENTE GENERICO QUE USA O TOAST USAR MESMO COMPONENTE GENERICO EM TODOS OS COMENTARIOS DESSE-->
-        <span class="field-error" *ngIf="payerForm.get('cpf')?.invalid && payerForm.get('cpf')?.touched">
-          Informe um CPF válido com 11 dígitos.
-        </span>
+        <app-form-field-error
+          message="Informe um CPF válido com 11 dígitos."
+          [visible]="!!(payerForm.get('cpf')?.invalid && payerForm.get('cpf')?.touched)" />
       </div>
       <button type="submit" class="btn-primary" [disabled]="payerForm.invalid">
         Gerar código PIX

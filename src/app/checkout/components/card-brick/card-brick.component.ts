@@ -1,6 +1,5 @@
-import { AfterViewInit, Component, InputSignal, NgZone, OnDestroy, OutputEmitterRef, effect, inject, input, output } from '@angular/core';
+import { AfterViewInit, Component, InputSignal, NgZone, OnDestroy, OutputEmitterRef, effect, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MessageService } from 'primeng/api';
 import { loadMercadoPago } from '@mercadopago/sdk-js';
 import { environment } from '../../../../environments/environment';
 import { PaymentService } from '../../services/payment.service';
@@ -12,6 +11,7 @@ import { PaymentStatus } from '../../enums/payment-status.enum';
 import { MP_CARD_BRICK_CUSTOMIZATION } from '../../constants/mp-card-brick-style.constant';
 import { PAYMENT_ERROR_CODES } from '../../constants/payment-error-codes.constant';
 import { ColorUtil } from '../../../utils/color.util';
+import { ToastService } from '../../../services/toast.service';
 
 @Component({
   standalone: true,
@@ -33,10 +33,11 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
   private pendingReject: ((reason?: unknown) => void) | null = null;
   private loadTimeoutHandle: ReturnType<typeof setTimeout> | null = null;
 
-  private readonly ngZone: NgZone = inject(NgZone);
-  private readonly messageService: MessageService = inject(MessageService);
-
-  public constructor(public readonly paymentService: PaymentService) {
+  public constructor(
+    public readonly paymentService: PaymentService,
+    public readonly toastService: ToastService,
+    private readonly ngZone: NgZone,
+  ) {
     effect((): void => this.handlePaymentState(this.paymentService.paymentState()), { allowSignalWrites: true });
   }
 
@@ -46,7 +47,7 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
 
   private showError(code: string, detail: string): void {
     this.error = code;
-    this.messageService.add({ severity: 'error', summary: 'Erro no pagamento', detail });
+    this.toastService.error(detail, 'Erro no pagamento');
   }
 
   public retryLoad(): void {

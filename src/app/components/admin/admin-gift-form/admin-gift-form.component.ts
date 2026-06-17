@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
+import { Component, InputSignal, OutputEmitterRef, effect, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
@@ -6,6 +6,7 @@ import { Gift } from '../../../models/gift.model';
 import { GiftService } from '../../../services/gift.service';
 import { EndpointsUrls } from '../../../constants/api-endpoints';
 import { GIFT_CATEGORIES } from '../../../constants/gift-categories.constant';
+import { HttpErrorUtil } from '../../../utils/http-error';
 
 interface GiftEnrichResponse {
   name?: string;
@@ -24,9 +25,9 @@ const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
   styleUrl: './admin-gift-form.component.scss',
   imports: [CommonModule, FormsModule],
 })
-export class AdminGiftFormComponent implements OnChanges {
-  @Input() public editingGift: Gift | null = null;
-  @Output() public readonly cancel = new EventEmitter<void>();
+export class AdminGiftFormComponent {
+  public readonly editingGift: InputSignal<Gift | null> = input<Gift | null>(null);
+  public readonly cancel: OutputEmitterRef<void> = output<void>();
 
   public readonly categories: typeof GIFT_CATEGORIES = GIFT_CATEGORIES;
   public giftForm: Partial<Gift> = {};
@@ -36,9 +37,32 @@ export class AdminGiftFormComponent implements OnChanges {
 
   public constructor(
     public readonly giftService: GiftService,
-    private readonly http: HttpClient,
-    private readonly endpoints: EndpointsUrls,
-  ) {}
+    public readonly http: HttpClient,
+    public readonly endpoints: EndpointsUrls,
+  ) {
+    effect((): void => {
+      const gift: Gift | null = this.editingGift();
+
+      if (gift) {
+        this.giftForm = {
+          ...gift,
+          allowPartialContribution: gift.allowPartialContribution ?? true,
+        };
+
+        this.enrichUrl = '';
+        this.enrichError = '';
+        this.giftService.clearAdminGiftError();
+        this.giftService.resetAdminGiftSaved();
+        return;
+      }
+
+      this.giftForm = { category: GIFT_CATEGORIES[0].id, raised: 0, allowPartialContribution: true };
+      this.enrichUrl = '';
+      this.enrichError = '';
+      this.giftService.clearAdminGiftError();
+      this.giftService.resetAdminGiftSaved();
+    });
+  }
 
   public enrichFromLink(): void {
     if (!this.enrichUrl.trim())
@@ -57,29 +81,13 @@ export class AdminGiftFormComponent implements OnChanges {
       },
       error: (err: HttpErrorResponse): void => {
         this.enriching = false;
-        this.enrichError = err.error?.detail ?? err.error?.title ?? 'Não foi possível obter os dados do link.';
+        this.enrichError = HttpErrorUtil.extract(err, 'Não foi possível obter os dados do link.');
       },
     });
   }
 
-  public ngOnChanges(): void {
-    if (this.editingGift) {
-      this.giftForm = {
-        ...this.editingGift,
-        allowPartialContribution: this.editingGift.allowPartialContribution ?? true,
-      };
-    } else {
-      this.giftForm = { category: GIFT_CATEGORIES[0].id, raised: 0, allowPartialContribution: true };
-    }
-
-    this.enrichUrl = '';
-    this.enrichError = '';
-    this.giftService.clearAdminGiftError();
-    this.giftService.resetAdminGiftSaved();
-  }
-
   public save(): void {
-    const giftId: string | null = this.editingGift ? this.editingGift.id : null;
+    const giftId: string | null = this.editingGift() ? this.editingGift()!.id : null;
     this.giftService.saveAdminGift(giftId, this.giftForm);
   }
 

@@ -711,6 +711,34 @@
   padding-right: 1.5rem;
 }
 
+@media (max-width: 639px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .gifts-section {
+    padding: 1.25rem 0 3rem;
+  }
+
+  .gifts-grid {
+    gap: 0.875rem;
+  }
+
+  .filters-bar {
+    padding: 0.65rem 0;
+  }
+
+  .filters-inner {
+    gap: 0.5rem;
+  }
+
+  .hero-stats-wrap.container {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+  }
+}
+
 .gifts-section {
   padding: 2rem 0 4rem;
 }

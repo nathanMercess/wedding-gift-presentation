@@ -22,7 +22,10 @@ import { GIFT_CATEGORIES } from '../../../constants/gift-categories.constant';
 })
 export class AdminDashboardComponent implements OnInit, OnDestroy {
   public readonly AdminTab: typeof AdminTab = AdminTab;
-  public readonly categories: typeof GIFT_CATEGORIES = GIFT_CATEGORIES;
+  public readonly quickCategories: Array<{ id: string; label: string }> = [
+    { id: 'todos', label: 'Todos' },
+    ...GIFT_CATEGORIES,
+  ];
 
   public activeTab: AdminTab = AdminTab.Gifts;
   public showGiftForm: boolean = false;
@@ -134,6 +137,10 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   public cancelDeleteGift(): void {
     this.giftPendingDeletion = null;
+  }
+
+  public trackByOptionId(_: number, option: { id: string }): string {
+    return option.id;
   }
 
   public logout(): void {

@@ -1,10 +1,10 @@
 import { Component, HostListener, InputSignal, OnDestroy, OnInit, OutputEmitterRef, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MessageService } from 'primeng/api';
 import { Gift } from '../../models/gift.model';
 import { ButtonComponent } from '../button/button.component';
 import { GiftService } from '../../services/gift.service';
+import { ToastService } from '../../services/toast.service';
 import { PaymentMethodSelectorComponent } from '../../checkout/components/payment-method-selector/payment-method-selector.component';
 import { CardBrickComponent } from '../../checkout/components/card-brick/card-brick.component';
 import { PixDisplayComponent } from '../../checkout/components/pix-display/pix-display.component';
@@ -44,7 +44,7 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy {
   public quickAmounts: number[] = [50, 100, 200, 300];
   public showExitConfirm: boolean = false;
 
-  public constructor(public readonly giftService: GiftService, private readonly messageService: MessageService) {
+  public constructor(public readonly giftService: GiftService, public readonly toastService: ToastService) {
     this.giftService.resetContributionState();
   }
 
@@ -124,22 +124,22 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy {
     const amount = this.getContributionAmount();
 
     if (!this.guestName.trim()) {
-      this.messageService.add({ severity: 'error', summary: 'Campo obrigatório', detail: 'Por favor, informe seu nome completo.' });
+      this.toastService.error('Por favor, informe seu nome completo.', 'Campo obrigatório');
       return;
     }
 
     if (this.contributionType === ContributionType.Partial && amount < this.minAmount) {
-      this.messageService.add({ severity: 'error', summary: 'Valor inválido', detail: `O valor mínimo de contribuição é R$ ${this.minAmount.toFixed(2).replace('.', ',')}.` });
+      this.toastService.error(`O valor mínimo de contribuição é R$ ${this.minAmount.toFixed(2).replace('.', ',')}.`, 'Valor inválido');
       return;
     }
 
     if (amount <= 0) {
-      this.messageService.add({ severity: 'error', summary: 'Valor inválido', detail: 'Informe um valor de contribuição válido.' });
+      this.toastService.error('Informe um valor de contribuição válido.', 'Valor inválido');
       return;
     }
 
     if (amount > this.remaining) {
-      this.messageService.add({ severity: 'error', summary: 'Valor inválido', detail: `O valor não pode ser maior que R$ ${this.remaining.toFixed(2).replace('.', ',')}.` });
+      this.toastService.error(`O valor não pode ser maior que R$ ${this.remaining.toFixed(2).replace('.', ',')}.`, 'Valor inválido');
       return;
     }
 
