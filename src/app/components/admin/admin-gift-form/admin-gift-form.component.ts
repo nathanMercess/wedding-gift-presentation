@@ -64,10 +64,16 @@ export class AdminGiftFormComponent implements OnChanges {
 
   public ngOnChanges(): void {
     if (this.editingGift) {
-      this.giftForm = { ...this.editingGift };
+      this.giftForm = {
+        ...this.editingGift,
+        allowPartialContribution: this.editingGift.allowPartialContribution ?? true,
+      };
     } else {
       this.giftForm = { category: GIFT_CATEGORIES[0].id, raised: 0, allowPartialContribution: true };
     }
+
+    this.enrichUrl = '';
+    this.enrichError = '';
     this.giftService.clearAdminGiftError();
     this.giftService.resetAdminGiftSaved();
   }
