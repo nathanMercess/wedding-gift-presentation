@@ -66,7 +66,7 @@ export class AdminDashboardComponent implements OnInit {
 
   public openNewGift(): void {
     this.editingGift = null;
-    this.giftForm = { category: GIFT_CATEGORIES[0].id, raised: 0 };
+    this.giftForm = { category: GIFT_CATEGORIES[0].id, raised: 0, allowPartialContribution: true };
     this.giftService.clearAdminGiftError();
     this.giftService.resetAdminGiftSaved();
     this.showGiftForm = true;

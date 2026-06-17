@@ -79,11 +79,11 @@
 
           <form (ngSubmit)="onSubmit()" class="gift-form">
             <!-- Contribution Type -->
-            <div class="form-group">
+            <div class="form-group" *ngIf="gift().allowPartialContribution">
               <label>Tipo de contribuição</label>
               <div class="contrib-grid">
-                <button type="button" [class.selected]="contributionType === 'full'" class="contrib-btn"
-                  (click)="contributionType = 'full'">
+                <button type="button" [class.selected]="contributionType === ContributionType.Full" class="contrib-btn"
+                  (click)="contributionType = ContributionType.Full">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" class="contrib-icon">
                     <polyline points="20 12 20 22 4 22 4 12" />
@@ -95,8 +95,8 @@
                   <div class="contrib-label">Valor restante</div>
                   <div class="contrib-value">R$ {{ remaining.toFixed(2) }}</div>
                 </button>
-                <button type="button" [class.selected]="contributionType === 'partial'" class="contrib-btn"
-                  (click)="contributionType = 'partial'">
+                <button type="button" [class.selected]="contributionType === ContributionType.Partial" class="contrib-btn"
+                  (click)="contributionType = ContributionType.Partial">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" class="contrib-icon">
                     <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
@@ -109,7 +109,7 @@
             </div>
 
             <!-- Custom Amount -->
-            <div *ngIf="contributionType === 'partial'" class="form-group">
+            <div *ngIf="contributionType === ContributionType.Partial" class="form-group">
               <label>Valor da contribuição</label>
               <div class="quick-amounts" *ngIf="availableQuickAmounts.length">
                 <button *ngFor="let amount of availableQuickAmounts" type="button" class="quick-btn"

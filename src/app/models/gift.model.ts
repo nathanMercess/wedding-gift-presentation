@@ -8,4 +8,5 @@ export interface Gift {
   category: string;
   description?: string;
   available: boolean;
+  allowPartialContribution: boolean;
 }
