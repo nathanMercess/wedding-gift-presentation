@@ -73,15 +73,15 @@ export class GuestViewComponent implements OnInit, OnDestroy {
   }
 
   public get completedGifts(): number {
-    return this.giftService.guestState().gifts.filter((g: Gift): boolean => !g.available).length;
+    return (this.giftService.guestState().gifts ?? []).filter((g: Gift): boolean => !g.available).length;
   }
 
   public get totalRaised(): number {
-    return this.giftService.guestState().gifts.reduce((sum: number, gift: Gift): number => sum + gift.raised, 0);
+    return (this.giftService.guestState().gifts ?? []).reduce((sum: number, gift: Gift): number => sum + gift.raised, 0);
   }
 
   public get totalGoal(): number {
-    return this.giftService.guestState().gifts.reduce((sum: number, gift: Gift): number => sum + gift.total, 0);
+    return (this.giftService.guestState().gifts ?? []).reduce((sum: number, gift: Gift): number => sum + gift.total, 0);
   }
 
   public get progressPercentage(): number {
