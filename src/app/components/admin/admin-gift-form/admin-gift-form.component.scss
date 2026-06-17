@@ -5,7 +5,7 @@
   margin-bottom: 1.5rem;
   box-shadow: 0 2px 8px rgba(0,0,0,.06);
 
-  h3 { margin: 0 0 1.25rem; font-size: 1.1rem; color: #2C1810; }
+  h3 { font-family: var(--font-sans); margin: 0 0 1.25rem; font-size: 1.1rem; color: var(--foreground); }
 }
 
 .enrich-row {
@@ -29,18 +29,18 @@
   flex-direction: column;
   gap: .4rem;
 
-  label { font-size: .875rem; font-weight: 500; color: #4A3728; }
+  label { font-family: var(--font-sans); font-size: .875rem; font-weight: 500; color: var(--foreground); }
   &.full-width { grid-column: 1 / -1; }
 }
 
 .text-input {
   padding: .65rem .9rem;
-  border: 1.5px solid #E8DDD5;
+  border: 1.5px solid var(--border);
   border-radius: .5rem;
+  font-family: var(--font-sans);
   font-size: .95rem;
   outline: none;
   transition: border .2s;
-  font-family: inherit;
   width: 100%;
   box-sizing: border-box;
 
@@ -56,10 +56,11 @@
 
 .btn-primary {
   background: var(--primary);
-  color: #fff;
+  color: var(--primary-foreground);
   border: none;
   border-radius: .5rem;
   padding: .6rem 1.25rem;
+  font-family: var(--font-sans);
   font-size: .95rem;
   font-weight: 600;
   cursor: pointer;
@@ -75,6 +76,7 @@
   color: var(--primary);
   border-radius: .5rem;
   padding: .6rem 1.25rem;
+  font-family: var(--font-sans);
   font-size: .95rem;
   cursor: pointer;
   transition: background .2s;
@@ -98,7 +100,7 @@
   border-radius: .5rem;
   overflow: hidden;
   background: var(--secondary);
-  border: 1.5px solid #E8DDD5;
+  border: 1.5px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -107,8 +109,9 @@
 }
 
 .image-preview-placeholder {
+  font-family: var(--font-sans);
   font-size: .7rem;
-  color: #8B7B6B;
+  color: var(--muted-foreground);
   text-align: center;
   padding: .5rem;
 }
@@ -127,14 +130,15 @@
   white-space: nowrap;
 }
 
-.hint { font-size: .75rem; color: #8B7B6B; margin: 0; }
+.hint { font-family: var(--font-sans); font-size: .75rem; color: var(--muted-foreground); margin: 0; }
 
 .checkbox-label {
   display: flex;
   align-items: center;
   gap: .5rem;
+  font-family: var(--font-sans);
   font-size: .875rem;
-  color: #4A3728;
+  color: var(--foreground);
   cursor: pointer;
 }
 
@@ -143,6 +147,7 @@
   color: #dc2626;
   border-radius: .5rem;
   padding: .75rem 1rem;
+  font-family: var(--font-sans);
   font-size: .875rem;
   margin-bottom: 1rem;
   margin-top: .5rem;

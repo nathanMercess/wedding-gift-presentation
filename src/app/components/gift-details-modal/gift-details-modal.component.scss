@@ -25,7 +25,7 @@
   display: flex;
   flex-direction: column;
   box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.18);
-  animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes slideUp {
@@ -47,7 +47,7 @@
     max-height: 92vh;
     border-radius: 20px;
     box-shadow: 0 24px 80px rgba(0, 0, 0, 0.22);
-    animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
   @keyframes scaleIn {
@@ -71,7 +71,7 @@
   font-size: 1.05rem;
   font-weight: 600;
   letter-spacing: -0.01em;
-  color: #111;
+  color: var(--foreground);
   margin: 0;
 }
 
@@ -88,14 +88,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #888;
+  color: var(--muted-foreground);
   background: none;
   border: none;
   cursor: pointer;
   transition: background 0.18s, color 0.18s;
   flex-shrink: 0;
 
-  &:hover { background: #f0f0f0; color: #333; }
+  &:hover { background: var(--secondary); color: var(--foreground); }
 }
 
 .back-btn {
@@ -106,14 +106,14 @@
   border-radius: 8px;
   font-family: var(--font-sans);
   font-size: 0.85rem;
-  color: #888;
+  color: var(--muted-foreground);
   background: none;
   border: none;
   cursor: pointer;
   transition: background 0.18s, color 0.18s;
   white-space: nowrap;
 
-  &:hover { background: #f5f5f5; color: #333; }
+  &:hover { background: var(--secondary); color: var(--foreground); }
 }
 
 /* ── Content wrapper ── */
@@ -158,7 +158,9 @@
   .gift-info {
     width: 44%;
     flex-shrink: 0;
+    overflow-y: auto;
     border-right: 1px solid rgba(0, 0, 0, 0.06);
+    justify-content: center;
   }
 }
 
@@ -199,14 +201,14 @@
   font-family: var(--font-sans);
   font-size: 1rem;
   font-weight: 600;
-  color: #111;
+  color: var(--foreground);
   margin: 0 0 0.3rem;
 }
 
 .completed-sub {
   font-family: var(--font-sans);
   font-size: 0.875rem;
-  color: #666;
+  color: var(--muted-foreground);
   line-height: 1.55;
   margin: 0;
 }
@@ -224,10 +226,8 @@
   }
 }
 
-/* mobile: foto como banner horizontal no topo, steps abaixo */
+/* mobile: foto como banner fixo 200px, form com scroll interno */
 @media (max-width: 767px) {
-  .modal-content { overflow-y: auto; -webkit-overflow-scrolling: touch; }
-  .modal-grid    { overflow: visible; }
-  .gift-info     { flex-shrink: 0; }
-  .right-side    { overflow: visible; flex: none; }
+  .modal-container { max-height: 100dvh; border-radius: 24px 24px 0 0; }
+  .gift-info { flex-shrink: 0; height: 200px; overflow: hidden; }
 }

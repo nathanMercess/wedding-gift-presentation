@@ -2,13 +2,22 @@ import { Injectable, WritableSignal, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { finalize } from 'rxjs';
 import { EndpointsUrls } from '../constants/api-endpoints';
-import { Couple } from '../models/couple.model';
+import { CarouselPhoto, Couple } from '../models/couple.model';
 import { CoupleState } from '../models/couple-state.model';
 import { ThemeService } from './theme.service';
 import { HttpErrorUtil } from '../utils/http-error';
 
 interface ImageUploadResponse {
   url: string;
+}
+
+function normalizeCarouselPhotos(raw: any[]): CarouselPhoto[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.map(item =>
+    typeof item === 'string'
+      ? { url: item, tag: '', title: '' }
+      : { url: item.url ?? item.Url ?? '', tag: item.tag ?? item.Tag ?? '', title: item.title ?? item.Title ?? '' }
+  );
 }
 
 @Injectable({ providedIn: 'root' })
@@ -37,7 +46,7 @@ export class CoupleService {
         const couple: Couple = {
           ...raw,
           photoUrl: raw.photo ?? raw.photoUrl ?? '',
-          carouselPhotos: raw.carouselPhotos ?? [],
+          carouselPhotos: normalizeCarouselPhotos(raw.carouselPhotos),
         };
         this.patchState({ couple });
         this.theme.apply(couple.primaryColor, couple.secondaryColor);
@@ -58,7 +67,7 @@ export class CoupleService {
         const updatedCouple: Couple = {
           ...raw,
           photoUrl: raw.photo ?? raw.photoUrl ?? '',
-          carouselPhotos: raw.carouselPhotos ?? [],
+          carouselPhotos: normalizeCarouselPhotos(raw.carouselPhotos),
         };
         this.patchState({ couple: updatedCouple, success: true });
         this.theme.apply(updatedCouple.primaryColor, updatedCouple.secondaryColor);

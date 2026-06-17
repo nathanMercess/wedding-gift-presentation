@@ -1,3 +1,9 @@
+export interface CarouselPhoto {
+  url: string;
+  tag: string;
+  title: string;
+}
+
 export interface Couple {
   names: string;
   weddingDate: string;
@@ -5,5 +11,5 @@ export interface Couple {
   message: string;
   primaryColor: string;
   secondaryColor: string;
-  carouselPhotos: string[];
+  carouselPhotos: CarouselPhoto[];
 }

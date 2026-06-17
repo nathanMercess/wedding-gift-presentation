@@ -80,21 +80,29 @@
   <section class="cf-card">
     <div class="cf-section-head">
       <h3>Fotos do Carousel</h3>
-      <p>Adicione até 8 fotos que vão passar automaticamente no topo do site para os convidados.</p>
+      <p>Adicione as fotos que vão passar automaticamente no topo do site para os convidados.</p>
     </div>
 
     <div class="cf-carousel-grid">
       <div *ngFor="let photo of couple.carouselPhotos; let i = index" class="cf-carousel-item">
-        <img [src]="photo" alt="Foto {{ i + 1 }}" class="cf-carousel-thumb" />
-        <button type="button" class="cf-carousel-remove" (click)="removeCarouselPhoto(i)" title="Remover foto">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
-        </button>
-        <span class="cf-carousel-num">{{ i + 1 }}</span>
+        <div class="cf-carousel-thumb-wrap">
+          <img [src]="photo.url" alt="Foto {{ i + 1 }}" class="cf-carousel-thumb" />
+          <button type="button" class="cf-carousel-remove" (click)="removeCarouselPhoto(i)" title="Remover foto">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+          <span class="cf-carousel-num">{{ i + 1 }}</span>
+        </div>
+        <div class="cf-carousel-captions">
+          <input type="text" class="cf-carousel-caption-input" placeholder="Tag (ex: Momentos)"
+                 [(ngModel)]="couple.carouselPhotos[i].tag" [name]="'carouselTag' + i" />
+          <input type="text" class="cf-carousel-caption-input" placeholder="Título da foto"
+                 [(ngModel)]="couple.carouselPhotos[i].title" [name]="'carouselTitle' + i" />
+        </div>
       </div>
 
-      <label *ngIf="(couple.carouselPhotos?.length ?? 0) < 8" class="cf-carousel-add" [class.loading]="carouselUploading">
+      <label class="cf-carousel-add" [class.loading]="carouselUploading">
         <svg *ngIf="!carouselUploading" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
         </svg>

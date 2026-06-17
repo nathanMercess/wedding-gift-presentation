@@ -1,7 +1,7 @@
 import { Component, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Couple } from '../../../models/couple.model';
+import { CarouselPhoto, Couple } from '../../../models/couple.model';
 import { CoupleService } from '../../../services/couple.service';
 import { ThemeService } from '../../../services/theme.service';
 import { ColorUtil } from '../../../utils/color.util';
@@ -81,7 +81,7 @@ export class AdminCoupleFormComponent {
       this.coupleService.uploadCouplePhoto(
         file,
         (url: string): void => {
-          this.couple = { ...this.couple, carouselPhotos: [...(this.couple.carouselPhotos ?? []), url] };
+          this.couple = { ...this.couple, carouselPhotos: [...(this.couple.carouselPhotos ?? []), { url, tag: '', title: '' }] };
           remaining--;
           if (remaining === 0) this.carouselUploading = false;
         },
