@@ -33,7 +33,12 @@ export class CoupleService {
     this.patchState({ loading: true, error: '' });
 
     this.http.get<Couple>(this.endpointsUrls.coupleGet).pipe(finalize((): void => this.patchState({ loading: false }))).subscribe({
-      next: (couple: Couple): void => {
+      next: (raw: any): void => {
+        const couple: Couple = {
+          ...raw,
+          photo: raw.photo ?? raw.photoUrl ?? '',
+          carouselPhotos: raw.carouselPhotos ?? [],
+        };
         this.patchState({ couple });
         this.theme.apply(couple.primaryColor, couple.secondaryColor);
       },
@@ -46,8 +51,14 @@ export class CoupleService {
   public saveCouple(couple: Partial<Couple>): void {
     this.patchState({ saving: true, success: false, error: '' });
 
-    this.http.put<Couple>(this.endpointsUrls.coupleAdminUpdate, couple).pipe(finalize((): void => this.patchState({ saving: false }))).subscribe({
-      next: (updatedCouple: Couple): void => {
+    const payload = { ...couple, photoUrl: couple.photo };
+    this.http.put<any>(this.endpointsUrls.coupleAdminUpdate, payload).pipe(finalize((): void => this.patchState({ saving: false }))).subscribe({
+      next: (raw: any): void => {
+        const updatedCouple: Couple = {
+          ...raw,
+          photo: raw.photo ?? raw.photoUrl ?? '',
+          carouselPhotos: raw.carouselPhotos ?? [],
+        };
         this.patchState({ couple: updatedCouple, success: true });
         this.theme.apply(updatedCouple.primaryColor, updatedCouple.secondaryColor);
       },
