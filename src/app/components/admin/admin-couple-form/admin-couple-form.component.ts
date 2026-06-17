@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Couple } from '../../../models/couple.model';
@@ -11,14 +11,22 @@ import { CoupleService } from '../../../services/couple.service';
   styleUrl: './admin-couple-form.component.scss',
   imports: [CommonModule, FormsModule],
 })
-export class AdminCoupleFormComponent implements OnInit {
+export class AdminCoupleFormComponent {
   public couple: Couple = { names: '', weddingDate: '', photo: '', message: '', primaryColor: '#C79A6D' };
 
-  public constructor(public readonly coupleService: CoupleService) {}
+  private coupleSignature: string = '';
 
-  public ngOnInit(): void {
-    const loaded = this.coupleService.state().couple;
-    this.couple = { ...loaded };
+  public constructor(public readonly coupleService: CoupleService) {
+    effect((): void => {
+      const loaded: Couple = this.coupleService.state().couple;
+      const signature: string = `${loaded.names}|${loaded.weddingDate}|${loaded.photo}|${loaded.message}|${loaded.primaryColor}`;
+
+      if (this.coupleSignature === signature)
+        return;
+
+      this.coupleSignature = signature;
+      this.couple = { ...loaded, primaryColor: loaded.primaryColor || '#C79A6D' };
+    });
   }
 
   public onCouplePhotoSelected(event: Event): void {

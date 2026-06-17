@@ -66,15 +66,16 @@ export class GiftService {
     if (params.page) httpParams = httpParams.set('page', String(params.page));
     if (params.pageSize) httpParams = httpParams.set('pageSize', String(params.pageSize));
 
-    this.http.get<PagedResult<Gift> | Gift[]>(this.endpointsUrls.giftsList, { params: httpParams })
+    this.http.get<PagedResult<Gift>>(this.endpointsUrls.giftsList, { params: httpParams })
       .pipe(finalize((): void => this.patchGuestState({ loading: false })))
       .subscribe({
-        next: (result: PagedResult<Gift> | Gift[]): void => {
-          if (Array.isArray(result)) {
-            this.patchGuestState({ gifts: result, totalCount: result.length, totalPages: 1, currentPage: 1 });
-          } else {
-            this.patchGuestState({ gifts: result.items ?? [], totalCount: result.totalCount, totalPages: result.totalPages, currentPage: result.page });
-          }
+        next: (result: PagedResult<Gift>): void => {
+          this.patchGuestState({
+            gifts: result.items,
+            totalCount: result.totalCount,
+            totalPages: result.totalPages,
+            currentPage: result.page,
+          });
         },
         error: (err: HttpErrorResponse): void => {
           this.patchGuestState({ error: HttpErrorUtil.extract(err, 'Não foi possível carregar os presentes.') });
@@ -94,15 +95,16 @@ export class GiftService {
     if (params.page) httpParams = httpParams.set('page', String(params.page));
     if (params.pageSize) httpParams = httpParams.set('pageSize', String(params.pageSize));
 
-    this.http.get<PagedResult<Gift> | Gift[]>(this.endpointsUrls.adminGiftsList, { params: httpParams })
+    this.http.get<PagedResult<Gift>>(this.endpointsUrls.adminGiftsList, { params: httpParams })
       .pipe(finalize((): void => this.patchAdminState({ giftsLoading: false })))
       .subscribe({
-        next: (result: PagedResult<Gift> | Gift[]): void => {
-          if (Array.isArray(result)) {
-            this.patchAdminState({ gifts: result, totalCount: result.length, totalPages: 1, currentPage: 1 });
-          } else {
-            this.patchAdminState({ gifts: result.items ?? [], totalCount: result.totalCount, totalPages: result.totalPages, currentPage: result.page });
-          }
+        next: (result: PagedResult<Gift>): void => {
+          this.patchAdminState({
+            gifts: result.items,
+            totalCount: result.totalCount,
+            totalPages: result.totalPages,
+            currentPage: result.page,
+          });
         },
         error: (err: HttpErrorResponse): void => {
           this.patchAdminState({ giftsError: HttpErrorUtil.extract(err, 'Erro ao carregar presentes.') });
