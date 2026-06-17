@@ -3,4 +3,5 @@ export interface Couple {
   weddingDate: string;
   photo: string;
   message: string;
+  primaryColor: string;
 }

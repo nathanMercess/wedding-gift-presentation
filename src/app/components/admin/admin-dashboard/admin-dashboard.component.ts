@@ -25,7 +25,7 @@ export class AdminDashboardComponent implements OnInit {
   public readonly categories: typeof GIFT_CATEGORIES = GIFT_CATEGORIES;
 
   public activeTab: AdminTab = AdminTab.Gifts;
-  public couple: Couple = { names: '', weddingDate: '', photo: '', message: '' };
+  public couple: Couple = { names: '', weddingDate: '', photo: '', message: '', primaryColor: '#C79A6D' };
   public showGiftForm: boolean = false;
   public editingGift: Gift | null = null;
   public giftForm: Partial<Gift> = {};
@@ -146,6 +146,24 @@ export class AdminDashboardComponent implements OnInit {
 
   public cancelDeleteGift(): void {
     this.giftPendingDeletion = null;
+  }
+
+  public onCouplePhotoSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+
+    if (!file)
+      return;
+
+    const previousPhoto = this.couple.photo;
+    this.couple = { ...this.couple, photo: URL.createObjectURL(file) };
+
+    this.coupleService.uploadCouplePhoto(
+      file,
+      (url: string): void => { this.couple = { ...this.couple, photo: url }; },
+      (): void => { this.couple = { ...this.couple, photo: previousPhoto }; }
+    );
   }
 
   public saveCouple(): void {

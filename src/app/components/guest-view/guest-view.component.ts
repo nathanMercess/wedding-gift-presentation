@@ -51,6 +51,9 @@ export class GuestViewComponent implements OnInit {
       this.formattedWeddingDate = DateUtil.formatWeddingDate(stateCouple.weddingDate);
       this.hasTriedApiCouplePhoto = false;
       this.displayCouplePhoto = this.localCouplePhoto;
+
+      if (stateCouple.primaryColor)
+        document.documentElement.style.setProperty('--primary', stateCouple.primaryColor);
     });
   }
 

@@ -6,14 +6,20 @@ import { Couple } from '../models/couple.model';
 import { CoupleState } from '../models/couple-state.model';
 import { HttpErrorUtil } from '../utils/http-error';
 
+interface ImageUploadResponse {
+  url: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class CoupleService {
   public readonly state: WritableSignal<CoupleState> = signal<CoupleState>({
-    couple: { names: '', weddingDate: '', photo: '', message: '' },
+    couple: { names: '', weddingDate: '', photo: '', message: '', primaryColor: '#C79A6D' },
     loading: false,
     saving: false,
     success: false,
     error: '',
+    photoUploading: false,
+    photoUploadError: '',
   });
 
   public constructor(public readonly http: HttpClient, public readonly endpointsUrls: EndpointsUrls) {}
@@ -27,7 +33,7 @@ export class CoupleService {
       },
       error: (err: HttpErrorResponse): void => {
         this.patchState({ error: HttpErrorUtil.extract(err, 'Erro ao carregar informações do casal.') });
-      }
+      },
     });
   }
 
@@ -40,8 +46,30 @@ export class CoupleService {
       },
       error: (err: HttpErrorResponse): void => {
         this.patchState({ error: HttpErrorUtil.extract(err, 'Erro ao salvar informações do casal.') });
-      }
+      },
     });
+  }
+
+  public uploadCouplePhoto(file: File, onSuccess: (url: string) => void, onError?: () => void): void {
+    this.patchState({ photoUploading: true, photoUploadError: '' });
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    this.http.post<ImageUploadResponse>(this.endpointsUrls.adminUploadImage, formData)
+      .pipe(finalize((): void => this.patchState({ photoUploading: false })))
+      .subscribe({
+        next: (response: ImageUploadResponse): void => {
+          onSuccess(response.url);
+        },
+        error: (err: HttpErrorResponse): void => {
+          const message = err.status === 413
+            ? 'A imagem é muito grande para o servidor aceitar.'
+            : HttpErrorUtil.extract(err, 'Erro ao enviar a foto.');
+          this.patchState({ photoUploadError: message });
+          if (onError) onError();
+        },
+      });
   }
 
   public clearCoupleFeedback(): void {

@@ -6,4 +6,6 @@ export interface CoupleState {
   saving: boolean;
   success: boolean;
   error: string;
+  photoUploading: boolean;
+  photoUploadError: string;
 }
