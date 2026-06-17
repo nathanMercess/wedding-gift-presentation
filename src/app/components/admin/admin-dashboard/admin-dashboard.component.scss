@@ -6,7 +6,7 @@
 }
 
 .dash-header {
-  background: #2C1810;
+  background:  #fff;
   color: #fff;
   display: flex;
   align-items: center;
@@ -32,29 +32,29 @@
     button {
       background: none;
       border: none;
-      color: #BDB5AF;
+      color: var(--foreground);
       padding: .5rem 1rem;
       border-radius: .5rem;
       cursor: pointer;
       font-size: .95rem;
       transition: color .2s, background .2s;
 
-      &:hover { color: #fff; }
-      &.active { color: #fff; background: rgba(255,255,255,.1); }
+      &:hover { color: var(--primary); }
+      &.active { color: var(--primary); background: rgba(255,255,255,.1);  }
     }
   }
 
   .logout-btn {
     background: none;
     border: 1.5px solid rgba(255,255,255,.3);
-    color: #BDB5AF;
+      color: var(--foreground);
     padding: .4rem .9rem;
     border-radius: .5rem;
     cursor: pointer;
     font-size: .875rem;
     transition: color .2s, border-color .2s;
 
-    &:hover { color: #fff; border-color: rgba(255,255,255,.6); }
+    &:hover { color: var(--primary); border-color: rgba(255,255,255,.6); }
   }
 }
 
