@@ -1,16 +1,8 @@
-
-  <!--==CLAUDE==: Ver possibilidade para adicionar forma mais facil de adicionar produto, link, por IA, busca -->
 <div class="dash-root">
-  <!-- Sidebar / Header -->
-
-  <!--==CLAUDE==: Componentizar as coisas, para facilitar a manutenção e reutilização dos componentes -->
-  <!--==CLAUDE==: criar filtro e paginação descente -->
-
   <header class="dash-header">
     <div class="dash-brand">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-        <path
-          d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
       </svg>
       <span>Admin</span>
     </div>
@@ -46,194 +38,40 @@
         </span>
       </div>
 
-      <!-- Gift Form -->
-      <!-- ==CLAUDE==: Quero que cada presente tenha como decidir na hora de criar se vai
-        ser possivel enviar parte do valor, ou somente ele todo (precisa mudar no backend também)-->
-      <div *ngIf="showGiftForm" class="form-card">
-        <h3>{{ editingGift ? 'Editar presente' : 'Novo presente' }}</h3>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Nome</label>
-            <input type="text" [(ngModel)]="giftForm.name" name="gname" class="text-input"
-              placeholder="Nome do presente" />
-          </div>
-          <div class="form-group">
-            <label>Categoria</label>
-            <select [(ngModel)]="giftForm.category" name="gcat" class="text-input">
-              <option *ngFor="let category of categories" [value]="category.id">{{ category.label }}</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Preço total (R$)</label>
-            <input type="number" [(ngModel)]="giftForm.total" name="gtotal" class="text-input" placeholder="0.00"
-              step="0.01" />
-          </div>
-          <div class="form-group full-width">
-            <label>Foto do presente</label>
-            <div class="image-upload">
-              <div class="image-preview">
-                <img *ngIf="giftForm.image" [src]="giftForm.image" [alt]="giftForm.name || 'Pré-visualização'" />
-                <span *ngIf="!giftForm.image" class="image-preview-placeholder">Sem foto</span>
-              </div>
-              <div class="image-upload-actions">
-                <label class="btn-outline upload-btn">
-                  {{ giftService.adminState().imageUploading ? 'Enviando...' : 'Escolher foto' }}
-                    <!--==CLAUDE==: Ver Possibilidade de usar primeNg para upload de imagens p-fileupload -->
-                  <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onImageSelected($event)"
-                    [disabled]="giftService.adminState().imageUploading" hidden />
-                </label>
-                <p class="hint">JPG, PNG ou WEBP • até 20MB</p>
-              </div>
-            </div>
-            <div *ngIf="giftService.adminState().imageUploadError" class="error-msg">{{
-              giftService.adminState().imageUploadError }}</div>
-          </div>
-          <div class="form-group full-width">
-            <label>Descrição (opcional)</label>
-            <textarea [(ngModel)]="giftForm.description" name="gdesc" class="text-input" rows="2"
-              style="resize:none"></textarea>
-          </div>
-          <div class="form-group full-width">
-            <label class="checkbox-label">
-              <input type="checkbox" [(ngModel)]="giftForm.allowPartialContribution" name="gpartial" />
-              Permitir contribuição parcial
-            </label>
-          </div>
-        </div>
-        <div *ngIf="giftService.adminState().giftError" class="error-msg">{{ giftService.adminState().giftError }}</div>
-        <div class="form-actions">
-          <button class="btn-outline" (click)="cancelGiftForm()">Cancelar</button>
-          <button class="btn-primary" (click)="saveGift()"
-            [disabled]="giftService.adminState().giftSaving || giftService.adminState().imageUploading">
-            {{ giftService.adminState().giftSaving ? 'Salvando...' : 'Salvar' }}
-          </button>
-        </div>
+      <!-- Formulário -->
+      <app-admin-gift-form *ngIf="showGiftForm" [editingGift]="editingGift"
+        (cancel)="closeGiftForm()"></app-admin-gift-form>
+
+      <!-- Cards de presentes -->
+      <div *ngIf="!giftService.adminState().giftsLoading && giftService.adminState().gifts.length > 0" class="gifts-cards-grid">
+        <app-admin-gift-card
+          *ngFor="let gift of giftService.adminState().gifts"
+          [gift]="gift"
+          [isEditing]="editingGift?.id === gift.id"
+          (edit)="openEditGift($event)"
+          (delete)="requestDeleteGift($event)">
+        </app-admin-gift-card>
       </div>
 
-      <!-- Gifts Table -->
-      <!-- ==CLAUDE==: Trocar essa tabela por cards (componente novo), para melhorar a experiência do usuário e a responsividade -->
-      <div class="table-wrap"
-        *ngIf="!giftService.adminState().giftsLoading && giftService.adminState().gifts.length > 0">
-        <table class="gifts-table">
-          <thead>
-            <tr>
-              <th>Presente</th>
-              <th>Categoria</th>
-              <th>Total</th>
-              <th>Arrecadado</th>
-              <th>Progresso</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let gift of giftService.adminState().gifts" [class.editing-row]="editingGift?.id === gift.id">
-              <td data-label="Presente">
-                <div class="gift-cell">
-                  <img [src]="gift.image" [alt]="gift.name" class="gift-thumb" />
-                  <span>{{ gift.name }}</span>
-                </div>
-              </td>
-              <td data-label="Categoria">{{ gift.category }}</td>
-              <td data-label="Total">R$ {{ gift.total.toFixed(2) }}</td>
-              <td data-label="Arrecadado">R$ {{ gift.raised.toFixed(2) }}</td>
-              <td data-label="Progresso">
-                <div class="progress-bar">
-                  <div class="progress-fill" [style.width.%]="getProgressPercent(gift)"></div>
-                </div>
-                <span class="progress-label">{{ getProgressPercent(gift).toFixed(0) }}%</span>
-              </td>
-              <td data-label="Ações">
-                <div class="action-btns">
-                  <button class="btn-icon" (click)="openEditGift(gift)" title="Editar">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                      stroke="currentColor" stroke-width="2">
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                    </svg>
-                    <span class="btn-icon-label">Editar</span>
-                  </button>
-                  <button class="btn-icon danger" (click)="requestDeleteGift(gift)" title="Remover">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                      stroke="currentColor" stroke-width="2">
-                      <polyline points="3 6 5 6 21 6" />
-                      <path d="M19 6l-1 14H6L5 6" />
-                      <path d="M10 11v6" />
-                      <path d="M14 11v6" />
-                      <path d="M9 6V4h6v2" />
-                    </svg>
-                    <span class="btn-icon-label">Remover</span>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <!-- Paginação -->
-        <div *ngIf="totalPages > 1" class="pagination">
-          <button class="page-btn" [disabled]="currentPage <= 1" (click)="onPageChange(currentPage - 1)">&lsaquo; Anterior</button>
-          <span class="page-info">Página {{ currentPage }} de {{ totalPages }}</span>
-          <button class="page-btn" [disabled]="currentPage >= totalPages" (click)="onPageChange(currentPage + 1)">Próxima &rsaquo;</button>
-        </div>
+      <div *ngIf="!giftService.adminState().giftsLoading && !giftService.adminState().giftsError && giftService.adminState().gifts.length === 0 && !showGiftForm"
+        class="empty-state">
+        <p>Nenhum presente cadastrado ainda.</p>
+      </div>
+
+      <!-- Paginação -->
+      <div *ngIf="totalPages > 1" class="pagination">
+        <button class="page-btn" [disabled]="currentPage <= 1" (click)="onPageChange(currentPage - 1)">&lsaquo; Anterior</button>
+        <span class="page-info">Página {{ currentPage }} de {{ totalPages }}</span>
+        <button class="page-btn" [disabled]="currentPage >= totalPages" (click)="onPageChange(currentPage + 1)">Próxima &rsaquo;</button>
       </div>
     </section>
 
+    <!-- COUPLE TAB -->
     <section *ngIf="activeTab === AdminTab.Couple" class="tab-section">
       <div class="section-header">
         <h2>Informações do Casal</h2>
       </div>
-
-      <div *ngIf="coupleService.state().loading" class="status-msg">Carregando...</div>
-
-      <div *ngIf="!coupleService.state().loading" class="form-card">
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Nomes do casal</label>
-            <input type="text" [(ngModel)]="couple.names" name="cnames" class="text-input" placeholder="Ex: Ana & Pedro" />
-          </div>
-          <div class="form-group">
-            <label>Data do casamento</label>
-            <input type="text" [(ngModel)]="couple.weddingDate" name="cwdate" class="text-input" placeholder="Ex: 2026-09-15" />
-          </div>
-          <div class="form-group full-width">
-            <label>Foto do casal</label>
-            <div class="image-upload">
-              <div class="image-preview">
-                <img *ngIf="couple.photo" [src]="couple.photo" alt="Foto do casal" />
-                <span *ngIf="!couple.photo" class="image-preview-placeholder">Sem foto</span>
-              </div>
-              <div class="image-upload-actions">
-                <label class="btn-outline upload-btn">
-                  {{ coupleService.state().photoUploading ? 'Enviando...' : 'Escolher foto' }}
-                  <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onCouplePhotoSelected($event)"
-                    [disabled]="coupleService.state().photoUploading" hidden />
-                </label>
-                <p class="hint">JPG, PNG ou WEBP • até 20MB</p>
-              </div>
-            </div>
-            <div *ngIf="coupleService.state().photoUploadError" class="error-msg">{{ coupleService.state().photoUploadError }}</div>
-          </div>
-          <div class="form-group">
-            <label>Cor primária</label>
-            <div style="display:flex;align-items:center;gap:8px">
-              <input type="color" [(ngModel)]="couple.primaryColor" name="cprimarycolor" style="width:48px;height:36px;cursor:pointer;border:none;padding:0" />
-              <input type="text" [(ngModel)]="couple.primaryColor" name="cprimarycolortext" class="text-input" placeholder="#C79A6D" style="flex:1" />
-            </div>
-          </div>
-          <div class="form-group full-width">
-            <label>Mensagem para os convidados</label>
-            <textarea [(ngModel)]="couple.message" name="cmessage" class="text-input" rows="4" style="resize:vertical"></textarea>
-          </div>
-        </div>
-
-        <div *ngIf="coupleService.state().success" class="success-msg">Informações salvas com sucesso!</div>
-        <div *ngIf="coupleService.state().error" class="error-msg">{{ coupleService.state().error }}</div>
-
-        <div class="form-actions">
-          <button class="btn-primary" (click)="saveCouple()" [disabled]="coupleService.state().saving">
-            {{ coupleService.state().saving ? 'Salvando...' : 'Salvar alterações' }}
-          </button>
-        </div>
-      </div>
+      <app-admin-couple-form></app-admin-couple-form>
     </section>
 
   </main>

@@ -397,6 +397,65 @@
   }
 }
 
+.admin-filters {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+
+  .text-input {
+    flex: 1;
+    min-width: 160px;
+  }
+}
+
+.results-count {
+  font-size: 0.85rem;
+  color: #8B7B6B;
+  white-space: nowrap;
+}
+
+.gifts-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: #8B7B6B;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.page-btn {
+  padding: 0.4rem 1rem;
+  border: 1px solid #E8DDD5;
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: #4A3728;
+  transition: background 0.15s;
+
+  &:hover:not(:disabled) { background: #F7F0EA; }
+  &:disabled { opacity: 0.4; cursor: default; }
+}
+
+.page-info {
+  font-size: 0.875rem;
+  color: #8B7B6B;
+}
+
 .status-msg { color: #8B7B6B; padding: 1rem 0; }
 
 .error-msg {

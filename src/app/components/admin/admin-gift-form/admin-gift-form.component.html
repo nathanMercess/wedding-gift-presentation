@@ -1,0 +1,57 @@
+<div class="form-card">
+  <h3>{{ editingGift ? 'Editar presente' : 'Novo presente' }}</h3>
+  <div class="form-grid">
+    <div class="form-group">
+      <label>Nome</label>
+      <input type="text" [(ngModel)]="giftForm.name" name="gname" class="text-input" placeholder="Nome do presente" />
+    </div>
+    <div class="form-group">
+      <label>Categoria</label>
+      <select [(ngModel)]="giftForm.category" name="gcat" class="text-input">
+        <option *ngFor="let category of categories" [value]="category.id">{{ category.label }}</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Preço total (R$)</label>
+      <input type="number" [(ngModel)]="giftForm.total" name="gtotal" class="text-input" placeholder="0.00" step="0.01" />
+    </div>
+    <div class="form-group full-width">
+      <label>Foto do presente</label>
+      <div class="image-upload">
+        <div class="image-preview">
+          <img *ngIf="giftForm.image" [src]="giftForm.image" [alt]="giftForm.name || 'Pré-visualização'" />
+          <span *ngIf="!giftForm.image" class="image-preview-placeholder">Sem foto</span>
+        </div>
+        <div class="image-upload-actions">
+          <label class="btn-outline upload-btn">
+            {{ giftService.adminState().imageUploading ? 'Enviando...' : 'Escolher foto' }}
+            <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onImageSelected($event)"
+              [disabled]="giftService.adminState().imageUploading" hidden />
+          </label>
+          <p class="hint">JPG, PNG ou WEBP • até 20MB</p>
+        </div>
+      </div>
+      <div *ngIf="giftService.adminState().imageUploadError" class="error-msg">
+        {{ giftService.adminState().imageUploadError }}
+      </div>
+    </div>
+    <div class="form-group full-width">
+      <label>Descrição (opcional)</label>
+      <textarea [(ngModel)]="giftForm.description" name="gdesc" class="text-input" rows="2" style="resize:none"></textarea>
+    </div>
+    <div class="form-group full-width">
+      <label class="checkbox-label">
+        <input type="checkbox" [(ngModel)]="giftForm.allowPartialContribution" name="gpartial" />
+        Permitir contribuição parcial
+      </label>
+    </div>
+  </div>
+  <div *ngIf="giftService.adminState().giftError" class="error-msg">{{ giftService.adminState().giftError }}</div>
+  <div class="form-actions">
+    <button class="btn-outline" (click)="cancel.emit()">Cancelar</button>
+    <button class="btn-primary" (click)="save()"
+      [disabled]="giftService.adminState().giftSaving || giftService.adminState().imageUploading">
+      {{ giftService.adminState().giftSaving ? 'Salvando...' : 'Salvar' }}
+    </button>
+  </div>
+</div>

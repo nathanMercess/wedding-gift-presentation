@@ -1,0 +1,57 @@
+<div *ngIf="coupleService.state().loading" class="status-msg">Carregando...</div>
+
+<div *ngIf="!coupleService.state().loading" class="form-card">
+  <div class="form-grid">
+    <div class="form-group">
+      <label>Nomes do casal</label>
+      <input type="text" [(ngModel)]="couple.names" name="cnames" class="text-input" placeholder="Ex: Ana & Pedro" />
+    </div>
+    <div class="form-group">
+      <label>Data do casamento</label>
+      <input type="text" [(ngModel)]="couple.weddingDate" name="cwdate" class="text-input" placeholder="Ex: 2026-09-15" />
+    </div>
+    <div class="form-group full-width">
+      <label>Foto do casal</label>
+      <div class="image-upload">
+        <div class="image-preview">
+          <img *ngIf="couple.photo" [src]="couple.photo" alt="Foto do casal" />
+          <span *ngIf="!couple.photo" class="image-preview-placeholder">Sem foto</span>
+        </div>
+        <div class="image-upload-actions">
+          <label class="btn-outline upload-btn">
+            {{ coupleService.state().photoUploading ? 'Enviando...' : 'Escolher foto' }}
+            <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onCouplePhotoSelected($event)"
+              [disabled]="coupleService.state().photoUploading" hidden />
+          </label>
+          <p class="hint">JPG, PNG ou WEBP • até 20MB</p>
+        </div>
+      </div>
+      <div *ngIf="coupleService.state().photoUploadError" class="error-msg">
+        {{ coupleService.state().photoUploadError }}
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Cor primária</label>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="color" [(ngModel)]="couple.primaryColor" name="cprimarycolor"
+          style="width:48px;height:36px;cursor:pointer;border:none;padding:0" />
+        <input type="text" [(ngModel)]="couple.primaryColor" name="cprimarycolortext" class="text-input"
+          placeholder="#C79A6D" style="flex:1" />
+      </div>
+    </div>
+    <div class="form-group full-width">
+      <label>Mensagem para os convidados</label>
+      <textarea [(ngModel)]="couple.message" name="cmessage" class="text-input" rows="4"
+        style="resize:vertical"></textarea>
+    </div>
+  </div>
+
+  <div *ngIf="coupleService.state().success" class="success-msg">Informações salvas com sucesso!</div>
+  <div *ngIf="coupleService.state().error" class="error-msg">{{ coupleService.state().error }}</div>
+
+  <div class="form-actions">
+    <button class="btn-primary" (click)="save()" [disabled]="coupleService.state().saving">
+      {{ coupleService.state().saving ? 'Salvando...' : 'Salvar alterações' }}
+    </button>
+  </div>
+</div>
