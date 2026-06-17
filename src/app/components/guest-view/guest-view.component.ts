@@ -1,6 +1,7 @@
-import { Component, OnInit, effect } from '@angular/core';
+import { Component, OnDestroy, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { GiftCardComponent } from '../gift-card/gift-card.component';
 import { GiftDetailsModalComponent } from '../gift-details-modal/gift-details-modal.component';
 import { Gift } from '../../models/gift.model';
@@ -16,9 +17,9 @@ import { DateUtil } from '../../utils/date.util';
   selector: 'app-guest-view',
   templateUrl: './guest-view.component.html',
   styleUrl: './guest-view.component.scss',
-  imports: [CommonModule, FormsModule, GiftCardComponent, GiftDetailsModalComponent]
+  imports: [CommonModule, FormsModule, GiftCardComponent, GiftDetailsModalComponent],
 })
-export class GuestViewComponent implements OnInit {
+export class GuestViewComponent implements OnInit, OnDestroy {
   public searchTerm: string = '';
   public selectedCategory: string = 'todos';
   public showQuickControls: boolean = false;
@@ -29,6 +30,8 @@ export class GuestViewComponent implements OnInit {
   public hasTriedApiCouplePhoto: boolean = false;
   public coupleSignature: string = '';
   public sortBy: string = 'name';
+  public sortDir: string = 'asc';
+  public onlyAvailable: boolean = false;
   public selectedGift: Gift | null = null;
 
   public readonly skeletonItems: number[] = [1, 2, 3, 4, 5, 6];
@@ -38,10 +41,12 @@ export class GuestViewComponent implements OnInit {
   ];
   public readonly sortOptions: typeof SORT_OPTIONS = SORT_OPTIONS;
 
+  private readonly destroy$ = new Subject<void>();
+  private readonly searchSubject = new Subject<string>();
+
   public constructor(public readonly giftService: GiftService, public readonly coupleService: CoupleService) {
     effect((): void => {
       const stateCouple: Couple = this.coupleService.state().couple;
-
       const nextSignature: string = `${stateCouple.names}|${stateCouple.weddingDate}|${stateCouple.photo}|${stateCouple.message}`;
 
       if (this.coupleSignature === nextSignature)
@@ -55,32 +60,16 @@ export class GuestViewComponent implements OnInit {
       if (stateCouple.primaryColor)
         document.documentElement.style.setProperty('--primary', stateCouple.primaryColor);
     });
-  }
 
-  public get filteredGifts(): Gift[] {
-    const allGifts = this.giftService.guestState().gifts;
-    const selectedCategoryKey = this.getCategoryKey(this.selectedCategory);
-    const normalizedSearch = this.normalizeText(this.searchTerm);
-
-    return allGifts
-      .filter((gift: Gift): boolean => {
-        const matchCat = selectedCategoryKey === 'todos' || this.getCategoryKey(gift.category) === selectedCategoryKey;
-        const matchSearch = !normalizedSearch || this.normalizeText(gift.name).includes(normalizedSearch);
-        return matchCat && matchSearch;
-      })
-      .sort((a: Gift, b: Gift): number => {
-        if (this.sortBy === 'price-asc')
-          return a.price - b.price;
-
-        if (this.sortBy === 'price-desc')
-          return b.price - a.price;
-
-        return a.name.localeCompare(b.name);
-      });
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$),
+    ).subscribe((): void => this.loadGifts());
   }
 
   public get totalGifts(): number {
-    return this.giftService.guestState().gifts.length;
+    return this.giftService.guestState().totalCount;
   }
 
   public get completedGifts(): number {
@@ -99,13 +88,51 @@ export class GuestViewComponent implements OnInit {
     return this.totalGoal > 0 ? (this.totalRaised / this.totalGoal) * 100 : 0;
   }
 
+  public get currentPage(): number {
+    return this.giftService.guestState().currentPage;
+  }
+
+  public get totalPages(): number {
+    return this.giftService.guestState().totalPages;
+  }
+
   public ngOnInit(): void {
     this.loadCouple();
     this.loadGifts();
   }
 
+  public ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   public loadCouple(): void {
     this.coupleService.loadCouple();
+  }
+
+  public loadGifts(page: number = 1): void {
+    const [orderBy, orderDir] = this.parseSortBy();
+    this.giftService.loadGuestGifts({
+      search: this.searchTerm || undefined,
+      category: this.selectedCategory !== 'todos' ? this.selectedCategory : undefined,
+      orderBy,
+      orderDir,
+      onlyAvailable: this.onlyAvailable || undefined,
+      page,
+      pageSize: 20,
+    });
+  }
+
+  public onSearchChange(): void {
+    this.searchSubject.next(this.searchTerm);
+  }
+
+  public onFilterChange(): void {
+    this.loadGifts(1);
+  }
+
+  public onPageChange(page: number): void {
+    this.loadGifts(page);
   }
 
   public onCouplePhotoError(): void {
@@ -120,24 +147,14 @@ export class GuestViewComponent implements OnInit {
     this.displayCouplePhoto = this.fallbackCouplePhoto;
   }
 
-  public loadGifts(): void {
-    this.giftService.loadGuestGifts();
-  }
-
   public onGiftPaymentCompleted(): void {
-    this.loadGifts();
+    this.loadGifts(this.currentPage);
   }
 
-  public normalizeText(value: string): string {
-    return value.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
-  }
-
-  public getCategoryKey(category: string): string {
-    const normalized = this.normalizeText(category);
-    if (normalized === 'eletro' || normalized === 'eletrodomestico' || normalized === 'eletrodomesticos')
-      return 'eletrodomesticos';
-
-    return normalized;
+  private parseSortBy(): [string, string] {
+    if (this.sortBy === 'price-asc') return ['price', 'asc'];
+    if (this.sortBy === 'price-desc') return ['price', 'desc'];
+    return ['name', 'asc'];
   }
 
   public trackByGiftId(_: number, gift: Gift): string {

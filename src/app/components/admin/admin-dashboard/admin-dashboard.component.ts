@@ -1,6 +1,7 @@
-import { Component, OnInit, effect } from '@angular/core';
+import { Component, OnDestroy, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { Gift } from '../../../models/gift.model';
 import { Couple } from '../../../models/couple.model';
 import { GiftService } from '../../../services/gift.service';
@@ -20,7 +21,7 @@ const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
   styleUrl: './admin-dashboard.component.scss',
   imports: [CommonModule, FormsModule, ConfirmDialogComponent],
 })
-export class AdminDashboardComponent implements OnInit {
+export class AdminDashboardComponent implements OnInit, OnDestroy {
   public readonly AdminTab: typeof AdminTab = AdminTab;
   public readonly categories: typeof GIFT_CATEGORIES = GIFT_CATEGORIES;
 
@@ -30,6 +31,11 @@ export class AdminDashboardComponent implements OnInit {
   public editingGift: Gift | null = null;
   public giftForm: Partial<Gift> = {};
   public giftPendingDeletion: Gift | null = null;
+  public searchTerm: string = '';
+  public selectedCategory: string = 'todos';
+
+  private readonly destroy$ = new Subject<void>();
+  private readonly searchSubject = new Subject<string>();
 
   public constructor(
     public readonly giftService: GiftService,
@@ -49,6 +55,24 @@ export class AdminDashboardComponent implements OnInit {
       const loadedCouple: Couple = this.coupleService.state().couple;
       this.couple = { ...loadedCouple };
     });
+
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$),
+    ).subscribe((): void => this.loadGifts(1));
+  }
+
+  public get currentPage(): number {
+    return this.giftService.adminState().currentPage;
+  }
+
+  public get totalPages(): number {
+    return this.giftService.adminState().totalPages;
+  }
+
+  public get totalCount(): number {
+    return this.giftService.adminState().totalCount;
   }
 
   public ngOnInit(): void {
@@ -56,8 +80,30 @@ export class AdminDashboardComponent implements OnInit {
     this.loadCouple();
   }
 
-  public loadGifts(): void {
-    this.giftService.loadAdminGifts();
+  public ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  public loadGifts(page: number = this.currentPage): void {
+    this.giftService.loadAdminGifts({
+      search: this.searchTerm || undefined,
+      category: this.selectedCategory !== 'todos' ? this.selectedCategory : undefined,
+      page,
+      pageSize: 20,
+    });
+  }
+
+  public onSearchChange(): void {
+    this.searchSubject.next(this.searchTerm);
+  }
+
+  public onFilterChange(): void {
+    this.loadGifts(1);
+  }
+
+  public onPageChange(page: number): void {
+    this.loadGifts(page);
   }
 
   public loadCouple(): void {

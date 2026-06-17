@@ -33,6 +33,19 @@
       <div *ngIf="giftService.adminState().giftsLoading" class="status-msg">Carregando...</div>
       <div *ngIf="giftService.adminState().giftsError" class="error-msg">{{ giftService.adminState().giftsError }}</div>
 
+      <!-- Filtros -->
+      <div class="admin-filters">
+        <input type="text" class="text-input" placeholder="Buscar presente..." [(ngModel)]="searchTerm"
+          name="asearch" (input)="onSearchChange()" />
+        <select class="text-input" [(ngModel)]="selectedCategory" name="acat" (change)="onFilterChange()">
+          <option value="todos">Todas as categorias</option>
+          <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.label }}</option>
+        </select>
+        <span *ngIf="!giftService.adminState().giftsLoading" class="results-count">
+          {{ totalCount }} presente{{ totalCount !== 1 ? 's' : '' }}
+        </span>
+      </div>
+
       <!-- Gift Form -->
       <!-- ==CLAUDE==: Quero que cada presente tenha como decidir na hora de criar se vai
         ser possivel enviar parte do valor, ou somente ele todo (precisa mudar no backend também)-->
@@ -155,6 +168,12 @@
             </tr>
           </tbody>
         </table>
+        <!-- Paginação -->
+        <div *ngIf="totalPages > 1" class="pagination">
+          <button class="page-btn" [disabled]="currentPage <= 1" (click)="onPageChange(currentPage - 1)">&lsaquo; Anterior</button>
+          <span class="page-info">Página {{ currentPage }} de {{ totalPages }}</span>
+          <button class="page-btn" [disabled]="currentPage >= totalPages" (click)="onPageChange(currentPage + 1)">Próxima &rsaquo;</button>
+        </div>
       </div>
     </section>
 

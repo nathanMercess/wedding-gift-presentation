@@ -1,7 +1,4 @@
 <div class="gv-root">
-  <!--==CLAUDE==: Componentizar as coisas, para facilitar a manutenção e reutilização dos componentes -->
-  
-  <!--==CLAUDE==: criar filtro e paginação descente -->
   <div *ngIf="giftService.guestState().loading || coupleService.state().loading" class="api-loading-overlay"
     aria-live="polite" aria-busy="true">
     <div class="api-loading-shell">
@@ -49,7 +46,6 @@
   </header>
 
   <!-- Couple Hero -->
-   
   <section class="couple-section">
     <div class="container couple-inner">
       <div class="couple-photo">
@@ -86,7 +82,7 @@
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
           <input type="text" placeholder="Buscar presente..." [(ngModel)]="searchTerm" name="search"
-            class="search-input" />
+            class="search-input" (input)="onSearchChange()" />
         </div>
 
         <button class="quick-toggle-btn" [class.active]="showQuickControls"
@@ -112,8 +108,8 @@
           <p class="quick-text">Categorias</p>
           <div class="quick-filters">
             <button *ngFor="let cat of quickCategories; trackBy: trackByOptionId"
-              [class.active]="selectedCategory === cat.id" class="chip" (click)="selectedCategory = cat.id">{{ cat.label
-              }}</button>
+              [class.active]="selectedCategory === cat.id" class="chip"
+              (click)="selectedCategory = cat.id; onFilterChange()">{{ cat.label }}</button>
           </div>
           <p class="quick-scroll-hint">Deslize para ver mais categorias</p>
         </div>
@@ -122,7 +118,15 @@
           <p class="quick-text">Ordenar</p>
           <div class="quick-orders">
             <button *ngFor="let s of sortOptions; trackBy: trackByOptionId" [class.active]="sortBy === s.id"
-              class="chip" (click)="sortBy = s.id">{{ s.label }}</button>
+              class="chip" (click)="sortBy = s.id; onFilterChange()">{{ s.label }}</button>
+          </div>
+        </div>
+
+        <div class="quick-group">
+          <p class="quick-text">Disponibilidade</p>
+          <div class="quick-filters">
+            <button class="chip" [class.active]="!onlyAvailable" (click)="onlyAvailable = false; onFilterChange()">Todos</button>
+            <button class="chip" [class.active]="onlyAvailable" (click)="onlyAvailable = true; onFilterChange()">Disponíveis</button>
           </div>
         </div>
       </div>
@@ -139,7 +143,7 @@
         <p>{{ giftService.guestState().error }}</p>
         <button class="chip" (click)="loadGifts()">Tentar novamente</button>
       </div>
-      <div *ngIf="!giftService.guestState().loading && !giftService.guestState().error && filteredGifts.length === 0"
+      <div *ngIf="!giftService.guestState().loading && !giftService.guestState().error && giftService.guestState().gifts.length === 0"
         class="empty-state">
         <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="1.5">
@@ -150,14 +154,24 @@
         <p>Tente ajustar os filtros ou buscar por outro termo</p>
       </div>
 
-      <div *ngIf="!giftService.guestState().loading && !giftService.guestState().error && filteredGifts.length > 0">
-        <p class="results-count">Mostrando {{ filteredGifts.length }} de {{ giftService.guestState().gifts.length }}
-          presentes</p>
+      <div *ngIf="!giftService.guestState().loading && !giftService.guestState().error && giftService.guestState().gifts.length > 0">
+        <p class="results-count">{{ giftService.guestState().totalCount }} presente{{ giftService.guestState().totalCount !== 1 ? 's' : '' }} encontrado{{ giftService.guestState().totalCount !== 1 ? 's' : '' }}</p>
         <div class="gifts-grid">
-          <div *ngFor="let gift of filteredGifts; trackBy: trackByGiftId" class="gift-grid-item"
+          <div *ngFor="let gift of giftService.guestState().gifts; trackBy: trackByGiftId" class="gift-grid-item"
             (click)="selectedGift = gift" style="cursor:pointer">
             <app-gift-card [gift]="gift"></app-gift-card>
           </div>
+        </div>
+
+        <!-- Paginação -->
+        <div *ngIf="totalPages > 1" class="pagination">
+          <button class="page-btn" [disabled]="currentPage <= 1" (click)="onPageChange(currentPage - 1)">
+            &lsaquo; Anterior
+          </button>
+          <span class="page-info">Página {{ currentPage }} de {{ totalPages }}</span>
+          <button class="page-btn" [disabled]="currentPage >= totalPages" (click)="onPageChange(currentPage + 1)">
+            Próxima &rsaquo;
+          </button>
         </div>
       </div>
     </div>
