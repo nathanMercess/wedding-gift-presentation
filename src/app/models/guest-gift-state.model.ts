@@ -7,4 +7,8 @@ export interface GuestGiftState {
   currentPage: number;
   loading: boolean;
   error: string;
+  overallTotal: number;
+  overallCompleted: number;
+  overallRaised: number;
+  overallGoal: number;
 }

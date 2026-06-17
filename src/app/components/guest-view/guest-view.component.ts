@@ -147,19 +147,19 @@ export class GuestViewComponent implements OnInit, OnDestroy {
   }
 
   public get totalGifts(): number {
-    return this.giftService.guestState().totalCount;
+    return this.giftService.guestState().overallTotal;
   }
 
   public get completedGifts(): number {
-    return this.giftService.guestState().gifts.filter((g: Gift): boolean => !g.available).length;
+    return this.giftService.guestState().overallCompleted;
   }
 
   public get totalRaised(): number {
-    return this.giftService.guestState().gifts.reduce((sum: number, gift: Gift): number => sum + gift.raised, 0);
+    return this.giftService.guestState().overallRaised;
   }
 
   public get totalGoal(): number {
-    return this.giftService.guestState().gifts.reduce((sum: number, gift: Gift): number => sum + gift.total, 0);
+    return this.giftService.guestState().overallGoal;
   }
 
   public get progressPercentage(): number {
@@ -177,6 +177,7 @@ export class GuestViewComponent implements OnInit, OnDestroy {
   public ngOnInit(): void {
     this.loadCouple();
     this.loadGifts();
+    this.giftService.loadGuestStats();
   }
 
   public ngOnDestroy(): void {
@@ -263,6 +264,7 @@ export class GuestViewComponent implements OnInit, OnDestroy {
 
   public onGiftPaymentCompleted(): void {
     this.loadGifts(this.currentPage);
+    this.giftService.loadGuestStats();
   }
 
   private parseSortBy(): [string, string] {

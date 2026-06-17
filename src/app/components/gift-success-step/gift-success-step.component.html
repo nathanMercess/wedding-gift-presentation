@@ -1,0 +1,25 @@
+<div class="success-step">
+  <div class="completed-notice success-notice" role="status" aria-live="polite">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="2">
+      <path d="M20 6L9 17l-5-5" />
+    </svg>
+    <p>Pagamento aprovado com sucesso. Obrigado por presentear {{ coupleName() }}.</p>
+  </div>
+
+  <div class="summary-box">
+    <div class="summary-row">
+      <span class="label">Presente</span>
+      <span class="value">{{ giftName() }}</span>
+    </div>
+    <div class="summary-row total-row">
+      <span class="value">Valor pago</span>
+      <span class="total-amount">{{ amount() | currency:'BRL' }}</span>
+    </div>
+  </div>
+
+  <div class="actions">
+    <app-button [variant]="ButtonVariant.Primary" [type]="ButtonType.Button"
+      (click)="close.emit()">Fechar</app-button>
+  </div>
+</div>

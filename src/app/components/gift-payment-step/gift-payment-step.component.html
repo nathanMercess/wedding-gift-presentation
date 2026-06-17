@@ -1,0 +1,31 @@
+<div class="payment-step">
+  <div class="payment-summary-bar">
+    <span class="payment-gift-name">{{ giftName() }}</span>
+    <span class="payment-total">{{ amount() | currency:'BRL' }}</span>
+  </div>
+
+  <app-payment-method-selector (methodSelected)="activeMethod = $event">
+  </app-payment-method-selector>
+
+  <ng-container *ngIf="activeMethod">
+    <app-card-brick
+      *ngIf="activeMethod === PaymentMethod.CreditCard || activeMethod === PaymentMethod.DebitCard"
+      [config]="{ cardType: activeMethod, orderId: orderId(), giftId: giftId(), contributorName: contributorName(), message: message(), amount: amount(), payerEmail: '' }"
+      (paymentApproved)="paymentApproved.emit()">
+    </app-card-brick>
+
+    <app-pix-display
+      *ngIf="activeMethod === PaymentMethod.Pix"
+      [orderId]="orderId()"
+      [giftId]="giftId()"
+      [contributorName]="contributorName()"
+      [message]="message()"
+      [amount]="amount()"
+      (paymentApproved)="paymentApproved.emit()">
+    </app-pix-display>
+  </ng-container>
+
+  <p *ngIf="!activeMethod" class="payment-hint">
+    Escolha como deseja pagar para continuar.
+  </p>
+</div>

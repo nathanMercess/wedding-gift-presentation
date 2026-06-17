@@ -44,6 +44,10 @@ export class GiftService {
     currentPage: 1,
     loading: false,
     error: '',
+    overallTotal: 0,
+    overallCompleted: 0,
+    overallRaised: 0,
+    overallGoal: 0,
   });
 
   public readonly contributionState: WritableSignal<GiftContributionState> = signal<GiftContributionState>({
@@ -197,6 +201,21 @@ export class GiftService {
           this.patchContributionState({ error: HttpErrorUtil.extract(err, 'Erro ao registrar contribuição. Tente novamente.') });
         },
       });
+  }
+
+  public loadGuestStats(): void {
+    this.http.get<PagedResult<Gift>>(this.endpointsUrls.giftsList, {
+      params: new HttpParams().set('pageSize', '500'),
+    }).subscribe({
+      next: (result: PagedResult<Gift>): void => {
+        this.patchGuestState({
+          overallTotal: result.totalCount,
+          overallCompleted: result.items.filter((g: Gift): boolean => !g.available).length,
+          overallRaised: result.items.reduce((s: number, g: Gift): number => s + g.raised, 0),
+          overallGoal: result.items.reduce((s: number, g: Gift): number => s + g.total, 0),
+        });
+      },
+    });
   }
 
   public resetContributionState(): void {

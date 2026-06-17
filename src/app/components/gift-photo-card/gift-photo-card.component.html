@@ -1,0 +1,27 @@
+<div class="gift-photo-card">
+  <img [src]="gift().image" [alt]="gift().name" class="gift-photo-img" decoding="async" />
+  <div class="gift-photo-overlay"></div>
+  <div class="gift-photo-content">
+    <p class="gift-photo-tag">{{ gift().category }}</p>
+    <h3 class="gift-photo-title">{{ gift().name }}</h3>
+  </div>
+  <div class="gift-photo-stats">
+    <p class="description" *ngIf="gift().description">{{ gift().description }}</p>
+    <div class="mini-stats">
+      <div class="mini-stat">
+        <span class="mini-stat-label">Valor total</span>
+        <span class="mini-stat-value">R$ {{ gift().total.toFixed(2) }}</span>
+      </div>
+      <div class="mini-stat">
+        <span class="mini-stat-label">Faltam</span>
+        <span class="mini-stat-value primary">R$ {{ remaining().toFixed(2) }}</span>
+      </div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-bar">
+        <div class="progress-fill" [style.width.%]="progress()"></div>
+      </div>
+      <p class="progress-text">{{ progress().toFixed(0) }}% arrecadado</p>
+    </div>
+  </div>
+</div>

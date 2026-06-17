@@ -1,0 +1,41 @@
+<div class="toast-host" aria-live="polite" aria-atomic="false">
+  <div
+    *ngFor="let t of toastService.items(); trackBy: trackById"
+    class="toast"
+    [class]="'toast toast--' + t.type"
+    role="alert">
+
+    <!-- Ícone por tipo -->
+    <div class="toast-icon">
+      <!-- success -->
+      <svg *ngIf="t.type === 'success'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/>
+      </svg>
+      <!-- error -->
+      <svg *ngIf="t.type === 'error'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <!-- warn -->
+      <svg *ngIf="t.type === 'warn'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      <!-- info -->
+      <svg *ngIf="t.type === 'info'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+      </svg>
+    </div>
+
+    <!-- Texto -->
+    <div class="toast-body">
+      <p class="toast-title">{{ t.title }}</p>
+      <p class="toast-msg">{{ t.message }}</p>
+    </div>
+
+    <!-- Fechar -->
+    <button class="toast-close" (click)="toastService.dismiss(t.id)" aria-label="Fechar">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+</div>

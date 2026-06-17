@@ -1,26 +1,30 @@
-import { Component, HostListener, InputSignal, OnDestroy, OnInit, OutputEmitterRef, input, output } from '@angular/core';
+import { Component, HostListener, InputSignal, OnDestroy, OnInit, OutputEmitterRef, ViewChild, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { Gift } from '../../models/gift.model';
 import { ButtonComponent } from '../button/button.component';
-import { GiftService } from '../../services/gift.service';
-import { ToastService } from '../../services/toast.service';
-import { PaymentMethodSelectorComponent } from '../../checkout/components/payment-method-selector/payment-method-selector.component';
-import { CardBrickComponent } from '../../checkout/components/card-brick/card-brick.component';
-import { PixDisplayComponent } from '../../checkout/components/pix-display/pix-display.component';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
-import { PaymentMethod } from '../../checkout/enums/payment-method.enum';
+import { GiftPhotoCardComponent } from '../gift-photo-card/gift-photo-card.component';
+import { GiftContributionFormComponent, ContributionSubmitData } from '../gift-contribution-form/gift-contribution-form.component';
+import { GiftPaymentStepComponent } from '../gift-payment-step/gift-payment-step.component';
+import { GiftSuccessStepComponent } from '../gift-success-step/gift-success-step.component';
 import { ModalStep } from '../../enums/modal-step.enum';
 import { ButtonVariant } from '../../enums/button-variant.enum';
 import { ButtonType } from '../../enums/button-type.enum';
-import { ContributionType } from '../../enums/contribution-type.enum';
 
 @Component({
   standalone: true,
   selector: 'app-gift-details-modal',
   templateUrl: './gift-details-modal.component.html',
   styleUrl: './gift-details-modal.component.scss',
-  imports: [CommonModule, FormsModule, ButtonComponent, PaymentMethodSelectorComponent, CardBrickComponent, PixDisplayComponent, ConfirmDialogComponent]
+  imports: [
+    CommonModule,
+    ButtonComponent,
+    ConfirmDialogComponent,
+    GiftPhotoCardComponent,
+    GiftContributionFormComponent,
+    GiftPaymentStepComponent,
+    GiftSuccessStepComponent,
+  ],
 })
 export class GiftDetailsModalComponent implements OnInit, OnDestroy {
   public readonly gift: InputSignal<Gift> = input.required<Gift>();
@@ -29,36 +33,17 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy {
   public readonly paymentCompleted: OutputEmitterRef<void> = output<void>();
 
   public readonly ModalStep: typeof ModalStep = ModalStep;
-  public readonly PaymentMethod: typeof PaymentMethod = PaymentMethod;
   public readonly ButtonVariant: typeof ButtonVariant = ButtonVariant;
   public readonly ButtonType: typeof ButtonType = ButtonType;
-  public readonly ContributionType: typeof ContributionType = ContributionType;
 
   public step: ModalStep = ModalStep.Contribution;
-  public activeMethod: PaymentMethod | null = null;
   public orderId: string = '';
-  public contributionType: ContributionType = ContributionType.Full;
-  public customAmount: string = '';
-  public guestName: string = '';
-  public guestMessage: string = '';
-  public quickAmounts: number[] = [50, 100, 200, 300];
+  public contributorName: string = '';
+  public contributorMessage: string = '';
+  public contributionAmount: number = 0;
   public showExitConfirm: boolean = false;
 
-  public constructor(public readonly giftService: GiftService, public readonly toastService: ToastService) {
-    this.giftService.resetContributionState();
-  }
-
-  public ngOnInit(): void {
-    document.body.classList.add('modal-open');
-  }
-
-  public ngOnDestroy(): void {
-    document.body.classList.remove('modal-open');
-  }
-
-  public get hasUnsavedInput(): boolean {
-    return this.step === ModalStep.Contribution && (this.guestName.trim().length > 0 || this.customAmount.trim().length > 0);
-  }
+  @ViewChild(GiftContributionFormComponent) private formRef?: GiftContributionFormComponent;
 
   public get remaining(): number {
     return this.gift().total - this.gift().raised;
@@ -77,14 +62,19 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy {
   }
 
   public get availableQuickAmounts(): number[] {
-    return this.quickAmounts.filter((amount: number): boolean => amount <= this.remaining);
+    return [50, 100, 200, 300].filter((a: number): boolean => a <= this.remaining);
   }
 
-  public getContributionAmount(): number {
-    if (this.contributionType === ContributionType.Full)
-      return this.remaining;
+  public get hasUnsavedInput(): boolean {
+    return this.step === ModalStep.Contribution && !!(this.formRef?.isDirty);
+  }
 
-    return parseFloat(this.customAmount) || 0;
+  public ngOnInit(): void {
+    document.body.classList.add('modal-open');
+  }
+
+  public ngOnDestroy(): void {
+    document.body.classList.remove('modal-open');
   }
 
   @HostListener('document:keydown.escape')
@@ -98,7 +88,7 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy {
   }
 
   public onBackdropClick(event: MouseEvent): void {
-    if ((event.target as HTMLElement).classList.contains('modal-backdrop')) 
+    if ((event.target as HTMLElement).classList.contains('modal-backdrop'))
       this.requestClose();
   }
 
@@ -120,40 +110,19 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy {
     this.showExitConfirm = false;
   }
 
-  public onSubmit(): void {
-    const amount = this.getContributionAmount();
-
-    if (!this.guestName.trim()) {
-      this.toastService.error('Por favor, informe seu nome completo.', 'Campo obrigatório');
-      return;
-    }
-
-    if (this.contributionType === ContributionType.Partial && amount < this.minAmount) {
-      this.toastService.error(`O valor mínimo de contribuição é R$ ${this.minAmount.toFixed(2).replace('.', ',')}.`, 'Valor inválido');
-      return;
-    }
-
-    if (amount <= 0) {
-      this.toastService.error('Informe um valor de contribuição válido.', 'Valor inválido');
-      return;
-    }
-
-    if (amount > this.remaining) {
-      this.toastService.error(`O valor não pode ser maior que R$ ${this.remaining.toFixed(2).replace('.', ',')}.`, 'Valor inválido');
-      return;
-    }
-
+  public onContributionSubmit(data: ContributionSubmitData): void {
+    this.contributorName = data.guestName;
+    this.contributorMessage = data.guestMessage;
+    this.contributionAmount = data.amount;
     this.orderId = crypto.randomUUID();
     this.step = ModalStep.Payment;
   }
 
   public backToContribution(): void {
     this.step = ModalStep.Contribution;
-    this.activeMethod = null;
   }
 
   public onPaymentApproved(): void {
-    this.activeMethod = null;
     this.step = ModalStep.Success;
     this.paymentCompleted.emit();
   }
