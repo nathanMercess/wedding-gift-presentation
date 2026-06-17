@@ -47,7 +47,7 @@
   img { width: 100%; height: 100%; object-fit: cover; }
 }
 
-.cf-photo-placeholder { color: color-mix(in srgb, var(--primary) 55%, #b0a090); }
+.cf-photo-placeholder { color: color-mix(in srgb, var(--primary) 55%, var(--muted-foreground)); }
 
 .cf-photo-btn {
   display: inline-flex;

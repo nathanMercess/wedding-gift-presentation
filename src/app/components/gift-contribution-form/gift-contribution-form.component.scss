@@ -85,7 +85,7 @@ h3 {
 
   &:hover:not(.selected) {
     border-color: color-mix(in srgb, var(--primary) 40%, transparent);
-    background: #f5f5f5;
+    background: var(--secondary);
   }
 }
 

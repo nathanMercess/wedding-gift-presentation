@@ -21,8 +21,8 @@
   margin-bottom: 2rem;
 
   .brand-icon { color: var(--primary); margin-bottom: .5rem; }
-  h1 { font-size: 1.5rem; font-weight: 700; color: #2C1810; margin: 0 0 .25rem; }
-  p { color: #8B7B6B; font-size: .9rem; margin: 0; }
+  h1 { font-family: var(--font-sans); font-size: 1.5rem; font-weight: 700; color: var(--foreground); margin: 0 0 .25rem; }
+  p { font-family: var(--font-sans); color: var(--muted-foreground); font-size: .9rem; margin: 0; }
 }
 
 .login-form {
@@ -36,13 +36,14 @@
   flex-direction: column;
   gap: .4rem;
 
-  label { font-size: .875rem; font-weight: 500; color: #4A3728; }
+  label { font-family: var(--font-sans); font-size: .875rem; font-weight: 500; color: var(--foreground); }
 }
 
 .text-input {
   padding: .75rem 1rem;
-  border: 1.5px solid #E8DDD5;
+  border: 1.5px solid var(--border);
   border-radius: .5rem;
+  font-family: var(--font-sans);
   font-size: .95rem;
   outline: none;
   transition: border .2s;
