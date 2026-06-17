@@ -181,7 +181,7 @@
   align-items: center;
   gap: 1rem;
   margin-top: 0.5rem;
-  background: #fff;
+  background: var(--card);
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 99px;
   padding: 0.55rem 1.5rem;
@@ -315,7 +315,7 @@
   width: 2.75rem;
   height: 2.75rem;
   border-radius: 50%;
-  background: #fff;
+  background: var(--card);
   border: 1px solid rgba(0, 0, 0, 0.08);
   color: #333;
   display: none;
@@ -601,7 +601,7 @@
   left: 0;
   right: 0;
   z-index: 50;
-  background: #fff;
+  background: var(--background);
   border-radius: 20px 20px 0 0;
   padding: 0 1.25rem 2rem;
   transform: translateY(100%);
@@ -801,7 +801,7 @@
   height: 2.5rem;
   border: 1.5px solid rgba(0, 0, 0, 0.1);
   border-radius: 50%;
-  background: #fff;
+  background: var(--card);
   cursor: pointer;
   transition: all 0.18s;
   color: #555;

@@ -1,8 +1,8 @@
 .checkout-container {
-  max-width: 480px;
-  margin: 40px auto;
-  padding: 32px;
-  background: #fff;
+  max-width: 30rem;
+  margin: 2.5rem auto;
+  padding: 2rem;
+  background: var(--card);
   border-radius: 12px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
 }
@@ -28,14 +28,14 @@
   .checkout-container {
     max-width: 100%;
     margin: 0;
-    padding: 20px 16px;
+    padding: 1.25rem 1rem;
     border-radius: 0;
     box-shadow: none;
     min-height: 100vh;
   }
 
   .checkout-title {
-    font-size: 20px;
+    font-size: 1.25rem;
   }
 }
 

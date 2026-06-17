@@ -1,7 +1,7 @@
 .gift-card {
   display: flex;
   flex-direction: column;
-  background: #fff;
+  background: var(--card);
   border: 1px solid #EFE6DD;
   border-radius: 14px;
   overflow: hidden;
@@ -136,7 +136,7 @@
   padding: 0.5rem;
   border: 1px solid #E8DDD5;
   border-radius: 8px;
-  background: #fff;
+  background: var(--card);
   color: #6B5B4B;
   font-size: 0.82rem;
   font-weight: 500;
