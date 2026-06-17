@@ -22,8 +22,8 @@
         <div class="progress-fill" [style.width.%]="getProgressPercent()"></div>
       </div>
       <div class="gift-card-values">
-        <span class="raised">R$ {{ gift().raised.toFixed(2) }}</span>
-        <span class="total">de R$ {{ gift().total.toFixed(2) }}</span>
+        <span class="raised">{{ gift().raised | currency:'BRL':'symbol':'1.2-2' }}</span>
+        <span class="total">de {{ gift().total | currency:'BRL':'symbol':'1.2-2' }}</span>
       </div>
     </div>
   </div>

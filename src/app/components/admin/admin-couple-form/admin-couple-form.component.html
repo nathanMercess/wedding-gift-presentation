@@ -120,7 +120,7 @@
   <div *ngIf="coupleService.state().error" class="error-msg">{{ coupleService.state().error }}</div>
 
   <div class="cf-actions">
-    <button class="cf-save" (click)="save()" [disabled]="coupleService.state().saving">
+    <button class="cf-save" (click)="save()" [disabled]="coupleService.state().saving || carouselUploading">
       {{ coupleService.state().saving ? 'Salvando...' : 'Salvar alterações' }}
     </button>
   </div>

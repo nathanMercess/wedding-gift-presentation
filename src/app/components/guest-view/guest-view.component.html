@@ -41,7 +41,9 @@
       <!-- Multi-card horizontal carousel -->
       <div class="carousel-section"
         (mouseenter)="stopCarousel()"
-        (mouseleave)="startCarousel()">
+        (mouseleave)="startCarousel()"
+        (touchstart)="onTouchStart($event)"
+        (touchend)="onTouchEnd($event)">
         <div #carouselTrack class="carousel-track" (scroll)="onCarouselScroll($event)">
 
           <!-- Multiple photos (tripled for infinite loop) -->
@@ -200,7 +202,7 @@
           <p class="results-count">{{ giftService.guestState().totalCount }} presente{{ giftService.guestState().totalCount !== 1 ? 's' : '' }}</p>
           <div class="gifts-grid">
             <div *ngFor="let gift of giftService.guestState().gifts; trackBy: trackByGiftId" class="gift-grid-item" (click)="selectedGift = gift">
-              <app-gift-card [gift]="gift"></app-gift-card>
+              <app-gift-card [gift]="gift" (presentClick)="selectedGift = gift"></app-gift-card>
             </div>
           </div>
 

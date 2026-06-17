@@ -1,4 +1,17 @@
-@if (!giftService.adminState().giftsLoading && coupleService.state().couple.names !== '') {
+@if (coupleService.state().loading) {
+<div class="dash-loading">
+  <div class="dash-loading-spinner"></div>
+  <p>Carregando...</p>
+</div>
+}
+
+@if (!coupleService.state().loading && coupleService.state().error) {
+<div class="dash-load-error">
+  <p>{{ coupleService.state().error }}</p>
+</div>
+}
+
+@if (!coupleService.state().loading && !coupleService.state().error) {
 <div class="dash-root">
   <header class="dash-header">
     <div class="dash-brand">

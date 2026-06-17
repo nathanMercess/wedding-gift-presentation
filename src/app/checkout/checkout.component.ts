@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { PaymentMethodSelectorComponent } from './components/payment-method-selector/payment-method-selector.component';
 import { CardBrickComponent } from './components/card-brick/card-brick.component';
 import { PixDisplayComponent } from './components/pix-display/pix-display.component';
@@ -22,12 +22,12 @@ export class CheckoutComponent implements OnInit {
   public paymentApproved: boolean = false;
   public cardConfig: CardBrickConfig | null = null;
 
-  private giftId: string = '';
-  private contributorName: string = '';
-  private message: string = '';
+  public giftId: string = '';
+  public contributorName: string = '';
+  public message: string = '';
   private payerEmail: string = '';
 
-  public constructor(public readonly route: ActivatedRoute) {}
+  public constructor(public readonly route: ActivatedRoute, private readonly router: Router) {}
 
   public ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
@@ -37,6 +37,10 @@ export class CheckoutComponent implements OnInit {
       this.contributorName = (params['contributorName'] as string) ?? '';
       this.message = (params['message'] as string) ?? '';
       this.payerEmail = (params['payerEmail'] as string) ?? '';
+
+      if (!this.orderId || this.totalAmount <= 0) {
+        void this.router.navigate(['/']);
+      }
     });
   }
 

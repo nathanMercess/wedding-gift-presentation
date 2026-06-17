@@ -21,7 +21,7 @@
             <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
           </svg>
           <div class="contrib-label">Valor restante</div>
-          <div class="contrib-value">R$ {{ remaining().toFixed(2) }}</div>
+          <div class="contrib-value">{{ remaining() | currency:'BRL':'symbol':'1.2-2' }}</div>
         </button>
         <button type="button" [class.selected]="contributionType === ContributionType.Partial" class="contrib-btn"
           (click)="contributionType = ContributionType.Partial">
@@ -50,7 +50,7 @@
         <input type="number" step="0.01" [min]="minAmount()" [max]="remaining()" [(ngModel)]="customAmount"
           name="customAmount" placeholder="0,00" required class="text-input padded" />
       </div>
-      <p class="hint">Valor mínimo: R$ {{ minAmount().toFixed(2) }} • Valor máximo: R$ {{ remaining().toFixed(2) }}</p>
+      <p class="hint">Valor mínimo: {{ minAmount() | currency:'BRL':'symbol':'1.2-2' }} • Valor máximo: {{ remaining() | currency:'BRL':'symbol':'1.2-2' }}</p>
     </div>
 
     <!-- Dados do convidado -->
@@ -62,7 +62,7 @@
     <div class="form-group">
       <label>Mensagem para o casal (opcional)</label>
       <textarea [(ngModel)]="guestMessage" name="guestMessage" placeholder="Deixe uma mensagem especial..."
-        rows="3" class="text-input" style="resize:none"></textarea>
+        rows="3" class="text-input no-resize"></textarea>
     </div>
 
   </div>
@@ -71,13 +71,13 @@
   <div class="form-footer">
     <div class="footer-total">
       <span class="footer-total-label">Total</span>
-      <span class="footer-total-value">R$ {{ getContributionAmount().toFixed(2) }}</span>
+      <span class="footer-total-value">{{ getContributionAmount() | currency:'BRL':'symbol':'1.2-2' }}</span>
     </div>
     <div class="actions">
       <app-button [variant]="ButtonVariant.Outline" [type]="ButtonType.Button"
         (click)="cancelled.emit()">Cancelar</app-button>
       <app-button [variant]="ButtonVariant.Primary" [type]="ButtonType.Submit"
-        [disabled]="contributionType === 'partial' && !customAmount">
+        [disabled]="contributionType === ContributionType.Partial && !customAmount">
         Confirmar
       </app-button>
     </div>

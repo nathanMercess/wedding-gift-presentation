@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild, effect, signal, WritableSignal } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, effect, signal, WritableSignal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
@@ -30,7 +30,6 @@ export class GuestViewComponent implements OnInit, OnDestroy {
   public hasTriedApiCouplePhoto: boolean = false;
   public coupleSignature: string = '';
   public sortBy: string = 'name';
-  public sortDir: string = 'asc';
   public onlyAvailable: boolean = false;
   public selectedGift: Gift | null = null;
   public filterSheetOpen: boolean = false;
@@ -304,6 +303,13 @@ export class GuestViewComponent implements OnInit, OnDestroy {
     if (Math.abs(delta) < 50) return;
     if (delta < 0) this.nextSlide();
     else this.prevSlide();
+  }
+
+  @HostListener('window:resize')
+  public onResize(): void {
+    if (window.innerWidth >= 768 && this.filterSheetOpen) {
+      this.closeFilterSheet();
+    }
   }
 
   public openFilterSheet(): void {

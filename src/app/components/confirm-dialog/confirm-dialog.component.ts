@@ -1,4 +1,4 @@
-import { Component, InputSignal, OutputEmitterRef, input, output } from '@angular/core';
+import { Component, HostListener, InputSignal, OutputEmitterRef, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '../button/button.component';
 import { ButtonVariant } from '../../enums/button-variant.enum';
@@ -21,6 +21,11 @@ export class ConfirmDialogComponent {
 
   public readonly confirmed: OutputEmitterRef<void> = output<void>();
   public readonly cancelled: OutputEmitterRef<void> = output<void>();
+
+  @HostListener('document:keydown.escape')
+  public onEscape(): void {
+    this.cancelled.emit();
+  }
 
   public onBackdropClick(event: MouseEvent): void {
     if ((event.target as HTMLElement).classList.contains('confirm-backdrop')) {

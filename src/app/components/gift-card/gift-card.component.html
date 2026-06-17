@@ -2,12 +2,12 @@
   <div class="card-image">
     <img [src]="gift().image" [alt]="gift().name" (error)="onImgError($event)" />
     <div class="card-badge" *ngIf="!gift().available">Completo</div>
-    <div class="card-hover-btn" (click)="onPresent()">Presentear</div>
+    <button type="button" class="card-hover-btn" (click)="onPresent()">Presentear</button>
   </div>
   <div class="card-body">
     <p class="card-category" *ngIf="gift().category">{{ gift().category }}</p>
     <h3 class="card-name">{{ gift().name }}</h3>
-    <div class="card-price">R$ {{ gift().total.toFixed(2) }}</div>
+    <div class="card-price">{{ gift().total | currency:'BRL':'symbol':'1.2-2' }}</div>
     <div class="card-progress">
       <div class="progress-track">
         <div class="progress-fill" [style.width.%]="progressPercent"></div>

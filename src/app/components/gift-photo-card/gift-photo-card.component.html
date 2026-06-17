@@ -10,11 +10,11 @@
     <div class="mini-stats">
       <div class="mini-stat">
         <span class="mini-stat-label">Valor total</span>
-        <span class="mini-stat-value">R$ {{ gift().total.toFixed(2) }}</span>
+        <span class="mini-stat-value">{{ gift().total | currency:'BRL':'symbol':'1.2-2' }}</span>
       </div>
       <div class="mini-stat">
         <span class="mini-stat-label">Faltam</span>
-        <span class="mini-stat-value primary">R$ {{ remaining().toFixed(2) }}</span>
+        <span class="mini-stat-value primary">{{ remaining() | currency:'BRL':'symbol':'1.2-2' }}</span>
       </div>
     </div>
     <div class="progress-wrap">

@@ -62,7 +62,8 @@
 
           <!-- Passo 1: Formulário de contribuição -->
           <app-gift-contribution-form
-            *ngIf="!isCompleted && step === ModalStep.Contribution"
+            *ngIf="!isCompleted"
+            [hidden]="step !== ModalStep.Contribution"
             [gift]="gift()"
             [coupleName]="coupleName()"
             [minAmount]="minAmount"

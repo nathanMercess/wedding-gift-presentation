@@ -228,6 +228,9 @@
 
 /* mobile: foto como banner fixo 200px, form com scroll interno */
 @media (max-width: 767px) {
-  .modal-container { max-height: 100dvh; border-radius: 24px 24px 0 0; }
+  .modal-container {
+    max-height: calc(100dvh - env(safe-area-inset-bottom, 0px));
+    border-radius: 24px 24px 0 0;
+  }
   .gift-info { flex-shrink: 0; height: 200px; overflow: hidden; }
 }

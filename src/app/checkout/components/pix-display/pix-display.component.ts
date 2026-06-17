@@ -136,6 +136,7 @@ export class PixDisplayComponent implements OnDestroy {
       this.mpOrderId.set(response.mpOrderId);
       this.qrCode.set(response.qrCode ?? '');
       this.qrCodeBase64.set(response.qrCodeBase64);
+      this.error.set('');
       this.pixStep.set(PixStep.Qr);
       this.startPolling();
       this.startCountdown();

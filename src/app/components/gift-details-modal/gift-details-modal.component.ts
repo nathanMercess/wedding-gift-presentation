@@ -50,7 +50,7 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy {
   }
 
   public get progress(): number {
-    return (this.gift().raised / this.gift().total) * 100;
+    return Math.min((this.gift().raised / this.gift().total) * 100, 100);
   }
 
   public get isCompleted(): boolean {

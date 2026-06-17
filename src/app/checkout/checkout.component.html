@@ -17,6 +17,9 @@
     <app-pix-display
       *ngIf="activeMethod === PaymentMethod.Pix"
       [orderId]="orderId"
+      [giftId]="giftId"
+      [contributorName]="contributorName"
+      [message]="message"
       [amount]="totalAmount"
       (paymentApproved)="onPaymentApproved()">
     </app-pix-display>
