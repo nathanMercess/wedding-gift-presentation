@@ -70,7 +70,7 @@
       <!-- Cards de presentes (a edição acontece inline, no lugar do card) -->
       <div *ngIf="!giftService.adminState().giftsLoading && giftService.adminState().gifts.length > 0"
         class="gifts-cards-grid">
-        <ng-container *ngFor="let gift of giftService.adminState().gifts">
+        <ng-container *ngFor="let gift of giftService.adminState().gifts; trackBy: trackByGiftId">
           <app-admin-gift-form *ngIf="editingGift?.id === gift.id" class="inline-edit" [editingGift]="gift"
             (cancel)="closeGiftForm()"></app-admin-gift-form>
           <app-admin-gift-card *ngIf="editingGift?.id !== gift.id" [gift]="gift"

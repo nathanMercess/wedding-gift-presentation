@@ -130,9 +130,13 @@ export class GiftService {
       this.http.post<Gift>(this.endpointsUrls.adminGiftsList, gift)
         .pipe(finalize((): void => this.patchAdminState({ giftSaving: false })))
         .subscribe({
-          next: (): void => {
-            this.patchAdminState({ giftSaved: true });
-            this.loadAdminGifts();
+          next: (created: Gift): void => {
+            this.adminState.update((s: AdminGiftState): AdminGiftState => ({
+              ...s,
+              gifts: [created, ...s.gifts],
+              totalCount: s.totalCount + 1,
+              giftSaved: true,
+            }));
           },
           error: (err: HttpErrorResponse): void => {
             this.patchAdminState({ giftError: HttpErrorUtil.extract(err, 'Erro ao salvar presente.') });
@@ -141,26 +145,39 @@ export class GiftService {
       return;
     }
 
+    const snapshot: Gift[] = this.adminState().gifts;
+    const optimistic: Gift[] = snapshot.map((g: Gift): Gift => g.id === giftId ? { ...g, ...gift, id: giftId } : g);
+    this.patchAdminState({ gifts: optimistic });
+
     this.http.put<Gift>(this.endpointsUrls.adminGiftsById(giftId), gift)
       .pipe(finalize((): void => this.patchAdminState({ giftSaving: false })))
       .subscribe({
-        next: (): void => {
-          this.patchAdminState({ giftSaved: true });
-          this.loadAdminGifts();
+        next: (saved: Gift): void => {
+          this.adminState.update((s: AdminGiftState): AdminGiftState => ({
+            ...s,
+            gifts: s.gifts.map((g: Gift): Gift => g.id === giftId ? saved : g),
+            giftSaved: true,
+          }));
         },
         error: (err: HttpErrorResponse): void => {
-          this.patchAdminState({ giftError: HttpErrorUtil.extract(err, 'Erro ao salvar presente.') });
+          this.patchAdminState({ gifts: snapshot, giftError: HttpErrorUtil.extract(err, 'Erro ao salvar presente.') });
         },
       });
   }
 
   public deleteAdminGift(id: string): void {
-    this.patchAdminState({ giftsError: '' });
+    const snapshot: Gift[] = this.adminState().gifts;
+    const snapshotCount: number = this.adminState().totalCount;
+
+    this.patchAdminState({
+      giftsError: '',
+      gifts: snapshot.filter((g: Gift): boolean => g.id !== id),
+      totalCount: Math.max(0, snapshotCount - 1),
+    });
 
     this.http.delete<void>(this.endpointsUrls.adminGiftsById(id)).subscribe({
-      next: (): void => { this.loadAdminGifts(); },
       error: (err: HttpErrorResponse): void => {
-        this.patchAdminState({ giftsError: HttpErrorUtil.extract(err, 'Erro ao remover presente.') });
+        this.patchAdminState({ gifts: snapshot, totalCount: snapshotCount, giftsError: HttpErrorUtil.extract(err, 'Erro ao remover presente.') });
       },
     });
   }

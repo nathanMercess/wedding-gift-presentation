@@ -206,6 +206,23 @@ textarea.text-input {
   margin: 0;
 }
 
+.field-error {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--danger);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.text-input.ng-invalid.ng-touched {
+  border-color: var(--danger);
+
+  &:focus {
+    box-shadow: 0 0 0 3.5px color-mix(in srgb, var(--danger) 14%, transparent);
+  }
+}
+
 .form-footer {
   flex-shrink: 0;
   padding: 1.1rem 1.75rem max(1.35rem, env(safe-area-inset-bottom));

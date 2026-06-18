@@ -1,6 +1,6 @@
 <div class="gv-root">
   <!-- Loading skeleton -->
-  <div *ngIf="giftService.guestState().loading || coupleService.state().loading" class="sk-root" aria-live="polite" aria-busy="true">
+  <div *ngIf="isInitialLoading" class="sk-root" aria-live="polite" aria-busy="true">
     <div class="sk-hero-block"></div>
     <div class="sk-body">
       <div class="sk-quote"></div>
@@ -20,7 +20,7 @@
     </div>
   </div>
 
-  <ng-container *ngIf="!giftService.guestState().loading && !coupleService.state().loading">
+  <ng-container *ngIf="!isInitialLoading">
 
     <!-- Hero block: header + mensagem + carousel + stats -->
     <section class="hero-block">

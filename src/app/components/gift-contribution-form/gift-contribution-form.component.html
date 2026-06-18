@@ -1,4 +1,4 @@
-<form (ngSubmit)="onSubmit()" class="gift-form">
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="gift-form">
   <div class="form-scroll">
 
     <div class="form-heading">
@@ -11,7 +11,7 @@
       <label>Tipo de contribuição</label>
       <div class="contrib-grid">
         <button type="button" [class.selected]="contributionType === ContributionType.Full" class="contrib-btn"
-          (click)="contributionType = ContributionType.Full">
+          (click)="selectType(ContributionType.Full)">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" class="contrib-icon">
             <polyline points="20 12 20 22 4 22 4 12" />
@@ -24,7 +24,7 @@
           <div class="contrib-value">{{ remaining() | currency:'BRL':'symbol':'1.2-2' }}</div>
         </button>
         <button type="button" [class.selected]="contributionType === ContributionType.Partial" class="contrib-btn"
-          (click)="contributionType = ContributionType.Partial">
+          (click)="selectType(ContributionType.Partial)">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" class="contrib-icon">
             <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
@@ -41,27 +41,31 @@
       <label>Valor da contribuição</label>
       <div class="quick-amounts" *ngIf="availableQuickAmounts().length">
         <button *ngFor="let amount of availableQuickAmounts()" type="button" class="quick-btn"
-          (click)="customAmount = amount.toString()">
+          (click)="selectQuickAmount(amount)">
           R$ {{ amount }}
         </button>
       </div>
       <div class="input-wrap">
         <span class="input-prefix">R$</span>
-        <input type="number" step="0.01" [min]="minAmount()" [max]="remaining()" [(ngModel)]="customAmount"
-          name="customAmount" placeholder="0,00" required class="text-input padded" />
+        <input type="number" step="0.01" [min]="minAmount()" [max]="remaining()" formControlName="customAmount"
+          placeholder="0,00" class="text-input padded" />
       </div>
-      <p class="hint">Valor mínimo: {{ minAmount() | currency:'BRL':'symbol':'1.2-2' }} • Valor máximo: {{ remaining() | currency:'BRL':'symbol':'1.2-2' }}</p>
+      <p class="field-error" *ngIf="amountControl.touched && amountControl.hasError('required')">Informe um valor para contribuir.</p>
+      <p class="field-error" *ngIf="amountControl.touched && amountControl.hasError('invalidAmount')">Valor inválido.</p>
+      <p class="field-error" *ngIf="amountControl.touched && amountControl.hasError('min')">Valor mínimo: {{ minAmount() | currency:'BRL':'symbol':'1.2-2' }}.</p>
+      <p class="field-error" *ngIf="amountControl.touched && amountControl.hasError('max')">Valor máximo: {{ remaining() | currency:'BRL':'symbol':'1.2-2' }}.</p>
+      <p class="hint" *ngIf="amountControl.valid || amountControl.untouched">Valor mínimo: {{ minAmount() | currency:'BRL':'symbol':'1.2-2' }} • Valor máximo: {{ remaining() | currency:'BRL':'symbol':'1.2-2' }}</p>
     </div>
 
     <!-- Dados do convidado -->
     <div class="form-group">
       <label>Seu nome completo</label>
-      <input type="text" [(ngModel)]="guestName" name="guestName" placeholder="Digite seu nome" required
-        class="text-input" />
+      <input type="text" formControlName="guestName" placeholder="Digite seu nome" class="text-input" />
+      <p class="field-error" *ngIf="nameControl.touched && nameControl.hasError('required')">Por favor, informe seu nome.</p>
     </div>
     <div class="form-group">
       <label>Mensagem para o casal (opcional)</label>
-      <textarea [(ngModel)]="guestMessage" name="guestMessage" placeholder="Deixe uma mensagem especial..."
+      <textarea formControlName="guestMessage" placeholder="Deixe uma mensagem especial..."
         rows="3" class="text-input no-resize"></textarea>
     </div>
 
@@ -77,7 +81,7 @@
       <app-button [variant]="ButtonVariant.Outline" [type]="ButtonType.Button"
         (click)="cancelled.emit()">Cancelar</app-button>
       <app-button [variant]="ButtonVariant.Primary" [type]="ButtonType.Submit"
-        [disabled]="contributionType === ContributionType.Partial && !customAmount">
+        [disabled]="form.invalid">
         Confirmar
       </app-button>
     </div>

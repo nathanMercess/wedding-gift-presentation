@@ -143,6 +143,10 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     return option.id;
   }
 
+  public trackByGiftId(_: number, gift: Gift): string {
+    return gift.id;
+  }
+
   public logout(): void {
     this.auth.logout();
   }

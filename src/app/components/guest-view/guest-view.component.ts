@@ -189,6 +189,10 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
     return this.totalGoal > 0 ? (this.totalRaised / this.totalGoal) * 100 : 0;
   }
 
+  public get isInitialLoading(): boolean {
+    return (this.giftService.guestState().loading && this.giftService.guestState().gifts.length === 0) || this.coupleService.state().loading;
+  }
+
   public get currentPage(): number {
     return this.giftService.guestState().currentPage;
   }

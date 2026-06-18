@@ -90,6 +90,9 @@ export class PixDisplayComponent implements OnDestroy {
   }
 
   public generatePix(): void {
+    if (this.awaitingPixResponse || this.pixStep() === PixStep.Loading)
+      return;
+
     if (this.payerForm.invalid) {
       this.payerForm.markAllAsTouched();
       return;

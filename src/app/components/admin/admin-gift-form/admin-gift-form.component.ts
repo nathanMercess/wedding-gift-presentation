@@ -1,6 +1,7 @@
 import { Component, InputSignal, OutputEmitterRef, effect, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Gift } from '../../../models/gift.model';
 import { GiftService } from '../../../services/gift.service';
@@ -23,45 +24,56 @@ const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
   selector: 'app-admin-gift-form',
   templateUrl: './admin-gift-form.component.html',
   styleUrl: './admin-gift-form.component.scss',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
 })
 export class AdminGiftFormComponent {
   public readonly editingGift: InputSignal<Gift | null> = input<Gift | null>(null);
   public readonly cancel: OutputEmitterRef<void> = output<void>();
 
   public readonly categories: typeof GIFT_CATEGORIES = GIFT_CATEGORIES;
-  public giftForm: Partial<Gift> = {};
+  public readonly form: FormGroup;
   public enrichUrl: string = '';
   public enriching: boolean = false;
   public enrichError: string = '';
+  private raised: number = 0;
 
   public constructor(
     public readonly giftService: GiftService,
     public readonly http: HttpClient,
     public readonly endpoints: EndpointsUrls,
+    public readonly fb: FormBuilder,
   ) {
+    this.form = this.fb.group({
+      name: ['', [Validators.required, Validators.maxLength(120)]],
+      category: [GIFT_CATEGORIES[0].id, [Validators.required]],
+      total: [null, [Validators.required, Validators.min(0.01)]],
+      image: [''],
+      description: ['', [Validators.maxLength(1000)]],
+      allowPartialContribution: [true],
+    });
+
     effect((): void => {
       const gift: Gift | null = this.editingGift();
 
-      if (gift) {
-        this.giftForm = {
-          ...gift,
-          allowPartialContribution: gift.allowPartialContribution ?? true,
-        };
+      this.raised = gift?.raised ?? 0;
+      this.form.reset({
+        name: gift?.name ?? '',
+        category: gift?.category ?? GIFT_CATEGORIES[0].id,
+        total: gift?.total ?? null,
+        image: gift?.image ?? '',
+        description: gift?.description ?? '',
+        allowPartialContribution: gift?.allowPartialContribution ?? true,
+      });
 
-        this.enrichUrl = '';
-        this.enrichError = '';
-        this.giftService.clearAdminGiftError();
-        this.giftService.resetAdminGiftSaved();
-        return;
-      }
-
-      this.giftForm = { category: GIFT_CATEGORIES[0].id, raised: 0, allowPartialContribution: true };
       this.enrichUrl = '';
       this.enrichError = '';
       this.giftService.clearAdminGiftError();
       this.giftService.resetAdminGiftSaved();
     }, { allowSignalWrites: true });
+  }
+
+  public get imageUrl(): string {
+    return this.form.get('image')!.value ?? '';
   }
 
   public enrichFromLink(): void {
@@ -74,10 +86,10 @@ export class AdminGiftFormComponent {
     this.http.post<GiftEnrichResponse>(this.endpoints.adminGiftsEnrich, { url: this.enrichUrl }).subscribe({
       next: (data: GiftEnrichResponse): void => {
         this.enriching = false;
-        if (data.name) this.giftForm = { ...this.giftForm, name: data.name };
-        if (data.description) this.giftForm = { ...this.giftForm, description: data.description };
-        if (data.price) this.giftForm = { ...this.giftForm, total: data.price };
-        if (data.imageUrl) this.giftForm = { ...this.giftForm, image: data.imageUrl };
+        if (data.name) this.form.get('name')!.setValue(data.name);
+        if (data.description) this.form.get('description')!.setValue(data.description);
+        if (data.price) this.form.get('total')!.setValue(data.price);
+        if (data.imageUrl) this.form.get('image')!.setValue(data.imageUrl);
       },
       error: (err: HttpErrorResponse): void => {
         this.enriching = false;
@@ -87,8 +99,28 @@ export class AdminGiftFormComponent {
   }
 
   public save(): void {
+    if (this.giftService.adminState().giftSaving)
+      return;
+
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
     const giftId: string | null = this.editingGift() ? this.editingGift()!.id : null;
-    this.giftService.saveAdminGift(giftId, this.giftForm);
+    const value = this.form.value;
+
+    const payload: Partial<Gift> = {
+      name: `${value.name ?? ''}`.trim(),
+      category: value.category,
+      total: Number(value.total),
+      image: value.image ?? '',
+      description: `${value.description ?? ''}`.trim(),
+      allowPartialContribution: !!value.allowPartialContribution,
+      raised: this.raised,
+    };
+
+    this.giftService.saveAdminGift(giftId, payload);
   }
 
   public onImageSelected(event: Event): void {
@@ -110,13 +142,13 @@ export class AdminGiftFormComponent {
       return;
     }
 
-    const previousImage = this.giftForm.image ?? '';
-    this.giftForm = { ...this.giftForm, image: URL.createObjectURL(file) };
+    const previousImage: string = this.form.get('image')!.value ?? '';
+    this.form.get('image')!.setValue(URL.createObjectURL(file));
 
     this.giftService.uploadGiftImage(
       file,
-      (url: string): void => { this.giftForm = { ...this.giftForm, image: url }; },
-      (): void => { this.giftForm = { ...this.giftForm, image: previousImage }; },
+      (url: string): void => { this.form.get('image')!.setValue(url); },
+      (): void => { this.form.get('image')!.setValue(previousImage); },
     );
   }
 }

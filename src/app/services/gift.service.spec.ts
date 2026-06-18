@@ -1,0 +1,156 @@
+import { TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { GiftService } from './gift.service';
+import { EndpointsUrls } from '../constants/api-endpoints';
+import { Gift } from '../models/gift.model';
+import { PagedResult } from '../models/paged-result.model';
+
+function makeGift(over: Partial<Gift> = {}): Gift {
+  return {
+    id: 'g1',
+    image: 'http://img/g1.jpg',
+    name: 'Jogo de panelas',
+    price: 500,
+    raised: 100,
+    total: 500,
+    category: 'Cozinha',
+    description: '',
+    available: true,
+    allowPartialContribution: true,
+    ...over,
+  };
+}
+
+function makePage(items: Gift[]): PagedResult<Gift> {
+  return { items, totalCount: items.length, page: 1, pageSize: 20, totalPages: 1 };
+}
+
+describe('GiftService', () => {
+  let service: GiftService;
+  let httpMock: HttpTestingController;
+  let endpoints: EndpointsUrls;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
+      providers: [GiftService, EndpointsUrls],
+    });
+    service = TestBed.inject(GiftService);
+    httpMock = TestBed.inject(HttpTestingController);
+    endpoints = TestBed.inject(EndpointsUrls);
+  });
+
+  afterEach(() => httpMock.verify());
+
+  it('deve ser criado com estado inicial limpo', () => {
+    expect(service).toBeTruthy();
+    expect(service.adminState().gifts).toEqual([]);
+    expect(service.adminState().giftsLoading).toBe(false);
+  });
+
+  describe('loadAdminGifts', () => {
+    it('liga o loading, popula a lista no sucesso e desliga o loading', () => {
+      service.loadAdminGifts({ page: 1 });
+      expect(service.adminState().giftsLoading).toBe(true);
+
+      const req = httpMock.expectOne((r) => r.url === endpoints.adminGiftsList);
+      expect(req.request.method).toBe('GET');
+      req.flush(makePage([makeGift()]));
+
+      expect(service.adminState().giftsLoading).toBe(false);
+      expect(service.adminState().gifts.length).toBe(1);
+      expect(service.adminState().giftsError).toBe('');
+    });
+
+    it('seta giftsError em falha de rede, sem deixar o loading preso', () => {
+      service.loadAdminGifts();
+      const req = httpMock.expectOne((r) => r.url === endpoints.adminGiftsList);
+      req.flush({ detail: 'boom' }, { status: 500, statusText: 'Server Error' });
+
+      expect(service.adminState().giftsLoading).toBe(false);
+      expect(service.adminState().giftsError).toBeTruthy();
+    });
+  });
+
+  describe('saveAdminGift — edição otimista', () => {
+    beforeEach(() => {
+      service.patchAdminState({ gifts: [makeGift({ id: 'g1', name: 'Antigo' })], totalCount: 1 });
+    });
+
+    it('reflete a mudança IMEDIATAMENTE (otimista) e nunca recarrega a lista', () => {
+      service.saveAdminGift('g1', { name: 'Novo nome' });
+
+      expect(service.adminState().gifts[0].name).toBe('Novo nome');
+      expect(service.adminState().giftSaving).toBe(true);
+
+      const req = httpMock.expectOne(endpoints.adminGiftsById('g1'));
+      expect(req.request.method).toBe('PUT');
+      req.flush(makeGift({ id: 'g1', name: 'Novo nome', raised: 200 }));
+
+      expect(service.adminState().gifts[0].raised).toBe(200);
+      expect(service.adminState().giftSaved).toBe(true);
+      expect(service.adminState().giftSaving).toBe(false);
+      httpMock.expectNone(endpoints.adminGiftsList);
+    });
+
+    it('faz ROLLBACK ao snapshot e expõe giftError quando a API falha', () => {
+      service.saveAdminGift('g1', { name: 'Novo nome' });
+      expect(service.adminState().gifts[0].name).toBe('Novo nome');
+
+      const req = httpMock.expectOne(endpoints.adminGiftsById('g1'));
+      req.flush({ detail: 'falhou' }, { status: 500, statusText: 'Server Error' });
+
+      expect(service.adminState().gifts[0].name).toBe('Antigo');
+      expect(service.adminState().giftError).toBeTruthy();
+      expect(service.adminState().giftSaving).toBe(false);
+    });
+  });
+
+  describe('saveAdminGift — criação', () => {
+    it('insere o item retornado no topo e incrementa o total sem recarregar', () => {
+      service.patchAdminState({ gifts: [makeGift({ id: 'g1' })], totalCount: 1 });
+      service.saveAdminGift(null, { name: 'Novo' });
+
+      const req = httpMock.expectOne(endpoints.adminGiftsList);
+      expect(req.request.method).toBe('POST');
+      req.flush(makeGift({ id: 'g2', name: 'Novo' }));
+
+      expect(service.adminState().gifts[0].id).toBe('g2');
+      expect(service.adminState().totalCount).toBe(2);
+      expect(service.adminState().giftSaved).toBe(true);
+      httpMock.expectNone((r) => r.method === 'GET' && r.url === endpoints.adminGiftsList);
+    });
+  });
+
+  describe('deleteAdminGift — otimista', () => {
+    beforeEach(() => {
+      service.patchAdminState({ gifts: [makeGift({ id: 'g1' }), makeGift({ id: 'g2' })], totalCount: 2 });
+    });
+
+    it('remove imediatamente e não recarrega no sucesso', () => {
+      service.deleteAdminGift('g1');
+
+      expect(service.adminState().gifts.length).toBe(1);
+      expect(service.adminState().gifts[0].id).toBe('g2');
+      expect(service.adminState().totalCount).toBe(1);
+
+      const req = httpMock.expectOne(endpoints.adminGiftsById('g1'));
+      expect(req.request.method).toBe('DELETE');
+      req.flush(null);
+
+      expect(service.adminState().gifts.length).toBe(1);
+      httpMock.expectNone(endpoints.adminGiftsList);
+    });
+
+    it('restaura a lista (rollback) e expõe giftsError quando a remoção falha', () => {
+      service.deleteAdminGift('g1');
+      expect(service.adminState().gifts.length).toBe(1);
+
+      const req = httpMock.expectOne(endpoints.adminGiftsById('g1'));
+      req.flush({ detail: 'falhou' }, { status: 500, statusText: 'Server Error' });
+
+      expect(service.adminState().gifts.length).toBe(2);
+      expect(service.adminState().giftsError).toBeTruthy();
+    });
+  });
+});
