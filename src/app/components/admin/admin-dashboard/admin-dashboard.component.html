@@ -63,16 +63,19 @@
         </span>
       </div>
 
-      <!-- Formulário -->
-      <app-admin-gift-form *ngIf="showGiftForm" [editingGift]="editingGift"
+      <!-- Formulário de novo presente (topo) -->
+      <app-admin-gift-form *ngIf="showGiftForm && !editingGift" [editingGift]="null"
         (cancel)="closeGiftForm()"></app-admin-gift-form>
 
-      <!-- Cards de presentes -->
+      <!-- Cards de presentes (a edição acontece inline, no lugar do card) -->
       <div *ngIf="!giftService.adminState().giftsLoading && giftService.adminState().gifts.length > 0"
         class="gifts-cards-grid">
-        <app-admin-gift-card *ngFor="let gift of giftService.adminState().gifts" [gift]="gift"
-          [isEditing]="editingGift?.id === gift.id" (edit)="openEditGift($event)" (delete)="requestDeleteGift($event)">
-        </app-admin-gift-card>
+        <ng-container *ngFor="let gift of giftService.adminState().gifts">
+          <app-admin-gift-form *ngIf="editingGift?.id === gift.id" class="inline-edit" [editingGift]="gift"
+            (cancel)="closeGiftForm()"></app-admin-gift-form>
+          <app-admin-gift-card *ngIf="editingGift?.id !== gift.id" [gift]="gift"
+            (edit)="openEditGift($event)" (delete)="requestDeleteGift($event)"></app-admin-gift-card>
+        </ng-container>
       </div>
 
       <div

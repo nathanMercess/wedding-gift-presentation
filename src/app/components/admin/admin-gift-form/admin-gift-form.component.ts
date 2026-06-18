@@ -61,7 +61,7 @@ export class AdminGiftFormComponent {
       this.enrichError = '';
       this.giftService.clearAdminGiftError();
       this.giftService.resetAdminGiftSaved();
-    });
+    }, { allowSignalWrites: true });
   }
 
   public enrichFromLink(): void {

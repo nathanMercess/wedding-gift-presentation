@@ -1,20 +1,82 @@
 .login-root {
   min-height: 100vh;
   display: flex;
+  background: var(--neutral-0);
+}
+
+/* ── Painel esquerdo: foto editorial (P&B) ── */
+.login-aside {
+  position: relative;
+  flex: 1.1;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--neutral-900), var(--neutral-700));
+}
+
+.login-aside-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.04);
+}
+
+.login-aside-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.78) 0%,
+    rgba(0, 0, 0, 0.42) 38%,
+    rgba(0, 0, 0, 0.12) 68%,
+    rgba(0, 0, 0, 0.28) 100%
+  );
+}
+
+.login-aside-content {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 3rem;
+  z-index: 1;
+}
+
+.login-aside-tag {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--on-media-dim);
+  margin: 0 0 0.75rem;
+}
+
+.login-aside-title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.7rem, 2.6vw, 2.4rem);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--on-media);
+  margin: 0;
+  max-width: 18ch;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.35);
+}
+
+/* ── Painel direito: formulário ── */
+.login-main {
+  flex: 1;
+  display: flex;
   align-items: center;
   justify-content: center;
-  background: #fafafa;
-  padding: 1.5rem;
+  padding: 2rem 1.5rem;
+  background: var(--neutral-0);
 }
 
 .login-card {
-  background: #ffffff;
-  border: 1px solid #ececec;
-  border-radius: 1.25rem;
-  padding: 2.75rem 2.25rem;
   width: 100%;
-  max-width: 400px;
-  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.05);
+  max-width: 360px;
 }
 
 .login-header {
@@ -27,24 +89,25 @@
     justify-content: center;
     width: 3.25rem;
     height: 3.25rem;
-    border-radius: 0.9rem;
-    background: #111111;
-    color: #ffffff;
+    border-radius: var(--radius-lg);
+    background: var(--neutral-900);
+    color: var(--neutral-0);
     margin-bottom: 1rem;
+    box-shadow: var(--shadow-sm);
   }
 
   h1 {
     font-family: var(--font-sans);
     font-size: 1.4rem;
     font-weight: 700;
-    letter-spacing: -0.01em;
-    color: #111111;
+    letter-spacing: -0.02em;
+    color: var(--neutral-900);
     margin: 0 0 .35rem;
   }
 
   p {
     font-family: var(--font-sans);
-    color: #8a8a8a;
+    color: var(--neutral-500);
     font-size: .9rem;
     margin: 0;
   }
@@ -65,34 +128,36 @@
     font-family: var(--font-sans);
     font-size: .82rem;
     font-weight: 600;
-    color: #3a3a3a;
+    color: var(--neutral-700);
   }
 }
 
 .text-input {
+  min-height: 48px;
   padding: .8rem 1rem;
-  border: 1.5px solid #e2e2e2;
-  border-radius: .7rem;
+  border: 1.5px solid var(--neutral-200);
+  border-radius: var(--radius-md);
   font-family: var(--font-sans);
   font-size: .95rem;
-  color: #111111;
-  background: #ffffff;
+  color: var(--neutral-900);
+  background: var(--neutral-0);
   outline: none;
-  transition: border-color .18s, box-shadow .18s;
+  box-sizing: border-box;
+  transition: border-color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
 
-  &::placeholder { color: #b3b3b3; }
+  &::placeholder { color: var(--neutral-400); }
 
   &:focus {
-    border-color: #111111;
-    box-shadow: 0 0 0 4px rgba(17, 17, 17, 0.08);
+    border-color: var(--neutral-900);
+    box-shadow: 0 0 0 3.5px color-mix(in srgb, var(--neutral-900) 8%, transparent);
   }
 }
 
 .error-msg {
-  background: #fef2f2;
-  color: #dc2626;
-  border: 1px solid #fecaca;
-  border-radius: .7rem;
+  background: var(--danger-bg);
+  color: var(--danger);
+  border: 1px solid var(--danger-border);
+  border-radius: var(--radius-md);
   padding: .75rem 1rem;
   font-family: var(--font-sans);
   font-size: .85rem;
@@ -100,23 +165,46 @@
 
 .submit-btn {
   margin-top: .35rem;
-  background: #111111;
-  color: #ffffff;
+  min-height: 48px;
+  background: var(--neutral-900);
+  color: var(--neutral-0);
   border: none;
-  border-radius: .7rem;
+  border-radius: var(--radius-md);
   padding: .9rem;
   font-family: var(--font-sans);
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background .18s, transform .18s;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--duration-base) var(--ease-spring), box-shadow var(--duration-base) var(--ease-spring), filter var(--duration-fast) var(--ease-out);
 
   &:hover:not(:disabled) {
-    background: #000000;
+    filter: brightness(1.25);
     transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
   }
 
-  &:active:not(:disabled) { transform: translateY(0); }
+  &:active:not(:disabled) { transform: translateY(0) scale(0.99); }
 
   &:disabled { opacity: .5; cursor: not-allowed; }
+}
+
+/* ── Mobile: esconde a foto, form ocupa tudo ── */
+@media (max-width: 860px) {
+  .login-aside {
+    display: none;
+  }
+
+  .login-main {
+    background: var(--neutral-50);
+  }
+
+  .login-card {
+    max-width: 400px;
+    background: var(--neutral-0);
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--radius-xl);
+    padding: 2.5rem 2rem;
+    box-shadow: var(--shadow-lg);
+  }
 }

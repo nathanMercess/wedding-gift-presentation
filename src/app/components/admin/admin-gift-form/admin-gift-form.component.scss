@@ -1,11 +1,12 @@
 .form-card {
   background: var(--card);
-  border-radius: 1rem;
-  padding: 1.5rem;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
   margin-bottom: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  box-shadow: var(--shadow-md);
 
-  h3 { font-family: var(--font-sans); margin: 0 0 1.25rem; font-size: 1.1rem; color: var(--foreground); }
+  h3 { font-family: var(--font-sans); margin: 0 0 1.25rem; font-size: 1.1rem; font-weight: 600; color: var(--foreground); }
 }
 
 .enrich-row {
@@ -34,17 +35,25 @@
 }
 
 .text-input {
-  padding: .65rem .9rem;
-  border: 1.5px solid var(--border);
-  border-radius: .5rem;
+  min-height: 44px;
+  padding: .7rem .95rem;
+  border: 1.5px solid var(--hairline-strong);
+  border-radius: var(--radius-md);
   font-family: var(--font-sans);
   font-size: .95rem;
+  color: var(--foreground);
+  background: var(--secondary);
   outline: none;
-  transition: border .2s;
-  width: 100%;
   box-sizing: border-box;
+  transition: border-color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-out);
+  width: 100%;
 
-  &:focus { border-color: var(--primary); }
+  &:focus {
+    border-color: var(--primary);
+    background: var(--card);
+    box-shadow: 0 0 0 3.5px color-mix(in srgb, var(--primary) 14%, transparent);
+  }
+  &::placeholder { color: var(--muted-foreground); }
 }
 
 .form-actions {
@@ -58,31 +67,34 @@
   background: var(--primary);
   color: var(--primary-foreground);
   border: none;
-  border-radius: .5rem;
+  border-radius: var(--radius-md);
   padding: .6rem 1.25rem;
   font-family: var(--font-sans);
   font-size: .95rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background .2s;
+  box-shadow: var(--shadow-primary);
+  transition: filter var(--duration-fast) var(--ease-out), transform var(--duration-base) var(--ease-spring), box-shadow var(--duration-base) var(--ease-spring);
 
-  &:hover:not(:disabled) { background: color-mix(in srgb, var(--primary) 85%, black); }
-  &:disabled { opacity: .6; cursor: not-allowed; }
+  &:hover:not(:disabled) { filter: brightness(0.96); transform: translateY(-1px); }
+  &:active:not(:disabled) { transform: translateY(0) scale(0.98); }
+  &:disabled { opacity: .6; cursor: not-allowed; box-shadow: none; }
 }
 
 .btn-outline {
   background: none;
   border: 1.5px solid var(--primary);
   color: var(--primary);
-  border-radius: .5rem;
+  border-radius: var(--radius-md);
   padding: .6rem 1.25rem;
   font-family: var(--font-sans);
   font-size: .95rem;
   cursor: pointer;
-  transition: background .2s;
+  transition: background var(--duration-fast) var(--ease-out), transform var(--duration-base) var(--ease-spring);
   white-space: nowrap;
 
   &:hover:not(:disabled) { background: color-mix(in srgb, var(--primary) 8%, transparent); }
+  &:active:not(:disabled) { transform: scale(0.98); }
   &:disabled { opacity: .6; cursor: not-allowed; }
 }
 
@@ -97,10 +109,10 @@
   width: 96px;
   height: 96px;
   flex-shrink: 0;
-  border-radius: .5rem;
+  border-radius: var(--radius-md);
   overflow: hidden;
   background: var(--secondary);
-  border: 1.5px solid var(--border);
+  border: 1px solid var(--hairline-strong);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -143,9 +155,10 @@
 }
 
 .error-msg {
-  background: #fef2f2;
-  color: #dc2626;
-  border-radius: .5rem;
+  background: var(--danger-bg);
+  color: var(--danger);
+  border: 1px solid var(--danger-border);
+  border-radius: var(--radius-md);
   padding: .75rem 1rem;
   font-family: var(--font-sans);
   font-size: .875rem;

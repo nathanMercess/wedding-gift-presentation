@@ -6,10 +6,10 @@
 
 .cf-card {
   background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 16px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
   padding: 1.5rem;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-md);
 }
 
 /* ── Hero: foto + dados ── */
@@ -42,7 +42,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-md);
 
   img { width: 100%; height: 100%; object-fit: cover; }
 }
@@ -54,16 +54,17 @@
   align-items: center;
   justify-content: center;
   padding: 0.45rem 1rem;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   border: 1.5px solid var(--primary);
   color: var(--primary);
   font-family: var(--font-sans);
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.18s;
+  transition: background var(--duration-fast) var(--ease-out), transform var(--duration-base) var(--ease-spring);
 
   &:hover { background: color-mix(in srgb, var(--primary) 8%, transparent); }
+  &:active { transform: scale(0.97); }
 }
 
 .cf-hint { font-family: var(--font-sans); font-size: 0.72rem; color: var(--muted-foreground); margin: 0; text-align: center; }
@@ -87,19 +88,22 @@
 .cf-input {
   width: 100%;
   box-sizing: border-box;
+  min-height: 44px;
   padding: 0.65rem 0.9rem;
-  border: 1.5px solid var(--border);
-  border-radius: 10px;
+  border: 1.5px solid var(--hairline-strong);
+  border-radius: var(--radius-md);
   font-size: 0.95rem;
   font-family: var(--font-sans);
   color: var(--foreground);
+  background: var(--secondary);
   outline: none;
-  transition: border-color 0.18s, box-shadow 0.18s;
+  transition: border-color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-out);
   resize: vertical;
 
   &:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 15%, transparent);
+    background: var(--card);
+    box-shadow: 0 0 0 3.5px color-mix(in srgb, var(--primary) 14%, transparent);
   }
 }
 
@@ -107,7 +111,7 @@
 .cf-section-head {
   margin-bottom: 1.1rem;
 
-  h3 { font-family: var(--font-sans); margin: 0 0 0.25rem; font-size: 1.05rem; color: var(--foreground); }
+  h3 { font-family: var(--font-sans); margin: 0 0 0.25rem; font-size: 1.05rem; font-weight: 600; color: var(--foreground); }
   p { font-family: var(--font-sans); margin: 0; font-size: 0.82rem; color: var(--muted-foreground); }
 }
 
@@ -142,17 +146,17 @@
   align-items: center;
   gap: 0.6rem;
   padding: 0.4rem 0.5rem;
-  border: 1.5px solid var(--border);
-  border-radius: 12px;
+  border: 1.5px solid var(--hairline-strong);
+  border-radius: var(--radius-md);
   background: var(--secondary);
 }
 
 .cf-swatch {
   width: 38px;
   height: 38px;
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
   flex-shrink: 0;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+  box-shadow: inset 0 0 0 1px var(--hairline-strong);
   pointer-events: none;
 }
 
@@ -174,8 +178,9 @@
   text-transform: uppercase;
   font-family: var(--font-sans);
   font-size: 0.9rem;
+  color: var(--foreground);
 
-  &:focus { box-shadow: none; }
+  &:focus { box-shadow: none; outline: none; }
 }
 
 .cf-link {
@@ -196,12 +201,12 @@
   gap: 0.75rem;
   margin-top: 1.1rem;
   padding-top: 1.1rem;
-  border-top: 1px dashed var(--border);
+  border-top: 1px dashed var(--hairline-strong);
 }
 
 .cf-preview-chip {
   padding: 0.4rem 0.9rem;
-  border-radius: 99px;
+  border-radius: var(--radius-pill);
   font-family: var(--font-sans);
   font-size: 0.8rem;
   font-weight: 600;
@@ -210,7 +215,7 @@
 .cf-preview-btn {
   padding: 0.5rem 1.1rem;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   color: var(--primary-foreground);
   font-family: var(--font-sans);
   font-size: 0.85rem;
@@ -228,16 +233,18 @@
   background: var(--primary);
   color: var(--primary-foreground);
   border: none;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   padding: 0.7rem 1.6rem;
   font-family: var(--font-sans);
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  transition: filter 0.18s;
+  box-shadow: var(--shadow-primary);
+  transition: filter var(--duration-fast) var(--ease-out), transform var(--duration-base) var(--ease-spring), box-shadow var(--duration-base) var(--ease-spring);
 
-  &:hover:not(:disabled) { filter: brightness(0.93); }
-  &:disabled { opacity: 0.6; cursor: not-allowed; }
+  &:hover:not(:disabled) { filter: brightness(0.96); transform: translateY(-1px); }
+  &:active:not(:disabled) { transform: translateY(0) scale(0.98); }
+  &:disabled { opacity: 0.6; cursor: not-allowed; box-shadow: none; }
 }
 
 /* ── Carousel ── */
@@ -259,9 +266,10 @@
   position: relative;
   width: 150px;
   height: 110px;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   overflow: hidden;
   flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
 }
 
 .cf-carousel-thumb {
@@ -275,19 +283,22 @@
   position: absolute;
   top: 4px;
   right: 4px;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0, 0, 0, 0.55);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
   border: none;
-  color: #fff;
+  color: var(--on-media);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background var(--duration-fast) var(--ease-out), transform var(--duration-base) var(--ease-spring);
 
-  &:hover { background: #dc2626; }
+  &:hover { background: var(--danger); }
+  &:active { transform: scale(0.9); }
 }
 
 .cf-carousel-num {
@@ -297,9 +308,9 @@
   font-family: var(--font-sans);
   font-size: 0.65rem;
   font-weight: 700;
-  color: #fff;
-  background: rgba(0,0,0,0.45);
-  border-radius: 3px;
+  color: var(--on-media);
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: var(--radius-xs);
   padding: 1px 4px;
 }
 
@@ -312,15 +323,15 @@
 .cf-carousel-caption-input {
   width: 100%;
   padding: 0.3rem 0.5rem;
-  border: 1.5px solid var(--border);
-  border-radius: 6px;
+  border: 1.5px solid var(--hairline-strong);
+  border-radius: var(--radius-xs);
   font-family: var(--font-sans);
   font-size: 0.72rem;
   color: var(--foreground);
   background: var(--background);
   outline: none;
   box-sizing: border-box;
-  transition: border-color 0.18s, box-shadow 0.18s;
+  transition: border-color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
 
   &:focus {
     border-color: var(--primary);
@@ -333,8 +344,8 @@
 .cf-carousel-add {
   width: 150px;
   height: 110px;
-  border-radius: 10px;
-  border: 2px dashed var(--border);
+  border-radius: var(--radius-md);
+  border: 2px dashed var(--hairline-strong);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -344,28 +355,30 @@
   font-size: 0.72rem;
   color: var(--muted-foreground);
   cursor: pointer;
-  transition: border-color 0.18s, color 0.18s;
+  transition: border-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-out);
   flex-shrink: 0;
 
-  &:hover { border-color: var(--primary); color: var(--primary); }
+  &:hover { border-color: var(--primary); color: var(--primary); background: color-mix(in srgb, var(--primary) 4%, transparent); }
   &.loading { opacity: 0.6; pointer-events: none; }
 }
 
 .status-msg { font-family: var(--font-sans); color: var(--muted-foreground); padding: 1rem 0; }
 
 .error-msg {
-  background: #fef2f2;
-  color: #dc2626;
-  border-radius: 10px;
+  background: var(--danger-bg);
+  color: var(--danger);
+  border: 1px solid var(--danger-border);
+  border-radius: var(--radius-md);
   padding: 0.75rem 1rem;
   font-family: var(--font-sans);
   font-size: 0.875rem;
 }
 
 .success-msg {
-  background: #f0fdf4;
-  color: #16a34a;
-  border-radius: 10px;
+  background: var(--success-bg);
+  color: var(--success);
+  border: 1px solid var(--success-border);
+  border-radius: var(--radius-md);
   padding: 0.75rem 1rem;
   font-family: var(--font-sans);
   font-size: 0.875rem;
