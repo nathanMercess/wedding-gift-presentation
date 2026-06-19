@@ -17,6 +17,7 @@ export class AdminCoupleFormComponent {
   public couple: Couple = { names: '', weddingDate: '', photoUrl: '', message: '', primaryColor: '#C79A6D', secondaryColor: '#F7F0EA', carouselPhotos: [] };
   public carouselUploading: boolean = false;
   public carouselUploadError: string = '';
+  public isDraggingFiles: boolean = false;
 
   private coupleSignature: string = '';
 
@@ -70,7 +71,30 @@ export class AdminCoupleFormComponent {
     const input = event.target as HTMLInputElement;
     const files = Array.from(input.files ?? []);
     input.value = '';
-    if (!files.length) return;
+    this.uploadCarouselFiles(files);
+  }
+
+  public onCarouselDragOver(event: DragEvent): void {
+    event.preventDefault();
+    this.isDraggingFiles = true;
+  }
+
+  public onCarouselDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    this.isDraggingFiles = false;
+  }
+
+  public onCarouselDrop(event: DragEvent): void {
+    event.preventDefault();
+    this.isDraggingFiles = false;
+
+    const files = Array.from(event.dataTransfer?.files ?? []).filter((file: File): boolean => file.type.startsWith('image/'));
+    this.uploadCarouselFiles(files);
+  }
+
+  private uploadCarouselFiles(files: File[]): void {
+    if (!files.length)
+      return;
 
     this.carouselUploading = true;
     this.carouselUploadError = '';
@@ -97,6 +121,17 @@ export class AdminCoupleFormComponent {
   public removeCarouselPhoto(index: number): void {
     const photos = [...(this.couple.carouselPhotos ?? [])];
     photos.splice(index, 1);
+    this.couple = { ...this.couple, carouselPhotos: photos };
+  }
+
+  public moveCarouselPhoto(index: number, direction: number): void {
+    const photos = [...(this.couple.carouselPhotos ?? [])];
+    const target = index + direction;
+
+    if (target < 0 || target >= photos.length)
+      return;
+
+    [photos[index], photos[target]] = [photos[target], photos[index]];
     this.couple = { ...this.couple, carouselPhotos: photos };
   }
 

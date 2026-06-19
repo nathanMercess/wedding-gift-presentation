@@ -79,41 +79,48 @@
   <!-- Carousel de fotos -->
   <section class="cf-card">
     <div class="cf-section-head">
-      <h3>Fotos do Carousel</h3>
-      <p>Adicione as fotos que vão passar automaticamente no topo do site para os convidados.</p>
+      <h3>Fotos do Carrossel</h3>
+      <p>As fotos passam no topo do site na ordem abaixo. Use as setas para reordenar — a primeira é a que abre o carrossel.</p>
     </div>
 
-    <div class="cf-carousel-grid">
-      <div *ngFor="let photo of couple.carouselPhotos; let i = index" class="cf-carousel-item">
-        <div class="cf-carousel-thumb-wrap">
-          <img [src]="photo.url" alt="Foto {{ i + 1 }}" class="cf-carousel-thumb" />
-          <button type="button" class="cf-carousel-remove" (click)="removeCarouselPhoto(i)" title="Remover foto">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
-          <span class="cf-carousel-num">{{ i + 1 }}</span>
-        </div>
-        <div class="cf-carousel-captions">
-          <input type="text" class="cf-carousel-caption-input" placeholder="Tag (ex: Momentos)"
-                 [(ngModel)]="couple.carouselPhotos[i].tag" [name]="'carouselTag' + i" />
-          <input type="text" class="cf-carousel-caption-input" placeholder="Título da foto"
-                 [(ngModel)]="couple.carouselPhotos[i].title" [name]="'carouselTitle' + i" />
-        </div>
-      </div>
-
-      <label class="cf-carousel-add" [class.loading]="carouselUploading">
-        <svg *ngIf="!carouselUploading" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>
-        <span *ngIf="carouselUploading">Enviando...</span>
-        <span *ngIf="!carouselUploading">Adicionar foto</span>
-        <input type="file" accept="image/jpeg,image/png,image/webp" multiple (change)="onCarouselPhotoSelected($event)" [disabled]="carouselUploading" hidden />
-      </label>
-    </div>
+    <!-- Dropzone: arrastar-e-soltar ou clicar -->
+    <label class="cf-drop" [class.is-dragging]="isDraggingFiles" [class.loading]="carouselUploading"
+      (dragover)="onCarouselDragOver($event)" (dragleave)="onCarouselDragLeave($event)" (drop)="onCarouselDrop($event)">
+      <input type="file" accept="image/jpeg,image/png,image/webp" multiple (change)="onCarouselPhotoSelected($event)" [disabled]="carouselUploading" hidden />
+      <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" />
+      </svg>
+      <span class="cf-drop-title">{{ carouselUploading ? 'Enviando fotos...' : 'Arraste as fotos aqui ou clique para enviar' }}</span>
+      <span class="cf-drop-sub">JPG, PNG ou WEBP • até 20MB cada • várias de uma vez</span>
+    </label>
 
     <p *ngIf="carouselUploadError" class="error-msg" style="margin-top:.75rem">{{ carouselUploadError }}</p>
-    <p class="cf-hint" style="margin-top:.5rem">JPG, PNG ou WEBP • até 20MB por foto</p>
+
+    <p *ngIf="!couple.carouselPhotos?.length" class="cf-empty">Nenhuma foto ainda. Adicione acima para montar o carrossel.</p>
+
+    <div class="cf-carousel-grid" *ngIf="couple.carouselPhotos?.length">
+      <div *ngFor="let photo of couple.carouselPhotos; let i = index; let first = first; let last = last" class="cf-photo-card">
+        <div class="cf-photo-card-media">
+          <img [src]="photo.url" [alt]="'Foto ' + (i + 1)" loading="lazy" decoding="async" />
+          <span class="cf-order-badge">{{ i + 1 }}</span>
+          <div class="cf-photo-card-tools">
+            <button type="button" class="cf-tool" (click)="moveCarouselPhoto(i, -1)" [disabled]="first" title="Mover para trás" aria-label="Mover para trás">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6" /></svg>
+            </button>
+            <button type="button" class="cf-tool" (click)="moveCarouselPhoto(i, 1)" [disabled]="last" title="Mover para frente" aria-label="Mover para frente">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6" /></svg>
+            </button>
+            <button type="button" class="cf-tool cf-tool-danger" (click)="removeCarouselPhoto(i)" title="Remover" aria-label="Remover">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+            </button>
+          </div>
+        </div>
+        <div class="cf-photo-card-fields">
+          <input type="text" class="cf-mini-input" placeholder="Tag (ex: Momentos)" [(ngModel)]="couple.carouselPhotos[i].tag" [name]="'carouselTag' + i" />
+          <input type="text" class="cf-mini-input" placeholder="Título da foto" [(ngModel)]="couple.carouselPhotos[i].title" [name]="'carouselTitle' + i" />
+        </div>
+      </div>
+    </div>
   </section>
 
   <div *ngIf="coupleService.state().success" class="success-msg">Informações salvas com sucesso!</div>
