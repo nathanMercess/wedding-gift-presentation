@@ -289,7 +289,6 @@
   height: 100%;
   object-fit: cover;
   transition: transform 0.7s var(--ease-spring);
-  will-change: transform;
 }
 
 .carousel-card-overlay {
@@ -424,8 +423,8 @@
   top: 0;
   z-index: 40;
   background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
   border-bottom: 1px solid var(--hairline);
   box-shadow: var(--shadow-xs);
   padding: 0.85rem 0;

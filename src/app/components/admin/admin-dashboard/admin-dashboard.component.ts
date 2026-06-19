@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
+import { Subject, debounceTime, distinctUntilChanged, interval, takeUntil } from 'rxjs';
 import { Gift } from '../../../models/gift.model';
 import { GiftService } from '../../../services/gift.service';
 import { CoupleService } from '../../../services/couple.service';
@@ -10,6 +10,7 @@ import { ConfirmDialogComponent } from '../../confirm-dialog/confirm-dialog.comp
 import { AdminGiftCardComponent } from '../admin-gift-card/admin-gift-card.component';
 import { AdminGiftFormComponent } from '../admin-gift-form/admin-gift-form.component';
 import { AdminCoupleFormComponent } from '../admin-couple-form/admin-couple-form.component';
+import { SlideOverComponent } from '../../slide-over/slide-over.component';
 import { AdminTab } from '../../../enums/admin-tab.enum';
 import { GIFT_CATEGORIES } from '../../../constants/gift-categories.constant';
 
@@ -18,7 +19,7 @@ import { GIFT_CATEGORIES } from '../../../constants/gift-categories.constant';
   selector: 'app-admin-dashboard',
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss',
-  imports: [CommonModule, FormsModule, ConfirmDialogComponent, AdminGiftCardComponent, AdminGiftFormComponent, AdminCoupleFormComponent],
+  imports: [CommonModule, FormsModule, ConfirmDialogComponent, AdminGiftCardComponent, AdminGiftFormComponent, AdminCoupleFormComponent, SlideOverComponent],
 })
 export class AdminDashboardComponent implements OnInit, OnDestroy {
   public readonly AdminTab: typeof AdminTab = AdminTab;
@@ -36,6 +37,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   private readonly destroy$ = new Subject<void>();
   private readonly searchSubject = new Subject<string>();
+  private readonly pollIntervalMs: number = 15000;
 
   public constructor(
     public readonly giftService: GiftService,
@@ -55,6 +57,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       distinctUntilChanged(),
       takeUntil(this.destroy$),
     ).subscribe((): void => this.loadGifts(1));
+
+    interval(this.pollIntervalMs).pipe(takeUntil(this.destroy$)).subscribe((): void => this.pollGifts());
   }
 
   public get currentPage(): number {
@@ -103,13 +107,11 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   public openNewGift(): void {
     this.editingGift = null;
     this.showGiftForm = true;
-    this.scrollToGiftForm();
   }
 
   public openEditGift(gift: Gift): void {
     this.editingGift = gift;
     this.showGiftForm = true;
-    this.scrollToGiftForm();
   }
 
   public closeGiftForm(): void {
@@ -118,9 +120,21 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     this.giftService.clearAdminGiftError();
   }
 
-  private scrollToGiftForm(): void {
-    setTimeout((): void => {
-      document.querySelector('.form-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  private pollGifts(): void {
+    if (this.activeTab !== AdminTab.Gifts)
+      return;
+
+    if (this.showGiftForm)
+      return;
+
+    if (document.hidden)
+      return;
+
+    this.giftService.refreshAdminGiftsSilently({
+      search: this.searchTerm || undefined,
+      category: this.selectedCategory !== 'todos' ? this.selectedCategory : undefined,
+      page: this.currentPage,
+      pageSize: 20,
     });
   }
 

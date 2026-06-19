@@ -1,0 +1,97 @@
+/* ── Backdrop ── */
+.slide-over-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(20, 20, 20, 0.55);
+  display: flex;
+  justify-content: flex-end;
+  animation: soBackdropIn 0.3s var(--ease-out);
+}
+
+@keyframes soBackdropIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Panel (desktop: desliza da direita) ── */
+.slide-over-panel {
+  background: var(--card);
+  width: min(34rem, 100%);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-xl);
+  animation: soSlideIn var(--duration-slow) var(--ease-spring) both;
+}
+
+@keyframes soSlideIn {
+  from { transform: translateX(100%); opacity: 0.6; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+/* ── Header ── */
+.slide-over-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--hairline);
+  flex-shrink: 0;
+
+  h2 {
+    font-family: var(--font-sans);
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    color: var(--foreground);
+    margin: 0;
+  }
+}
+
+.slide-over-close {
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted-foreground);
+  background: none;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), transform var(--duration-base) var(--ease-spring);
+
+  &:hover { background: var(--secondary); color: var(--foreground); }
+  &:active { transform: scale(0.92); }
+}
+
+/* ── Body (rolável) ── */
+.slide-over-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+/* ── Mobile: vira bottom-sheet ── */
+@media (max-width: 767px) {
+  .slide-over-backdrop {
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .slide-over-panel {
+    width: 100%;
+    height: auto;
+    max-height: calc(100dvh - env(safe-area-inset-bottom, 0px));
+    border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+    animation: soSlideUp var(--duration-slow) var(--ease-spring) both;
+  }
+
+  @keyframes soSlideUp {
+    from { transform: translateY(100%); opacity: 0.6; }
+    to   { transform: translateY(0); opacity: 1; }
+  }
+}

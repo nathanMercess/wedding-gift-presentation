@@ -1,6 +1,6 @@
 <div class="gift-card" [class.is-editing]="isEditing()">
   <div class="gift-card-image">
-    <img *ngIf="gift().image" [src]="gift().image" [alt]="gift().name" />
+    <img *ngIf="gift().image" [src]="gift().image" [alt]="gift().name" loading="lazy" decoding="async" />
     <div *ngIf="!gift().image" class="gift-card-no-image">
       <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
         <rect x="3" y="3" width="18" height="18" rx="2" />

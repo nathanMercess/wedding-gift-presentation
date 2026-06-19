@@ -63,19 +63,12 @@
         </span>
       </div>
 
-      <!-- Formulário de novo presente (topo) -->
-      <app-admin-gift-form *ngIf="showGiftForm && !editingGift" [editingGift]="null"
-        (cancel)="closeGiftForm()"></app-admin-gift-form>
-
-      <!-- Cards de presentes (a edição acontece inline, no lugar do card) -->
+      <!-- Cards de presentes (edição abre em slide-over, mantendo a lista no contexto) -->
       <div *ngIf="!giftService.adminState().giftsLoading && giftService.adminState().gifts.length > 0"
         class="gifts-cards-grid">
-        <ng-container *ngFor="let gift of giftService.adminState().gifts; trackBy: trackByGiftId">
-          <app-admin-gift-form *ngIf="editingGift?.id === gift.id" class="inline-edit" [editingGift]="gift"
-            (cancel)="closeGiftForm()"></app-admin-gift-form>
-          <app-admin-gift-card *ngIf="editingGift?.id !== gift.id" [gift]="gift"
-            (edit)="openEditGift($event)" (delete)="requestDeleteGift($event)"></app-admin-gift-card>
-        </ng-container>
+        <app-admin-gift-card *ngFor="let gift of giftService.adminState().gifts; trackBy: trackByGiftId"
+          [gift]="gift" [isEditing]="editingGift?.id === gift.id"
+          (edit)="openEditGift($event)" (delete)="requestDeleteGift($event)"></app-admin-gift-card>
       </div>
 
       <div
@@ -103,6 +96,11 @@
     </section>
 
   </main>
+
+  <app-slide-over *ngIf="showGiftForm" [title]="editingGift ? 'Editar presente' : 'Novo presente'"
+    (closed)="closeGiftForm()">
+    <app-admin-gift-form [editingGift]="editingGift" (cancel)="closeGiftForm()"></app-admin-gift-form>
+  </app-slide-over>
 
   <app-confirm-dialog *ngIf="giftPendingDeletion" title="Remover presente?"
     [message]="'Tem certeza que deseja remover \'' + giftPendingDeletion.name + '\'? Essa ação não pode ser desfeita.'"
