@@ -94,6 +94,28 @@ export class GiftService {
       });
   }
 
+  public refreshGuestGiftsSilently(params: GiftQueryParams = {}): void {
+    let httpParams = new HttpParams();
+    if (params.category && params.category !== 'todos') httpParams = httpParams.set('category', params.category);
+    if (params.search) httpParams = httpParams.set('search', params.search);
+    if (params.orderBy) httpParams = httpParams.set('orderBy', params.orderBy);
+    if (params.orderDir) httpParams = httpParams.set('orderDir', params.orderDir);
+    if (params.onlyAvailable !== undefined) httpParams = httpParams.set('onlyAvailable', String(params.onlyAvailable));
+    if (params.page) httpParams = httpParams.set('page', String(params.page));
+    if (params.pageSize) httpParams = httpParams.set('pageSize', String(params.pageSize));
+
+    this.http.get<PagedResult<Gift>>(this.endpointsUrls.giftsList, { params: httpParams }).subscribe({
+      next: (result: PagedResult<Gift>): void => {
+        this.patchGuestState({
+          gifts: result.items,
+          totalCount: result.totalCount,
+          totalPages: result.totalPages,
+          currentPage: result.page,
+        });
+      },
+    });
+  }
+
   public loadAdminGifts(params: GiftQueryParams = {}): void {
     this.patchAdminState({ giftsLoading: true, giftsError: '' });
 
@@ -121,6 +143,28 @@ export class GiftService {
           this.patchAdminState({ giftsError: HttpErrorUtil.extract(err, 'Erro ao carregar presentes.') });
         },
       });
+  }
+
+  public refreshAdminGiftsSilently(params: GiftQueryParams = {}): void {
+    let httpParams = new HttpParams();
+    if (params.search) httpParams = httpParams.set('search', params.search);
+    if (params.category && params.category !== 'todos') httpParams = httpParams.set('category', params.category);
+    if (params.orderBy) httpParams = httpParams.set('orderBy', params.orderBy);
+    if (params.orderDir) httpParams = httpParams.set('orderDir', params.orderDir);
+    if (params.onlyAvailable !== undefined) httpParams = httpParams.set('onlyAvailable', String(params.onlyAvailable));
+    if (params.page) httpParams = httpParams.set('page', String(params.page));
+    if (params.pageSize) httpParams = httpParams.set('pageSize', String(params.pageSize));
+
+    this.http.get<PagedResult<Gift>>(this.endpointsUrls.adminGiftsList, { params: httpParams }).subscribe({
+      next: (result: PagedResult<Gift>): void => {
+        this.patchAdminState({
+          gifts: result.items,
+          totalCount: result.totalCount,
+          totalPages: result.totalPages,
+          currentPage: result.page,
+        });
+      },
+    });
   }
 
   public saveAdminGift(giftId: string | null, gift: Partial<Gift>): void {

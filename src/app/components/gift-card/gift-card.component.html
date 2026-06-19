@@ -1,6 +1,6 @@
 <div class="gift-card">
   <div class="card-image">
-    <img [src]="gift().image" [alt]="gift().name" (error)="onImgError($event)" />
+    <img [src]="gift().image" [alt]="gift().name" loading="lazy" decoding="async" (error)="onImgError($event)" />
     <div class="card-badge" *ngIf="!gift().available">Completo</div>
     <button type="button" class="card-hover-btn" (click)="onPresent()">Presentear</button>
   </div>

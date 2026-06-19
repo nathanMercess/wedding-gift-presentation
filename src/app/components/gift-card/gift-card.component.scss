@@ -39,7 +39,6 @@
     object-fit: cover;
     display: block;
     transition: transform 0.6s var(--ease-spring);
-    will-change: transform;
   }
 }
 
@@ -56,8 +55,6 @@
   text-transform: uppercase;
   padding: 0.28rem 0.7rem;
   border-radius: var(--radius-pill);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
@@ -66,9 +63,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: color-mix(in srgb, var(--primary) 92%, transparent);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
+  background: color-mix(in srgb, var(--primary) 96%, transparent);
   color: var(--primary-foreground);
   font-family: var(--font-sans);
   font-size: 0.9rem;

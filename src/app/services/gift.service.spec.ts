@@ -153,4 +153,45 @@ describe('GiftService', () => {
       expect(service.adminState().giftsError).toBeTruthy();
     });
   });
+
+  describe('refreshAdminGiftsSilently — tempo real sem flicker', () => {
+    it('atualiza a lista por baixo dos panos SEM ligar o giftsLoading', () => {
+      service.patchAdminState({ gifts: [makeGift({ id: 'g1', available: true, raised: 0 })], totalCount: 1 });
+
+      service.refreshAdminGiftsSilently({ page: 1, pageSize: 20 });
+      expect(service.adminState().giftsLoading).toBe(false);
+
+      const req = httpMock.expectOne((r) => r.url === endpoints.adminGiftsList);
+      expect(req.request.method).toBe('GET');
+      req.flush(makePage([makeGift({ id: 'g1', available: false, raised: 500 })]));
+
+      expect(service.adminState().giftsLoading).toBe(false);
+      expect(service.adminState().gifts[0].available).toBe(false);
+      expect(service.adminState().gifts[0].raised).toBe(500);
+    });
+
+    it('falha de rede no polling é silenciosa (não polui giftsError)', () => {
+      service.refreshAdminGiftsSilently();
+
+      const req = httpMock.expectOne((r) => r.url === endpoints.adminGiftsList);
+      req.error(new ProgressEvent('error'), { status: 0 });
+
+      expect(service.adminState().giftsError).toBe('');
+      expect(service.adminState().giftsLoading).toBe(false);
+    });
+  });
+
+  describe('refreshGuestGiftsSilently — sem flicker pós-pagamento', () => {
+    it('atualiza a lista do convidado sem ligar o loading', () => {
+      service.refreshGuestGiftsSilently({ page: 1, pageSize: 20 });
+      expect(service.guestState().loading).toBe(false);
+
+      const req = httpMock.expectOne((r) => r.url === endpoints.giftsList);
+      expect(req.request.method).toBe('GET');
+      req.flush(makePage([makeGift({ id: 'g1', raised: 500, available: false })]));
+
+      expect(service.guestState().loading).toBe(false);
+      expect(service.guestState().gifts[0].available).toBe(false);
+    });
+  });
 });

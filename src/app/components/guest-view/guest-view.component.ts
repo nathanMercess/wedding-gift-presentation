@@ -226,6 +226,9 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
       this.carouselReady.set(false);
     this.stopCarousel();
     this.carouselInterval = setInterval((): void => {
+      if (document.hidden)
+        return;
+
       this.scrollCarousel(1);
     }, 4500);
   }
@@ -292,7 +295,16 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   public onGiftPaymentCompleted(): void {
-    this.loadGifts(this.currentPage);
+    const [orderBy, orderDir] = this.parseSortBy();
+    this.giftService.refreshGuestGiftsSilently({
+      search: this.searchTerm || undefined,
+      category: this.selectedCategory !== 'todos' ? this.selectedCategory : undefined,
+      orderBy,
+      orderDir,
+      onlyAvailable: this.onlyAvailable || undefined,
+      page: this.currentPage,
+      pageSize: 20,
+    });
     this.giftService.loadGuestStats();
   }
 

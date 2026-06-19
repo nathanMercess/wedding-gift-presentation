@@ -1,4 +1,4 @@
-import { Component, InputSignal, OutputEmitterRef, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, InputSignal, OutputEmitterRef, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Gift } from '../../models/gift.model';
 import { ButtonComponent } from '../button/button.component';
@@ -11,6 +11,7 @@ import { ButtonSize } from '../../enums/button-size.enum';
   templateUrl: './gift-card.component.html',
   styleUrl: './gift-card.component.scss',
   imports: [CommonModule, ButtonComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GiftCardComponent {
   public readonly gift: InputSignal<Gift> = input.required<Gift>();

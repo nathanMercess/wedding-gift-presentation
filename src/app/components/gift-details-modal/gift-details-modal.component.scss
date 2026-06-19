@@ -3,9 +3,7 @@
   position: fixed;
   inset: 0;
   z-index: 50;
-  background: rgba(20, 20, 20, 0.42);
-  -webkit-backdrop-filter: blur(12px) saturate(120%);
-  backdrop-filter: blur(12px) saturate(120%);
+  background: rgba(20, 20, 20, 0.55);
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -81,6 +79,10 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
+}
+
+.sheet-grabber {
+  display: none;
 }
 
 .close-btn {
@@ -239,19 +241,56 @@
     position: relative;
   }
 
-  /* Scroll único: o .modal-content é o rolador; foto e rodapé usam sticky */
-  .modal-content { overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
-  .modal-grid { display: block; overflow: visible; min-height: 0; }
-  .right-side { display: block; overflow: visible; min-height: 0; }
+  /* Scroll único: o sheet inteiro rola — a foto flui junto e sai de cena */
+  .modal-content {
+    display: block;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
 
-  /* Foto = header que ENCOLHE ao rolar (sticky com top negativo — sem JS, sem jank).
-     Rola pra cima até restar uma faixa fina (72px) fixada, ainda mostrando o título. */
+  .modal-grid {
+    display: block;
+    overflow: visible;
+    min-height: 0;
+  }
+
+  .right-side {
+    display: block;
+    overflow: visible;
+    min-height: 0;
+  }
+
+  /* Foto = header dinâmico que rola para fora ao subir o conteúdo */
   .gift-info {
-    position: sticky;
-    top: -148px;
-    height: 220px;
+    height: clamp(200px, 42vh, 300px);
     overflow: hidden;
-    z-index: 2;
+  }
+
+  /* Etapas deixam de ter scroll interno: quem rola é o sheet inteiro */
+  .modal-grid ::ng-deep app-gift-contribution-form,
+  .modal-grid ::ng-deep app-gift-payment-step,
+  .modal-grid ::ng-deep app-gift-success-step {
+    display: block;
+    flex: none;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .modal-grid ::ng-deep .gift-form,
+  .modal-grid ::ng-deep .form-scroll,
+  .modal-grid ::ng-deep .payment-step {
+    flex: none;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  /* CTA + total sempre visíveis, colados na base do sheet */
+  .modal-grid ::ng-deep .form-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 3;
   }
 
   /* Header sem barra: botões flutuam sobre a foto */
@@ -286,6 +325,22 @@
     width: auto;
     border-radius: var(--radius-pill);
     padding: 0.5rem 0.9rem;
+  }
+
+  /* Grabber visível sobre a foto-hero */
+  .sheet-grabber {
+    display: block;
+    position: absolute;
+    top: 0.55rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2.5rem;
+    height: 0.3rem;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.78);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    z-index: 6;
+    pointer-events: none;
   }
 
   /* Faixa de progresso visível no mobile */

@@ -6,6 +6,7 @@ import { EndpointsUrls } from '../constants/api-endpoints';
 import { AuthLoginState } from '../models/auth-login-state.model';
 import { LoginApiResponse } from '../models/login-api-response.model';
 import { LoginRequest } from '../models/login-request.model';
+import { JwtUtil } from '../utils/jwt.util';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -59,7 +60,12 @@ export class AuthService {
   }
 
   public isAuthenticated(): boolean {
-    return !!this.getToken();
+    const token: string | null = this.getToken();
+
+    if (!token)
+      return false;
+
+    return !JwtUtil.isExpired(token);
   }
 
   public extractToken(response: LoginApiResponse): string | null {
