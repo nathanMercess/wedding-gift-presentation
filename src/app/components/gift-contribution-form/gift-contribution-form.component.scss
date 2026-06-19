@@ -274,3 +274,17 @@ textarea.text-input {
 @media (max-width: 360px) {
   .actions app-button ::ng-deep button { font-size: 0.875rem; }
 }
+
+/* Mobile: o scroll é do .modal-content (header colapsável). O form não rola sozinho;
+   só o rodapé fica fixo (sticky) no fundo da folha. */
+@media (max-width: 767px) {
+  :host { overflow: visible; min-height: 0; }
+  .gift-form { overflow: visible; min-height: 0; }
+  .form-scroll { overflow: visible; min-height: 0; }
+
+  .form-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 3;
+  }
+}

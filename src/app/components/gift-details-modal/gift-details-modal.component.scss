@@ -239,8 +239,20 @@
     position: relative;
   }
 
-  /* Foto vira hero */
-  .gift-info { flex-shrink: 0; height: 210px; overflow: hidden; }
+  /* Scroll único: o .modal-content é o rolador; foto e rodapé usam sticky */
+  .modal-content { overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+  .modal-grid { display: block; overflow: visible; min-height: 0; }
+  .right-side { display: block; overflow: visible; min-height: 0; }
+
+  /* Foto = header que ENCOLHE ao rolar (sticky com top negativo — sem JS, sem jank).
+     Rola pra cima até restar uma faixa fina (72px) fixada, ainda mostrando o título. */
+  .gift-info {
+    position: sticky;
+    top: -148px;
+    height: 220px;
+    overflow: hidden;
+    z-index: 2;
+  }
 
   /* Header sem barra: botões flutuam sobre a foto */
   .modal-header {
