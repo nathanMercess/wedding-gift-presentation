@@ -4,6 +4,7 @@ import { PaymentMethodSelectorComponent } from '../../checkout/components/paymen
 import { CardBrickComponent } from '../../checkout/components/card-brick/card-brick.component';
 import { PixDisplayComponent } from '../../checkout/components/pix-display/pix-display.component';
 import { PaymentMethod } from '../../checkout/enums/payment-method.enum';
+import { PaymentService } from '../../checkout/services/payment.service';
 
 @Component({
   standalone: true,
@@ -25,4 +26,6 @@ export class GiftPaymentStepComponent {
   public readonly PaymentMethod: typeof PaymentMethod = PaymentMethod;
 
   public activeMethod: PaymentMethod | null = null;
+
+  public constructor(public readonly paymentService: PaymentService) {}
 }

@@ -88,6 +88,9 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy {
   }
 
   public onBackdropClick(event: MouseEvent): void {
+    if (this.step !== ModalStep.Contribution)
+      return;
+
     if ((event.target as HTMLElement).classList.contains('modal-backdrop'))
       this.requestClose();
   }
@@ -111,6 +114,9 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy {
   }
 
   public onContributionSubmit(data: ContributionSubmitData): void {
+    if (this.step !== ModalStep.Contribution)
+      return;
+
     this.contributorName = data.guestName;
     this.contributorMessage = data.guestMessage;
     this.contributionAmount = data.amount;

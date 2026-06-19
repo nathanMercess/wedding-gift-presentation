@@ -84,4 +84,41 @@ describe('GiftDetailsModalComponent', () => {
     expect(closed).toBe(true);
     expect(component.showExitConfirm).toBe(false);
   });
+
+  it('onContributionSubmit ignora chamadas duplicadas (anti duplo-clique)', () => {
+    setup();
+    component.onContributionSubmit({ guestName: 'Nathan', guestMessage: 'Oi', amount: 150 });
+    const firstOrderId = component.orderId;
+
+    component.onContributionSubmit({ guestName: 'Outro', guestMessage: 'Mudou', amount: 999 });
+
+    expect(component.step).toBe(ModalStep.Payment);
+    expect(component.contributorName).toBe('Nathan');
+    expect(component.contributionAmount).toBe(150);
+    expect(component.orderId).toBe(firstOrderId);
+  });
+
+  it('backdrop NÃO fecha o modal durante o Pagamento (evita ir pra home por toque acidental)', () => {
+    setup();
+    component.onContributionSubmit({ guestName: 'N', guestMessage: '', amount: 50 });
+    let closed = false;
+    component.close.subscribe((): void => { closed = true; });
+
+    const event = { target: { classList: { contains: (c: string): boolean => c === 'modal-backdrop' } } } as unknown as MouseEvent;
+    component.onBackdropClick(event);
+
+    expect(component.step).toBe(ModalStep.Payment);
+    expect(closed).toBe(false);
+  });
+
+  it('backdrop fecha normalmente no passo de contribuição', () => {
+    setup();
+    let closed = false;
+    component.close.subscribe((): void => { closed = true; });
+
+    const event = { target: { classList: { contains: (c: string): boolean => c === 'modal-backdrop' } } } as unknown as MouseEvent;
+    component.onBackdropClick(event);
+
+    expect(closed).toBe(true);
+  });
 });

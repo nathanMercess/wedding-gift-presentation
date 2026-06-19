@@ -29,3 +29,13 @@
     Escolha como deseja pagar para continuar.
   </p>
 </div>
+
+<!-- Overlay de processamento: feedback ao pagar + bloqueia duplo-clique -->
+<div class="pay-processing" *ngIf="paymentService.paymentState().submitting" role="status" aria-live="polite">
+  <div class="pay-progress-bar"><span></span></div>
+  <div class="pay-processing-inner">
+    <div class="pay-spinner"></div>
+    <p>Processando pagamento…</p>
+    <span class="pay-processing-sub">Aguarde, não feche esta tela</span>
+  </div>
+</div>

@@ -4,6 +4,86 @@
   flex: 1;
   min-height: 0;
   overflow: hidden;
+  position: relative;
+}
+
+/* ── Overlay de processamento do pagamento ── */
+.pay-processing {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  background: color-mix(in srgb, var(--card) 88%, transparent);
+  animation: payFadeIn 0.2s var(--ease-out);
+}
+
+@keyframes payFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.pay-progress-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--track);
+  overflow: hidden;
+}
+
+.pay-progress-bar span {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 40%;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(to right, color-mix(in srgb, var(--primary) 55%, white), var(--primary));
+  animation: payIndeterminate 1.1s ease-in-out infinite;
+}
+
+@keyframes payIndeterminate {
+  0%   { left: -40%; }
+  100% { left: 100%; }
+}
+
+.pay-processing-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.pay-spinner {
+  width: 2.2rem;
+  height: 2.2rem;
+  border: 2.5px solid var(--track);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: paySpin 0.8s linear infinite;
+}
+
+@keyframes paySpin {
+  to { transform: rotate(360deg); }
+}
+
+.pay-processing p {
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--foreground);
+  margin: 0;
+}
+
+.pay-processing-sub {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
 }
 
 .payment-step {
