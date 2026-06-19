@@ -15,6 +15,6 @@ export abstract class HttpErrorUtil {
       return messages.length ? messages.join(' ') : (body.title || fallback);
     }
 
-    return body.detail || body.title || `${fallback} (${err.status})`;
+    return body.detail || body.title || body.message || `${fallback} (${err.status})`;
   }
 }
