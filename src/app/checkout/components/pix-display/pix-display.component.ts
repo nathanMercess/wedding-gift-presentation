@@ -28,6 +28,7 @@ export class PixDisplayComponent implements OnDestroy {
   public readonly contributorName: InputSignal<string> = input<string>('');
   public readonly message: InputSignal<string> = input<string>('');
   public readonly paymentApproved: OutputEmitterRef<void> = output<void>();
+  public readonly cancelled: OutputEmitterRef<void> = output<void>();
 
   public readonly PixStep: typeof PixStep = PixStep;
   public readonly PAYMENT_ERROR_CODES: typeof PAYMENT_ERROR_CODES = PAYMENT_ERROR_CODES;
@@ -193,6 +194,11 @@ export class PixDisplayComponent implements OnDestroy {
     this.qrCode.set('');
     this.qrCodeBase64.set('');
     this.mpOrderId.set('');
+  }
+
+  public cancel(): void {
+    this.stopPolling();
+    this.cancelled.emit();
   }
 
   public copyCode(): void {

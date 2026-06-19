@@ -49,6 +49,7 @@
   <div *ngIf="pixStep() === PixStep.Loading" class="pix-loading">
     <div class="loading-spinner"></div>
     <p>Gerando seu PIX...</p>
+    <button type="button" class="pix-link-btn" (click)="cancel()">Cancelar</button>
   </div>
 
   <!-- Step 2: QR Code -->
@@ -78,6 +79,9 @@
         {{ copied() ? 'Copiado!' : 'Copiar código' }}
       </button>
     </div>
+
+    <p class="qr-reassure">Assim que o pagamento for identificado, esta tela avança sozinha — você não precisa fazer mais nada.</p>
+    <button type="button" class="pix-link-btn" (click)="cancel()">Trocar forma de pagamento</button>
   </ng-container>
 
   <div *ngIf="expired()" class="pix-expired" role="alert">

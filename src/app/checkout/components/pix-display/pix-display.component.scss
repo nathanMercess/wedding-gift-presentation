@@ -189,6 +189,30 @@
   }
 }
 
+.qr-reassure {
+  font-size: 0.78rem;
+  color: var(--muted-foreground);
+  text-align: center;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.pix-link-btn {
+  align-self: center;
+  background: none;
+  border: none;
+  color: var(--muted-foreground);
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.4rem 0.6rem;
+  text-decoration: underline;
+  transition: color 0.2s;
+
+  &:hover { color: var(--primary); }
+}
+
 /* ── States ── */
 .pix-expired {
   display: flex;

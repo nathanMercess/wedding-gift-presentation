@@ -1,6 +1,8 @@
 import { Injectable, WritableSignal, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { finalize } from 'rxjs';
+import { Observable, finalize, throwError, timeout } from 'rxjs';
+
+const PAYMENT_TIMEOUT_MS = 25000;
 import { EndpointsUrls } from '../../constants/api-endpoints';
 import { CardPaymentDto } from '../models/card-payment-dto.model';
 import { PixPaymentDto } from '../models/pix-payment-dto.model';
@@ -27,7 +29,7 @@ export class PaymentService {
   public payWithCard(dto: CardPaymentDto): void {
     this.patchPaymentState({ submitting: true, response: null, error: '' });
 
-    this.http.post<PaymentResponse>(this.endpointsUrls.paymentCard, dto).pipe(finalize((): void => this.patchPaymentState({ submitting: false }))).subscribe({
+    this.http.post<PaymentResponse>(this.endpointsUrls.paymentCard, dto).pipe(timeout({ each: PAYMENT_TIMEOUT_MS, with: (): Observable<never> => throwError((): HttpErrorResponse => new HttpErrorResponse({ status: 0, statusText: 'Timeout' })) }), finalize((): void => this.patchPaymentState({ submitting: false }))).subscribe({
       next: (response: PaymentResponse): void => {
         this.patchPaymentState({ response });
       },
@@ -40,7 +42,7 @@ export class PaymentService {
   public payWithPix(dto: PixPaymentDto): void {
     this.patchPaymentState({ submitting: true, response: null, error: '' });
 
-    this.http.post<PaymentResponse>(this.endpointsUrls.paymentPix, dto).pipe(finalize((): void => this.patchPaymentState({ submitting: false }))).subscribe({
+    this.http.post<PaymentResponse>(this.endpointsUrls.paymentPix, dto).pipe(timeout({ each: PAYMENT_TIMEOUT_MS, with: (): Observable<never> => throwError((): HttpErrorResponse => new HttpErrorResponse({ status: 0, statusText: 'Timeout' })) }), finalize((): void => this.patchPaymentState({ submitting: false }))).subscribe({
       next: (response: PaymentResponse): void => {
         this.patchPaymentState({ response });
       },

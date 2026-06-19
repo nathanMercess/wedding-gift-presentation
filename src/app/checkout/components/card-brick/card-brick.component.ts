@@ -10,6 +10,7 @@ import { PaymentMethod } from '../../enums/payment-method.enum';
 import { PaymentStatus } from '../../enums/payment-status.enum';
 import { MP_CARD_BRICK_CUSTOMIZATION } from '../../constants/mp-card-brick-style.constant';
 import { PAYMENT_ERROR_CODES } from '../../constants/payment-error-codes.constant';
+import { MP_DECLINE_FALLBACK, MP_DECLINE_MESSAGES } from '../../constants/mp-decline-messages.constant';
 import { ColorUtil } from '../../../utils/color.util';
 import { ToastService } from '../../../services/toast.service';
 
@@ -198,13 +199,14 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
 
       if (response.status === PaymentStatus.InProcess || response.status === PaymentStatus.Pending) {
         this.pendingResolve?.();
-        this.showError(PAYMENT_ERROR_CODES.PAYMENT_DECLINED, 'Pagamento recusado. Verifique os dados do cartão e tente novamente.');
+        this.toastService.info('Pagamento em análise pelo emissor. Sua contribuição será confirmada em instantes.', 'Pagamento recebido');
+        this.paymentApproved.emit();
         this.clearPending();
         return;
       }
 
       this.pendingReject?.(new Error(response.statusDetail ?? 'declined'));
-      this.showError(response.errorCode ?? PAYMENT_ERROR_CODES.PAYMENT_DECLINED, 'Pagamento recusado. Verifique os dados e tente novamente.');
+      this.showError(response.errorCode ?? PAYMENT_ERROR_CODES.PAYMENT_DECLINED, MP_DECLINE_MESSAGES[response.statusDetail ?? ''] ?? MP_DECLINE_FALLBACK);
       this.clearPending();
     });
   }

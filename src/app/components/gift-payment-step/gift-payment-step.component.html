@@ -21,7 +21,8 @@
       [contributorName]="contributorName()"
       [message]="message()"
       [amount]="amount()"
-      (paymentApproved)="paymentApproved.emit()">
+      (paymentApproved)="paymentApproved.emit()"
+      (cancelled)="activeMethod = null">
     </app-pix-display>
   </ng-container>
 
@@ -30,8 +31,8 @@
   </p>
 </div>
 
-<!-- Overlay de processamento: feedback ao pagar + bloqueia duplo-clique -->
-<div class="pay-processing" *ngIf="paymentService.paymentState().submitting" role="status" aria-live="polite">
+<!-- Overlay de processamento do cartão: feedback ao pagar + bloqueia duplo-clique -->
+<div class="pay-processing" *ngIf="paymentService.paymentState().submitting && (activeMethod === PaymentMethod.CreditCard || activeMethod === PaymentMethod.DebitCard)" role="status" aria-live="polite">
   <div class="pay-progress-bar"><span></span></div>
   <div class="pay-processing-inner">
     <div class="pay-spinner"></div>
