@@ -5,14 +5,7 @@
     <button type="button" class="card-hover-btn" (click)="onPresent()">Presentear</button>
   </div>
   <div class="card-body">
-    <p class="card-category" *ngIf="gift().category">{{ gift().category }}</p>
     <h3 class="card-name">{{ gift().name }}</h3>
     <div class="card-price">{{ gift().total | currency:'BRL':'symbol':'1.2-2' }}</div>
-    <div class="card-progress">
-      <div class="progress-track">
-        <div class="progress-fill" [style.width.%]="progressPercent"></div>
-      </div>
-      <span class="progress-pct">{{ progressPercent.toFixed(0) }}%</span>
-    </div>
   </div>
 </div>

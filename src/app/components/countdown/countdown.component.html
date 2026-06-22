@@ -1,0 +1,21 @@
+<div class="countdown-container">
+  <div class="countdown-item">
+    <span class="value">{{ days }}</span>
+    <span class="label">Dias</span>
+  </div>
+  
+  <div class="countdown-item">
+    <span class="value">{{ hours | number:'2.0' }}</span>
+    <span class="label">Horas</span>
+  </div>
+  
+  <div class="countdown-item">
+    <span class="value">{{ minutes | number:'2.0' }}</span>
+    <span class="label">Minutos</span>
+  </div>
+  
+  <div class="countdown-item">
+    <span class="value">{{ seconds | number:'2.0' }}</span>
+    <span class="label">Segundos</span>
+  </div>
+</div>

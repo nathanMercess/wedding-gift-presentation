@@ -1,0 +1,94 @@
+.countdown-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+  margin: 3rem 0;
+  padding: 0 1rem;
+
+  .countdown-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    
+    /* Fundo estilo Widget iOS: translúcido com efeito de vidro (blur) */
+    background: color-mix(in srgb, var(--card, #ffffff) 85%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px); /* Suporte para Safari/iOS */
+    
+    /* Borda muito subtil usando a cor primária do tema */
+    border: 1px solid color-mix(in srgb, var(--primary) 20%, transparent);
+    
+    /* Cantos arredondados contínuos padrão Apple */
+    border-radius: 20px; 
+    
+    /* Sombra extremamente suave e difusa */
+    box-shadow: 0 10px 40px color-mix(in srgb, var(--primary) 8%, transparent);
+    
+    min-width: 110px;
+    height: 110px;
+    
+    transition: transform var(--duration-base, 0.3s) var(--ease-out, ease), 
+                box-shadow var(--duration-base, 0.3s) var(--ease-out, ease);
+    
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 45px color-mix(in srgb, var(--primary) 15%, transparent);
+    }
+
+    .value {
+      /* Fonte de sistema limpa, peso médio para não ficar muito "gordo" */
+      font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+      font-size: 3rem;
+      font-weight: 500; 
+      color: var(--primary);
+      line-height: 1.1;
+      letter-spacing: -1px; /* Números ligeiramente mais juntos */
+    }
+
+    .label {
+      font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+      font-size: 0.7rem;
+      color: color-mix(in srgb, var(--foreground) 70%, transparent);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-top: 0.25rem;
+      font-weight: 600;
+    }
+  }
+}
+
+/* Responsividade: Grelha Perfeita para Telemóveis (iOS Widgets) */
+@media (max-width: 576px) {
+  .countdown-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    margin: 2rem 0;
+    padding: 0 0.5rem;
+
+    .countdown-item {
+      min-width: 0;
+      height: auto;
+      
+      /* Mantém a forma de quadrado perfeito independentemente do ecrã */
+      aspect-ratio: 1 / 1; 
+      
+      padding: 0.5rem 0.25rem;
+      border-radius: 16px;
+      
+      .value {
+        font-size: 1.7rem; /* Reduzido suavemente para caber bem */
+        letter-spacing: -0.5px;
+      }
+      
+      .label {
+        font-size: 0.55rem;
+        letter-spacing: 1px;
+        margin-top: 0.25rem;
+      }
+    }
+  }
+}

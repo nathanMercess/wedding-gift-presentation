@@ -10,12 +10,14 @@ import { Gift } from '../models/gift.model';
 import { PagedResult } from '../models/paged-result.model';
 import { ImageUploadResponse } from '../models/image-upload-response.model';
 import { HttpErrorUtil } from '../utils/http-error';
+import { GiftSortField } from '../enums/GiftSortField';
+import { SortDirection } from '../enums/SortDirection';
 
 export interface GiftQueryParams {
   search?: string;
   category?: string;
-  orderBy?: string;
-  orderDir?: string;
+  orderBy?: GiftSortField;
+  orderDir?: SortDirection;
   onlyAvailable?: boolean;
   page?: number;
   pageSize?: number;

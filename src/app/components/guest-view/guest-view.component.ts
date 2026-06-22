@@ -1,23 +1,26 @@
-import { AfterViewChecked, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, effect, signal, WritableSignal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AfterViewChecked, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, WritableSignal, effect, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
-import { GiftCardComponent } from '../gift-card/gift-card.component';
-import { GiftDetailsModalComponent } from '../gift-details-modal/gift-details-modal.component';
-import { Gift } from '../../models/gift.model';
-import { CarouselPhoto, Couple } from '../../models/couple.model';
-import { GiftService } from '../../services/gift.service';
-import { CoupleService } from '../../services/couple.service';
+import { GiftSortField } from 'src/app/enums/GiftSortField';
+import { SortDirection } from 'src/app/enums/SortDirection';
 import { GIFT_CATEGORIES } from '../../constants/gift-categories.constant';
 import { SORT_OPTIONS } from '../../constants/sort-options.constant';
+import { CarouselPhoto, Couple } from '../../models/couple.model';
+import { Gift } from '../../models/gift.model';
+import { CoupleService } from '../../services/couple.service';
+import { GiftService } from '../../services/gift.service';
 import { DateUtil } from '../../utils/date.util';
+import { CountdownComponent } from '../countdown/countdown.component';
+import { GiftCardComponent } from '../gift-card/gift-card.component';
+import { GiftDetailsModalComponent } from '../gift-details-modal/gift-details-modal.component';
 
 @Component({
   standalone: true,
   selector: 'app-guest-view',
   templateUrl: './guest-view.component.html',
   styleUrl: './guest-view.component.scss',
-  imports: [CommonModule, FormsModule, GiftCardComponent, GiftDetailsModalComponent],
+  imports: [CommonModule, FormsModule, GiftCardComponent, GiftDetailsModalComponent, CountdownComponent],
 })
 export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   public searchTerm: string = '';
@@ -89,6 +92,7 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
 
     return second.offsetLeft - first.offsetLeft;
   }
+  
   public onCarouselScroll(_event: Event): void {
     const el = this.carouselTrack?.nativeElement;
     if (!el || this.carouselPhotos.length === 0) return;
@@ -136,7 +140,6 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   public readonly skeletonItems: number[] = [1, 2, 3, 4, 5, 6];
   
-
   public readonly quickCategories: Array<{ id: string; label: string }> = [
     { id: 'todos', label: 'Todos' },
     ...GIFT_CATEGORIES,
@@ -159,7 +162,7 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
       this.hasTriedApiCouplePhoto = false;
       this.displayCouplePhoto = this.localCouplePhoto;
       this.carouselIndex.set(0);
-      this.startCarousel(); // allowSignalWrites required: carouselIndex is a WritableSignal
+      this.startCarousel(); 
     }, { allowSignalWrites: true });
 
     this.searchSubject.pipe(
@@ -258,7 +261,8 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   public loadGifts(page: number = 1): void {
-    const [orderBy, orderDir] = this.parseSortBy();
+    // Uso del nuevo método tipado
+    const { orderBy, orderDir } = this.parseSortBy();
     this.giftService.loadGuestGifts({
       search: this.searchTerm || undefined,
       category: this.selectedCategory !== 'todos' ? this.selectedCategory : undefined,
@@ -295,7 +299,8 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   public onGiftPaymentCompleted(): void {
-    const [orderBy, orderDir] = this.parseSortBy();
+    // Uso del nuevo método tipado
+    const { orderBy, orderDir } = this.parseSortBy();
     this.giftService.refreshGuestGiftsSilently({
       search: this.searchTerm || undefined,
       category: this.selectedCategory !== 'todos' ? this.selectedCategory : undefined,
@@ -308,10 +313,11 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.giftService.loadGuestStats();
   }
 
-  private parseSortBy(): [string, string] {
-    if (this.sortBy === 'price-asc') return ['price', 'asc'];
-    if (this.sortBy === 'price-desc') return ['price', 'desc'];
-    return ['name', 'asc'];
+  // Mapeo seguro de String al tipo Enum
+  private parseSortBy(): { orderBy: GiftSortField; orderDir: SortDirection } {
+    if (this.sortBy === 'price-asc') return { orderBy: GiftSortField.Price, orderDir: SortDirection.Asc };
+    if (this.sortBy === 'price-desc') return { orderBy: GiftSortField.Price, orderDir: SortDirection.Desc };
+    return { orderBy: GiftSortField.Name, orderDir: SortDirection.Asc };
   }
 
   public trackByGiftId(_: number, gift: Gift): string {

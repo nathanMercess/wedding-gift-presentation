@@ -1,5 +1,4 @@
 <div class="gv-root">
-  <!-- Loading skeleton -->
   <div *ngIf="isInitialLoading" class="sk-root" aria-live="polite" aria-busy="true">
     <div class="sk-hero-block"></div>
     <div class="sk-body">
@@ -22,34 +21,31 @@
 
   <ng-container *ngIf="!isInitialLoading">
 
-    <!-- Hero block: header + mensagem + carousel + stats -->
     <section class="hero-block">
 
-      <!-- Header com nomes/data -->
       <div class="hero-header container">
         <p class="hero-date">{{ formattedWeddingDate || coupleService.state().couple.weddingDate }}</p>
         <h1 class="hero-names">{{ coupleService.state().couple.names }}</h1>
       </div>
 
-      <!-- Mensagem do casal (acima do carousel) -->
       <div class="couple-quote-wrap" *ngIf="coupleService.state().couple.message">
         <blockquote class="couple-quote">
           "{{ coupleService.state().couple.message }}"
         </blockquote>
       </div>
 
-      <!-- Multi-card horizontal carousel -->
-      <div class="carousel-section"
-        (mouseenter)="stopCarousel()"
-        (mouseleave)="startCarousel()"
-        (touchstart)="onTouchStart($event)"
-        (touchend)="onTouchEnd($event)">
-        <div #carouselTrack class="carousel-track" [class.is-ready]="carouselReady()" (scroll)="onCarouselScroll($event)">
+      <app-countdown [targetDate]="coupleService.state().couple.weddingDate"></app-countdown>
 
-          <!-- Multiple photos (tripled for infinite loop) -->
+
+      <div class="carousel-section" (mouseenter)="stopCarousel()" (mouseleave)="startCarousel()"
+        (touchstart)="onTouchStart($event)" (touchend)="onTouchEnd($event)">
+        <div #carouselTrack class="carousel-track" [class.is-ready]="carouselReady()"
+          (scroll)="onCarouselScroll($event)">
+
           <ng-container *ngIf="carouselPhotos.length > 0">
             <div *ngFor="let photo of loopedPhotos; let i = index" class="carousel-card">
-              <img [src]="photo.url" [alt]="coupleService.state().couple.names" class="carousel-card-img" decoding="async" />
+              <img [src]="photo.url" [alt]="coupleService.state().couple.names" class="carousel-card-img"
+                decoding="async" />
               <div class="carousel-card-overlay"></div>
               <div class="carousel-card-content">
                 <p class="carousel-card-tag">{{ getPhotoCaption(photo, i).tag }}</p>
@@ -58,10 +54,10 @@
             </div>
           </ng-container>
 
-          <!-- Single (fallback) photo -->
           <ng-container *ngIf="carouselPhotos.length === 0">
             <div class="carousel-card">
-              <img [src]="displayCouplePhoto" [alt]="coupleService.state().couple.names" (error)="onCouplePhotoError()" class="carousel-card-img" />
+              <img [src]="displayCouplePhoto" [alt]="coupleService.state().couple.names" (error)="onCouplePhotoError()"
+                class="carousel-card-img" />
               <div class="carousel-card-overlay"></div>
               <div class="carousel-card-content">
                 <p class="carousel-card-tag">Momentos</p>
@@ -71,107 +67,73 @@
           </ng-container>
         </div>
 
-        <!-- Arrows -->
-        <button *ngIf="carouselPhotos.length > 1" class="carousel-arrow carousel-prev" (click)="scrollCarousel(-1)" aria-label="Anterior">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        <button *ngIf="carouselPhotos.length > 1" class="carousel-arrow carousel-prev" (click)="scrollCarousel(-1)"
+          aria-label="Anterior">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
         </button>
-        <button *ngIf="carouselPhotos.length > 1" class="carousel-arrow carousel-next" (click)="scrollCarousel(1)" aria-label="Próxima">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <button *ngIf="carouselPhotos.length > 1" class="carousel-arrow carousel-next" (click)="scrollCarousel(1)"
+          aria-label="Próxima">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
         </button>
       </div>
-
-      <!-- Stats embaixo do carousel -->
       <div class="hero-stats-wrap container">
         <div class="hero-stats">
           <div class="hero-stat">
-            <span class="hero-stat-value">{{ completedGifts }}/{{ totalGifts }}</span>
-            <span class="hero-stat-label">Presentes completos</span>
-          </div>
-          <div class="hero-stat-divider"></div>
-          <div class="hero-stat">
-            <span class="hero-stat-value">{{ progressPercentage.toFixed(0) }}%</span>
-            <span class="hero-stat-label">Objetivo alcançado</span>
+            <span class="hero-stat-value">{{ completedGifts }}</span>
+            <span class="hero-stat-label">Presentes garantidos</span>
           </div>
         </div>
       </div>
-
     </section>
 
-    <!-- Filtros (desktop: inline; mobile: barra com botão + bottom sheet) -->
     <div class="filters-bar">
       <div class="container filters-inner">
         <div class="search-wrap">
-          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
-          <input type="text" placeholder="Buscar presente..." [(ngModel)]="searchTerm" name="search" class="search-input" (input)="onSearchChange()" />
+          <input type="text" placeholder="Buscar presente..." [(ngModel)]="searchTerm" name="search"
+            class="search-input" (input)="onSearchChange()" />
         </div>
 
-        <!-- Desktop: chips + sort + avail inline -->
         <div class="filter-row desktop-only">
           <div class="chips-scroll">
-            <button
-              *ngFor="let cat of quickCategories; trackBy: trackByOptionId"
-              class="chip"
-              [class.active]="selectedCategory === cat.id"
-              (click)="selectedCategory = cat.id; onFilterChange()">
-              {{ cat.label }}
+            <button *ngFor="let s of sortOptions; trackBy: trackByOptionId" class="chip"
+              [class.active]="sortBy === s.id" (click)="sortBy = s.id; onFilterChange()">
+              {{ s.label }}
             </button>
           </div>
-
-          <div class="sort-wrap">
-            <select class="sort-select" [(ngModel)]="sortBy" name="sortBy" (change)="onFilterChange()">
-              <option *ngFor="let s of sortOptions; trackBy: trackByOptionId" [value]="s.id">{{ s.label }}</option>
-            </select>
-          </div>
-
-          <button class="avail-toggle" [class.active]="onlyAvailable" (click)="onlyAvailable = !onlyAvailable; onFilterChange()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-            Disponíveis
-          </button>
         </div>
 
-        <!-- Mobile: botão Filtrar (inline com o search) -->
         <button class="filter-sheet-btn mobile-only" (click)="openFilterSheet()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2">
+            <line x1="4" y1="6" x2="20" y2="6" />
+            <line x1="8" y1="12" x2="16" y2="12" />
+            <line x1="11" y1="18" x2="13" y2="18" />
           </svg>
           Filtrar
         </button>
       </div>
     </div>
 
-    <!-- Filter bottom sheet (mobile) -->
     <div class="filter-sheet-backdrop" *ngIf="filterSheetOpen" (click)="closeFilterSheet()"></div>
     <div class="filter-sheet" [class.open]="filterSheetOpen">
       <div class="filter-sheet-handle"></div>
       <h3 class="filter-sheet-title">Filtros</h3>
-
-      <div class="filter-sheet-section">
-        <p class="filter-sheet-label">Categoria</p>
-        <div class="filter-sheet-chips">
-          <button *ngFor="let cat of quickCategories; trackBy: trackByOptionId"
-            class="chip" [class.active]="selectedCategory === cat.id"
-            (click)="selectedCategory = cat.id">{{ cat.label }}</button>
-        </div>
-      </div>
-
       <div class="filter-sheet-section">
         <p class="filter-sheet-label">Ordenar por</p>
         <div class="filter-sheet-chips">
-          <button *ngFor="let s of sortOptions; trackBy: trackByOptionId"
-            class="chip" [class.active]="sortBy === s.id"
+          <button *ngFor="let s of sortOptions; trackBy: trackByOptionId" class="chip" [class.active]="sortBy === s.id"
             (click)="sortBy = s.id">{{ s.label }}</button>
-        </div>
-      </div>
-
-      <div class="filter-sheet-section">
-        <p class="filter-sheet-label">Disponibilidade</p>
-        <div class="filter-sheet-chips">
-          <button class="chip" [class.active]="!onlyAvailable" (click)="onlyAvailable = false">Todos</button>
-          <button class="chip" [class.active]="onlyAvailable" (click)="onlyAvailable = true">Disponíveis</button>
         </div>
       </div>
 
@@ -181,7 +143,6 @@
       </div>
     </div>
 
-    <!-- Grid de presentes -->
     <section class="gifts-section">
       <div class="container">
 
@@ -191,28 +152,38 @@
         </div>
 
         <div *ngIf="!giftService.guestState().error && giftService.guestState().gifts.length === 0" class="empty-state">
-          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
-            <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="1.2">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
           <h3>Nenhum presente encontrado</h3>
           <p>Tente ajustar os filtros ou buscar por outro termo</p>
         </div>
 
         <div *ngIf="!giftService.guestState().error && giftService.guestState().gifts.length > 0">
-          <p class="results-count">{{ giftService.guestState().totalCount }} presente{{ giftService.guestState().totalCount !== 1 ? 's' : '' }}</p>
+          <p class="results-count">{{ giftService.guestState().totalCount }}
+            presente{{ giftService.guestState().totalCount !== 1 ? 's' : '' }}</p>
           <div class="gifts-grid">
-            <div *ngFor="let gift of giftService.guestState().gifts; trackBy: trackByGiftId" class="gift-grid-item" (click)="selectedGift = gift">
+            <div *ngFor="let gift of giftService.guestState().gifts; trackBy: trackByGiftId" class="gift-grid-item"
+              (click)="selectedGift = gift">
               <app-gift-card [gift]="gift" (presentClick)="selectedGift = gift"></app-gift-card>
             </div>
           </div>
 
           <div *ngIf="totalPages > 1" class="pagination">
             <button class="page-btn" [disabled]="currentPage <= 1" (click)="onPageChange(currentPage - 1)">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
             </button>
             <span class="page-info">{{ currentPage }} / {{ totalPages }}</span>
             <button class="page-btn" [disabled]="currentPage >= totalPages" (click)="onPageChange(currentPage + 1)">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
             </button>
           </div>
         </div>
@@ -220,23 +191,19 @@
       </div>
     </section>
 
-    <!-- Footer mínimo -->
     <footer class="gv-footer">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="footer-heart">
-        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"
+        class="footer-heart">
+        <path
+          d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
       </svg>
       <span>{{ coupleService.state().couple.names }}</span>
     </footer>
 
   </ng-container>
 
-  <!-- Modal -->
-  <app-gift-details-modal
-    *ngIf="selectedGift"
-    [gift]="selectedGift"
-    [coupleName]="coupleService.state().couple.names"
-    (close)="selectedGift = null"
-    (paymentCompleted)="onGiftPaymentCompleted()">
+  <app-gift-details-modal *ngIf="selectedGift" [gift]="selectedGift" [coupleName]="coupleService.state().couple.names"
+    (close)="selectedGift = null" (paymentCompleted)="onGiftPaymentCompleted()">
   </app-gift-details-modal>
 
 </div>

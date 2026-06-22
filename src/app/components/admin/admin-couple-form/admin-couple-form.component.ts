@@ -31,8 +31,20 @@ export class AdminCoupleFormComponent {
 
       this.coupleSignature = signature;
       const primaryColor: string = loaded.primaryColor || '#C79A6D';
+
+      // Formatar a data para garantir a compatibilidade com o <input type="datetime-local">
+      let formattedDate = loaded.weddingDate || '';
+      if (formattedDate) {
+        const d = new Date(formattedDate);
+        if (!isNaN(d.getTime())) {
+          const pad = (n: number) => n.toString().padStart(2, '0');
+          formattedDate = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        }
+      }
+
       this.couple = {
         ...loaded,
+        weddingDate: formattedDate, // Usa a data formatada
         primaryColor,
         secondaryColor: loaded.secondaryColor || ColorUtil.lighten(primaryColor, 0.85),
         carouselPhotos: loaded.carouselPhotos ?? [],
