@@ -5,7 +5,7 @@ import { Gift } from '../../models/gift.model';
 function makeGift(over: Partial<Gift> = {}): Gift {
   return {
     id: 'g1', image: 'http://img/g1.jpg', name: 'Jogo de panelas', price: 100, raised: 50, total: 100,
-    category: 'Cozinha', description: '', available: true, allowPartialContribution: true, ...over,
+    description: '', available: true, allowPartialContribution: true, ...over,
   };
 }
 
@@ -21,11 +21,10 @@ describe('GiftCardComponent', () => {
     fixture.detectChanges();
   });
 
-  it('cria e renderiza nome e categoria do presente', () => {
+  it('cria e renderiza nome do presente', () => {
     expect(component).toBeTruthy();
     const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
     expect(text).toContain('Jogo de panelas');
-    expect(text).toContain('Cozinha');
   });
 
   it('progressPercent calcula a porcentagem arrecadada', () => {

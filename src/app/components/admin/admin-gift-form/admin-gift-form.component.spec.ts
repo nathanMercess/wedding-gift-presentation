@@ -8,12 +8,12 @@ import { Gift } from '../../../models/gift.model';
 function makeGift(over: Partial<Gift> = {}): Gift {
   return {
     id: 'g1', image: '', name: 'Item', price: 100, raised: 0, total: 100,
-    category: 'Cozinha', description: '', available: true, allowPartialContribution: true, ...over,
+    description: '', available: true, allowPartialContribution: true, ...over,
   };
 }
 
 function validValue(over: Record<string, unknown> = {}): Record<string, unknown> {
-  return { name: 'Air Fryer', category: 'Cozinha', total: 200, image: '', description: 'desc', allowPartialContribution: true, ...over };
+  return { name: 'Air Fryer', total: 200, image: '', description: 'desc', allowPartialContribution: true, ...over };
 }
 
 describe('AdminGiftFormComponent', () => {

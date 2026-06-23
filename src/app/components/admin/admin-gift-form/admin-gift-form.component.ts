@@ -6,7 +6,6 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Gift } from '../../../models/gift.model';
 import { GiftService } from '../../../services/gift.service';
 import { EndpointsUrls } from '../../../constants/api-endpoints';
-import { GIFT_CATEGORIES } from '../../../constants/gift-categories.constant';
 import { HttpErrorUtil } from '../../../utils/http-error';
 
 interface GiftEnrichResponse {
@@ -30,7 +29,6 @@ export class AdminGiftFormComponent {
   public readonly editingGift: InputSignal<Gift | null> = input<Gift | null>(null);
   public readonly cancel: OutputEmitterRef<void> = output<void>();
 
-  public readonly categories: typeof GIFT_CATEGORIES = GIFT_CATEGORIES;
   public readonly form: FormGroup;
   public enrichUrl: string = '';
   public enriching: boolean = false;
@@ -45,7 +43,6 @@ export class AdminGiftFormComponent {
   ) {
     this.form = this.fb.group({
       name: ['', [Validators.required, Validators.maxLength(120)]],
-      category: [GIFT_CATEGORIES[0].id, [Validators.required]],
       total: [null, [Validators.required, Validators.min(0.01)]],
       image: [''],
       description: ['', [Validators.maxLength(1000)]],
@@ -58,7 +55,6 @@ export class AdminGiftFormComponent {
       this.raised = gift?.raised ?? 0;
       this.form.reset({
         name: gift?.name ?? '',
-        category: gift?.category ?? GIFT_CATEGORIES[0].id,
         total: gift?.total ?? null,
         image: gift?.image ?? '',
         description: gift?.description ?? '',
@@ -112,7 +108,6 @@ export class AdminGiftFormComponent {
 
     const payload: Partial<Gift> = {
       name: `${value.name ?? ''}`.trim(),
-      category: value.category,
       total: Number(value.total),
       image: value.image ?? '',
       description: `${value.description ?? ''}`.trim(),

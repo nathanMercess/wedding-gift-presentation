@@ -2,9 +2,8 @@ import { CommonModule } from '@angular/common';
 import { AfterViewChecked, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, WritableSignal, effect, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
-import { GiftSortField } from 'src/app/enums/GiftSortField';
-import { SortDirection } from 'src/app/enums/SortDirection';
-import { GIFT_CATEGORIES } from '../../constants/gift-categories.constant';
+import { GiftSortField } from '../../enums/GiftSortField';
+import { SortDirection } from '../../enums/SortDirection';
 import { SORT_OPTIONS } from '../../constants/sort-options.constant';
 import { CarouselPhoto, Couple } from '../../models/couple.model';
 import { Gift } from '../../models/gift.model';
@@ -24,7 +23,6 @@ import { GiftDetailsModalComponent } from '../gift-details-modal/gift-details-mo
 })
 export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   public searchTerm: string = '';
-  public selectedCategory: string = 'todos';
   public showQuickControls: boolean = false;
   public formattedWeddingDate: string = '';
   public readonly localCouplePhoto: string = 'assets/images/couple-photo.jpg';
@@ -139,11 +137,6 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   public readonly skeletonItems: number[] = [1, 2, 3, 4, 5, 6];
-  
-  public readonly quickCategories: Array<{ id: string; label: string }> = [
-    { id: 'todos', label: 'Todos' },
-    ...GIFT_CATEGORIES,
-  ];
   public readonly sortOptions: typeof SORT_OPTIONS = SORT_OPTIONS;
 
   private readonly destroy$ = new Subject<void>();
@@ -265,7 +258,6 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
     const { orderBy, orderDir } = this.parseSortBy();
     this.giftService.loadGuestGifts({
       search: this.searchTerm || undefined,
-      category: this.selectedCategory !== 'todos' ? this.selectedCategory : undefined,
       orderBy,
       orderDir,
       onlyAvailable: this.onlyAvailable || undefined,
@@ -303,7 +295,6 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
     const { orderBy, orderDir } = this.parseSortBy();
     this.giftService.refreshGuestGiftsSilently({
       search: this.searchTerm || undefined,
-      category: this.selectedCategory !== 'todos' ? this.selectedCategory : undefined,
       orderBy,
       orderDir,
       onlyAvailable: this.onlyAvailable || undefined,
@@ -367,7 +358,6 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   public resetFilters(): void {
     this.searchTerm = '';
-    this.selectedCategory = 'todos';
     this.sortBy = 'name';
     this.onlyAvailable = false;
     this.closeFilterSheet();

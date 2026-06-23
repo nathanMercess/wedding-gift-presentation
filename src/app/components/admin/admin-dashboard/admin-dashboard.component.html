@@ -48,16 +48,6 @@
           <input type="text" class="search-input" placeholder="Buscar presente..." [(ngModel)]="searchTerm" name="asearch"
             (input)="onSearchChange()" />
         </div>
-        <div class="chips-scroll">
-          <button
-            *ngFor="let cat of quickCategories; trackBy: trackByOptionId"
-            type="button"
-            class="chip"
-            [class.active]="selectedCategory === cat.id"
-            (click)="selectedCategory = cat.id; onFilterChange()">
-            {{ cat.label }}
-          </button>
-        </div>
         <span *ngIf="!giftService.adminState().giftsLoading" class="results-count">
           {{ totalCount }} presente{{ totalCount !== 1 ? 's' : '' }}
         </span>

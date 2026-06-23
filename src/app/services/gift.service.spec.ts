@@ -13,7 +13,6 @@ function makeGift(over: Partial<Gift> = {}): Gift {
     price: 500,
     raised: 100,
     total: 500,
-    category: 'Cozinha',
     description: '',
     available: true,
     allowPartialContribution: true,

@@ -12,7 +12,6 @@ import { AdminGiftFormComponent } from '../admin-gift-form/admin-gift-form.compo
 import { AdminCoupleFormComponent } from '../admin-couple-form/admin-couple-form.component';
 import { SlideOverComponent } from '../../slide-over/slide-over.component';
 import { AdminTab } from '../../../enums/admin-tab.enum';
-import { GIFT_CATEGORIES } from '../../../constants/gift-categories.constant';
 
 @Component({
   standalone: true,
@@ -23,17 +22,12 @@ import { GIFT_CATEGORIES } from '../../../constants/gift-categories.constant';
 })
 export class AdminDashboardComponent implements OnInit, OnDestroy {
   public readonly AdminTab: typeof AdminTab = AdminTab;
-  public readonly quickCategories: Array<{ id: string; label: string }> = [
-    { id: 'todos', label: 'Todos' },
-    ...GIFT_CATEGORIES,
-  ];
 
   public activeTab: AdminTab = AdminTab.Gifts;
   public showGiftForm: boolean = false;
   public editingGift: Gift | null = null;
   public giftPendingDeletion: Gift | null = null;
   public searchTerm: string = '';
-  public selectedCategory: string = 'todos';
 
   private readonly destroy$ = new Subject<void>();
   private readonly searchSubject = new Subject<string>();
@@ -86,7 +80,6 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   public loadGifts(page: number = this.currentPage): void {
     this.giftService.loadAdminGifts({
       search: this.searchTerm || undefined,
-      category: this.selectedCategory !== 'todos' ? this.selectedCategory : undefined,
       page,
       pageSize: 20,
     });
@@ -132,7 +125,6 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
     this.giftService.refreshAdminGiftsSilently({
       search: this.searchTerm || undefined,
-      category: this.selectedCategory !== 'todos' ? this.selectedCategory : undefined,
       page: this.currentPage,
       pageSize: 20,
     });
@@ -151,10 +143,6 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   public cancelDeleteGift(): void {
     this.giftPendingDeletion = null;
-  }
-
-  public trackByOptionId(_: number, option: { id: string }): string {
-    return option.id;
   }
 
   public trackByGiftId(_: number, gift: Gift): string {

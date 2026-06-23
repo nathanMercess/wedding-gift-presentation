@@ -7,7 +7,7 @@ import { Gift } from '../../models/gift.model';
 function makeGift(over: Partial<Gift> = {}): Gift {
   return {
     id: 'g1', image: '', name: 'Aparelho de Jantar', price: 300, raised: 100, total: 300,
-    category: 'Mesa', description: '', available: true, allowPartialContribution: true, ...over,
+    description: '', available: true, allowPartialContribution: true, ...over,
   };
 }
 
