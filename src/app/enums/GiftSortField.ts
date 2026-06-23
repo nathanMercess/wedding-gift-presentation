@@ -1,5 +1,7 @@
 export enum GiftSortField {
   Name = 'Name',
   Price = 'Price',
-  Available = 'Available'
+  Total = 'Total',
+  Raised = 'Raised',
+  Available = 'Available',
 }

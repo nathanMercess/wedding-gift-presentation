@@ -2,9 +2,6 @@ import { CommonModule } from '@angular/common';
 import { AfterViewChecked, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, WritableSignal, effect, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
-import { GiftSortField } from '../../enums/GiftSortField';
-import { SortDirection } from '../../enums/SortDirection';
-import { SORT_OPTIONS } from '../../constants/sort-options.constant';
 import { CarouselPhoto, Couple } from '../../models/couple.model';
 import { Gift } from '../../models/gift.model';
 import { CoupleService } from '../../services/couple.service';
@@ -30,7 +27,6 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   public displayCouplePhoto: string = this.localCouplePhoto;
   public hasTriedApiCouplePhoto: boolean = false;
   public coupleSignature: string = '';
-  public sortBy: string = 'name';
   public onlyAvailable: boolean = false;
   public selectedGift: Gift | null = null;
   public filterSheetOpen: boolean = false;
@@ -137,8 +133,6 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   public readonly skeletonItems: number[] = [1, 2, 3, 4, 5, 6];
-  public readonly sortOptions: typeof SORT_OPTIONS = SORT_OPTIONS;
-
   private readonly destroy$ = new Subject<void>();
   private readonly searchSubject = new Subject<string>();
 
@@ -255,11 +249,8 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   public loadGifts(page: number = 1): void {
     // Uso del nuevo método tipado
-    const { orderBy, orderDir } = this.parseSortBy();
     this.giftService.loadGuestGifts({
       search: this.searchTerm || undefined,
-      orderBy,
-      orderDir,
       onlyAvailable: this.onlyAvailable || undefined,
       page,
       pageSize: 20,
@@ -292,11 +283,8 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   public onGiftPaymentCompleted(): void {
     // Uso del nuevo método tipado
-    const { orderBy, orderDir } = this.parseSortBy();
     this.giftService.refreshGuestGiftsSilently({
       search: this.searchTerm || undefined,
-      orderBy,
-      orderDir,
       onlyAvailable: this.onlyAvailable || undefined,
       page: this.currentPage,
       pageSize: 20,
@@ -304,19 +292,8 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.giftService.loadGuestStats();
   }
 
-  // Mapeo seguro de String al tipo Enum
-  private parseSortBy(): { orderBy: GiftSortField; orderDir: SortDirection } {
-    if (this.sortBy === 'price-asc') return { orderBy: GiftSortField.Price, orderDir: SortDirection.Asc };
-    if (this.sortBy === 'price-desc') return { orderBy: GiftSortField.Price, orderDir: SortDirection.Desc };
-    return { orderBy: GiftSortField.Name, orderDir: SortDirection.Asc };
-  }
-
   public trackByGiftId(_: number, gift: Gift): string {
     return gift.id;
-  }
-
-  public trackByOptionId(_: number, option: { id: string }): string {
-    return option.id;
   }
 
   public trackByNumber(_: number, value: number): number {
@@ -358,7 +335,6 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   public resetFilters(): void {
     this.searchTerm = '';
-    this.sortBy = 'name';
     this.onlyAvailable = false;
     this.closeFilterSheet();
     this.loadGifts(1);

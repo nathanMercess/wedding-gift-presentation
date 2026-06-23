@@ -104,15 +104,6 @@
             class="search-input" (input)="onSearchChange()" />
         </div>
 
-        <div class="filter-row desktop-only">
-          <div class="chips-scroll">
-            <button *ngFor="let s of sortOptions; trackBy: trackByOptionId" class="chip"
-              [class.active]="sortBy === s.id" (click)="sortBy = s.id; onFilterChange()">
-              {{ s.label }}
-            </button>
-          </div>
-        </div>
-
         <button class="filter-sheet-btn mobile-only" (click)="openFilterSheet()">
           <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2">
@@ -129,13 +120,6 @@
     <div class="filter-sheet" [class.open]="filterSheetOpen">
       <div class="filter-sheet-handle"></div>
       <h3 class="filter-sheet-title">Filtros</h3>
-      <div class="filter-sheet-section">
-        <p class="filter-sheet-label">Ordenar por</p>
-        <div class="filter-sheet-chips">
-          <button *ngFor="let s of sortOptions; trackBy: trackByOptionId" class="chip" [class.active]="sortBy === s.id"
-            (click)="sortBy = s.id">{{ s.label }}</button>
-        </div>
-      </div>
 
       <div class="filter-sheet-actions">
         <button class="filter-sheet-reset" (click)="resetFilters()">Limpar</button>
