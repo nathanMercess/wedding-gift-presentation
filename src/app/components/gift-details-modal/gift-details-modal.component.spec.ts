@@ -7,7 +7,7 @@ import { Gift } from '../../models/gift.model';
 function makeGift(over: Partial<Gift> = {}): Gift {
   return {
     id: 'g1', image: '', name: 'Aparelho de Jantar', price: 300, raised: 100, total: 300,
-    description: '', available: true, allowPartialContribution: true, ...over,
+    fullyFunded: false, description: '', available: true, allowPartialContribution: true, ...over,
   };
 }
 
@@ -36,14 +36,28 @@ describe('GiftDetailsModalComponent', () => {
     expect(component.remaining).toBe(200);
   });
 
-  it('isCompleted é true quando o presente está indisponível', () => {
+  it('isUnavailable é true quando o presente está indisponível', () => {
     setup(makeGift({ available: false }));
-    expect(component.isCompleted).toBe(true);
+    expect(component.isUnavailable).toBe(true);
+  });
+
+  it('mantém contribuição liberada quando available true e fullyFunded true', () => {
+    setup(makeGift({ available: true, fullyFunded: true, raised: 300, total: 300 }));
+    expect(component.isUnavailable).toBe(false);
+    expect(component.isFullyFunded).toBe(true);
+    expect(component.remaining).toBe(0);
+    expect(component.contributionLimit).toBe(300);
+    expect(component.minAmount).toBe(10);
   });
 
   it('availableQuickAmounts filtra valores que cabem no restante', () => {
     setup(makeGift({ total: 300, raised: 100 }));
     expect(component.availableQuickAmounts).toEqual([50, 100, 200]);
+  });
+
+  it('availableQuickAmounts usa o total como limite quando a meta já foi atingida', () => {
+    setup(makeGift({ fullyFunded: true, total: 300, raised: 300 }));
+    expect(component.availableQuickAmounts).toEqual([50, 100, 200, 300]);
   });
 
   it('onContributionSubmit avança para Pagamento guardando os dados', () => {

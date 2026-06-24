@@ -23,7 +23,18 @@ export class GiftCardComponent {
     return Math.min((this.gift().raised / this.gift().total) * 100, 100);
   }
 
+  public get isUnavailable(): boolean {
+    return this.gift().available === false;
+  }
+
+  public get isFullyFunded(): boolean {
+    return this.gift().fullyFunded;
+  }
+
   public onPresent(): void {
+    if (this.isUnavailable)
+      return;
+
     this.presentClick.emit();
   }
 

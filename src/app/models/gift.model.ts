@@ -5,6 +5,7 @@ export interface Gift {
   price: number;
   raised: number;
   total: number;
+  fullyFunded: boolean;
   description?: string;
   available: boolean;
   allowPartialContribution: boolean;
