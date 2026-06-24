@@ -144,6 +144,34 @@
 
 .hint { font-family: var(--font-sans); font-size: .75rem; color: var(--muted-foreground); margin: 0; }
 
+.card-preview {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: .35rem .85rem;
+  padding: .85rem 1rem;
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  background: var(--secondary);
+  font-family: var(--font-sans);
+  font-size: .82rem;
+  color: var(--muted-foreground);
+}
+
+.card-preview strong {
+  color: var(--foreground);
+  font-size: .92rem;
+  font-weight: 700;
+  text-align: right;
+}
+
+.card-preview small {
+  grid-column: 1 / -1;
+  color: var(--primary);
+  font-size: .82rem;
+  font-weight: 600;
+  text-align: right;
+}
+
 .field-error {
   font-family: var(--font-sans);
   font-size: .75rem;

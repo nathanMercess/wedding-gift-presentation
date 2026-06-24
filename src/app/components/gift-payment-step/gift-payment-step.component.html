@@ -1,7 +1,15 @@
 <div class="payment-step">
   <div class="payment-summary-bar">
     <span class="payment-gift-name">{{ giftName() }}</span>
-    <span class="payment-total">{{ amount() | currency:'BRL' }}</span>
+    <span class="payment-total">{{ paymentAmount | currency:'BRL' }}</span>
+  </div>
+
+  <div class="card-price-preview" *ngIf="activeMethod === PaymentMethod.CreditCard && creditCardAmount > amount()">
+    <span>Pix ou 1x</span>
+    <strong>{{ amount() | currency:'BRL':'symbol':'1.2-2' }}</strong>
+    <span>Cartao em ate {{ maxInstallments }}x</span>
+    <strong>{{ creditCardAmount | currency:'BRL':'symbol':'1.2-2' }}</strong>
+    <small>{{ maxInstallments }}x de {{ installmentPreview | currency:'BRL':'symbol':'1.2-2' }}</small>
   </div>
 
   <app-payment-method-selector (methodSelected)="activeMethod = $event">
@@ -10,7 +18,7 @@
   <ng-container *ngIf="activeMethod">
     <app-card-brick
       *ngIf="activeMethod === PaymentMethod.CreditCard || activeMethod === PaymentMethod.DebitCard"
-      [config]="{ cardType: activeMethod, orderId: orderId(), giftId: giftId(), contributorName: contributorName(), message: message(), amount: amount(), payerEmail: '' }"
+      [config]="{ cardType: activeMethod, orderId: orderId(), giftId: giftId(), contributorName: contributorName(), message: message(), amount: paymentAmount, netAmount: amount(), payerEmail: '', maxInstallments: maxInstallments }"
       (paymentApproved)="paymentApproved.emit()">
     </app-card-brick>
 

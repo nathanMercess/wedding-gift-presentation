@@ -9,4 +9,6 @@ export interface Gift {
   description?: string;
   available: boolean;
   allowPartialContribution: boolean;
+  creditCardFeePercent?: number;
+  creditCardMaxInstallments?: number;
 }

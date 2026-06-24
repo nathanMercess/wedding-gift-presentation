@@ -72,7 +72,9 @@
             @case (ModalStep.Payment) {
               <app-gift-payment-step *ngIf="!isUnavailable" [giftId]="gift().id" [giftName]="gift().name"
                 [amount]="contributionAmount" [orderId]="orderId" [contributorName]="contributorName"
-                [message]="contributorMessage" (paymentApproved)="onPaymentApproved()">
+                [message]="contributorMessage" [creditCardFeePercent]="gift().creditCardFeePercent ?? 0"
+                [creditCardMaxInstallments]="gift().creditCardMaxInstallments ?? 12"
+                (paymentApproved)="onPaymentApproved()">
               </app-gift-payment-step>
             }
 

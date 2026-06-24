@@ -92,7 +92,7 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
           paymentMethods: {
             creditCard: 'all',
             debitCard: 'all',
-            maxInstallments: cfg.cardType === PaymentMethod.CreditCard ? 12 : 1,
+            maxInstallments: cfg.cardType === PaymentMethod.CreditCard ? cfg.maxInstallments : 1,
           },
         },
         callbacks: {
@@ -153,6 +153,7 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
         message: cfg.message,
         orderId: cfg.orderId,
         amount: cfg.amount,
+        netAmount: cfg.netAmount,
         cardToken: formData.token,
         paymentMethodId: formData.payment_method_id,
         installments: formData.installments ?? 1,

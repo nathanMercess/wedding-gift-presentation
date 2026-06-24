@@ -127,6 +127,34 @@
   color: var(--primary);
 }
 
+.card-price-preview {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.35rem 0.85rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--secondary);
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  color: var(--muted-foreground);
+}
+
+.card-price-preview strong {
+  color: var(--foreground);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: right;
+}
+
+.card-price-preview small {
+  grid-column: 1 / -1;
+  color: var(--primary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-align: right;
+}
+
 .payment-hint {
   font-family: var(--font-sans);
   font-size: 0.875rem;

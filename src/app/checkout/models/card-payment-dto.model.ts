@@ -6,6 +6,7 @@ export interface CardPaymentDto {
   message?: string;
   orderId: string;
   amount: number;
+  netAmount: number;
   cardToken: string;
   paymentMethodId: string;
   installments: number;

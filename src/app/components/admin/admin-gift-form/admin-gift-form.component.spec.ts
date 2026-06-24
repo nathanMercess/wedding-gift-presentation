@@ -13,7 +13,7 @@ function makeGift(over: Partial<Gift> = {}): Gift {
 }
 
 function validValue(over: Record<string, unknown> = {}): Record<string, unknown> {
-  return { name: 'Air Fryer', total: 200, image: '', description: 'desc', allowPartialContribution: true, ...over };
+  return { name: 'Air Fryer', total: 200, image: '', description: 'desc', allowPartialContribution: true, creditCardFeePercent: 10, creditCardMaxInstallments: 12, ...over };
 }
 
 describe('AdminGiftFormComponent', () => {
@@ -67,7 +67,7 @@ describe('AdminGiftFormComponent', () => {
     component.save();
     expect(giftServiceMock.saveAdminGift).toHaveBeenCalledWith(
       null,
-      expect.objectContaining({ name: 'Air Fryer', total: 200, raised: 0, allowPartialContribution: true }),
+      expect.objectContaining({ name: 'Air Fryer', total: 200, raised: 0, allowPartialContribution: true, creditCardFeePercent: 10, creditCardMaxInstallments: 12 }),
     );
   });
 
@@ -77,6 +77,8 @@ describe('AdminGiftFormComponent', () => {
 
     expect(component.form.get('name')!.value).toBe('Existente');
     expect(component.form.get('total')!.value).toBe(150);
+    expect(component.form.get('creditCardFeePercent')!.value).toBe(0);
+    expect(component.form.get('creditCardMaxInstallments')!.value).toBe(12);
 
     component.save();
     expect(giftServiceMock.saveAdminGift).toHaveBeenCalledWith('g9', expect.objectContaining({ raised: 50, total: 150 }));

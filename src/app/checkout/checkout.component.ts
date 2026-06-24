@@ -51,12 +51,14 @@ export class CheckoutComponent implements OnInit {
     if (method === PaymentMethod.CreditCard || method === PaymentMethod.DebitCard) {
       this.cardConfig = {
         amount: this.totalAmount,
+        netAmount: this.totalAmount,
         orderId: this.orderId,
         giftId: this.giftId,
         contributorName: this.contributorName,
         message: this.message,
         cardType: method,
         payerEmail: this.payerEmail,
+        maxInstallments: 12,
       };
     }
   }
