@@ -7,6 +7,7 @@ import { Gift } from '../../../models/gift.model';
 import { GiftService } from '../../../services/gift.service';
 import { EndpointsUrls } from '../../../constants/api-endpoints';
 import { HttpErrorUtil } from '../../../utils/http-error';
+import { CreditCardFeeUtil } from '../../../checkout/utils/credit-card-fee.util';
 
 interface GiftEnrichResponse {
   name?: string;
@@ -47,8 +48,6 @@ export class AdminGiftFormComponent {
       image: [''],
       description: ['', [Validators.maxLength(1000)]],
       allowPartialContribution: [true],
-      creditCardFeePercent: [0, [Validators.min(0), Validators.max(99)]],
-      creditCardMaxInstallments: [12, [Validators.min(1), Validators.max(12)]],
     });
 
     effect((): void => {
@@ -61,8 +60,6 @@ export class AdminGiftFormComponent {
         image: gift?.image ?? '',
         description: gift?.description ?? '',
         allowPartialContribution: gift?.allowPartialContribution ?? true,
-        creditCardFeePercent: gift?.creditCardFeePercent ?? 0,
-        creditCardMaxInstallments: gift?.creditCardMaxInstallments ?? 12,
       });
 
       this.enrichUrl = '';
@@ -78,23 +75,19 @@ export class AdminGiftFormComponent {
 
   public get creditCardPreviewAmount(): number {
     const total: number = Number(this.form.get('total')!.value ?? 0);
-    const feePercent: number = Number(this.form.get('creditCardFeePercent')!.value ?? 0);
-
-    if (total <= 0)
-      return 0;
-
-    if (feePercent <= 0)
-      return total;
-
-    if (feePercent >= 99)
-      return total;
-
-    return Math.round((total / (1 - feePercent / 100)) * 100) / 100;
+    return CreditCardFeeUtil.calculateGrossAmount(total);
   }
 
   public get creditCardInstallmentPreview(): number {
-    const installments: number = Math.max(Math.min(Math.trunc(Number(this.form.get('creditCardMaxInstallments')!.value ?? 12)), 12), 1);
-    return Math.round((this.creditCardPreviewAmount / installments) * 100) / 100;
+    return CreditCardFeeUtil.calculateInstallmentAmount(Number(this.form.get('total')!.value ?? 0));
+  }
+
+  public get creditCardMaxInstallments(): number {
+    return CreditCardFeeUtil.getMaxInstallments();
+  }
+
+  public get creditCardFeePercent(): number {
+    return CreditCardFeeUtil.getTotalFeePercent();
   }
 
   public enrichFromLink(): void {
@@ -137,8 +130,6 @@ export class AdminGiftFormComponent {
       image: value.image ?? '',
       description: `${value.description ?? ''}`.trim(),
       allowPartialContribution: !!value.allowPartialContribution,
-      creditCardFeePercent: Number(value.creditCardFeePercent ?? 0),
-      creditCardMaxInstallments: Number(value.creditCardMaxInstallments ?? 12),
       raised: this.raised,
     };
 

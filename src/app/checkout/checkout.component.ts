@@ -6,6 +6,7 @@ import { CardBrickComponent } from './components/card-brick/card-brick.component
 import { PixDisplayComponent } from './components/pix-display/pix-display.component';
 import { PaymentMethod } from './enums/payment-method.enum';
 import { CardBrickConfig } from './models/card-brick-config.model';
+import { CreditCardFeeUtil } from './utils/credit-card-fee.util';
 
 @Component({
   standalone: true,
@@ -50,7 +51,7 @@ export class CheckoutComponent implements OnInit {
 
     if (method === PaymentMethod.CreditCard || method === PaymentMethod.DebitCard) {
       this.cardConfig = {
-        amount: this.totalAmount,
+        amount: method === PaymentMethod.CreditCard ? CreditCardFeeUtil.calculateGrossAmount(this.totalAmount) : this.totalAmount,
         netAmount: this.totalAmount,
         orderId: this.orderId,
         giftId: this.giftId,
@@ -58,7 +59,7 @@ export class CheckoutComponent implements OnInit {
         message: this.message,
         cardType: method,
         payerEmail: this.payerEmail,
-        maxInstallments: 12,
+        maxInstallments: CreditCardFeeUtil.getMaxInstallments(),
       };
     }
   }

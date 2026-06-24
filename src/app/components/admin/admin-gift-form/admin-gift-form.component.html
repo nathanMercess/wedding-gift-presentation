@@ -25,24 +25,12 @@
       <p class="field-error" *ngIf="form.get('total')!.touched && form.get('total')!.hasError('required')">Informe o valor total.</p>
       <p class="field-error" *ngIf="form.get('total')!.touched && form.get('total')!.hasError('min')">O valor deve ser maior que zero.</p>
     </div>
-    <div class="form-group">
-      <label>Taxa embutida no cartão (%)</label>
-      <input type="number" formControlName="creditCardFeePercent" class="text-input" placeholder="0.00" step="0.01" min="0" max="99" />
-      <p class="field-error" *ngIf="form.get('creditCardFeePercent')!.touched && form.get('creditCardFeePercent')!.hasError('min')">A taxa não pode ser negativa.</p>
-      <p class="field-error" *ngIf="form.get('creditCardFeePercent')!.touched && form.get('creditCardFeePercent')!.hasError('max')">Use uma taxa menor que 99%.</p>
-    </div>
-    <div class="form-group">
-      <label>Máximo de parcelas no cartão</label>
-      <input type="number" formControlName="creditCardMaxInstallments" class="text-input" placeholder="12" step="1" min="1" max="12" />
-      <p class="field-error" *ngIf="form.get('creditCardMaxInstallments')!.touched && form.get('creditCardMaxInstallments')!.hasError('min')">Informe pelo menos 1 parcela.</p>
-      <p class="field-error" *ngIf="form.get('creditCardMaxInstallments')!.touched && form.get('creditCardMaxInstallments')!.hasError('max')">O limite máximo é 12 parcelas.</p>
-    </div>
     <div class="card-preview full-width">
       <span>Pix ou 1x</span>
       <strong>{{ (form.get('total')!.value || 0) | currency:'BRL':'symbol':'1.2-2' }}</strong>
-      <span>Cartão parcelado</span>
+      <span>Cartão em até {{ creditCardMaxInstallments }}x</span>
       <strong>{{ creditCardPreviewAmount | currency:'BRL':'symbol':'1.2-2' }}</strong>
-      <small>Até {{ form.get('creditCardMaxInstallments')!.value || 12 }}x de {{ creditCardInstallmentPreview | currency:'BRL':'symbol':'1.2-2' }}</small>
+      <small>Taxa global: {{ creditCardFeePercent | number:'1.2-2' }}% • {{ creditCardMaxInstallments }}x de {{ creditCardInstallmentPreview | currency:'BRL':'symbol':'1.2-2' }}</small>
     </div>
     <div class="form-group full-width">
       <label>Foto do presente</label>
