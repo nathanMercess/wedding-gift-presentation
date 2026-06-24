@@ -15,7 +15,7 @@
           Voltar
         </button>
         <h2>{{
-          isCompleted ? 'Presente completo' :
+          isUnavailable ? 'Presente indisponível' :
           step === ModalStep.Contribution ? 'Detalhes do Presente' :
           step === ModalStep.Payment ? 'Pagamento' :
           'Pagamento confirmado'
@@ -44,15 +44,15 @@
         <div class="right-side">
 
           <!-- Presente indisponível -->
-          <div *ngIf="isCompleted" class="completed-panel">
+          <div *ngIf="isUnavailable" class="completed-panel">
             <div class="completed-notice">
               <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
                 <path
                   d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
               </svg>
               <div>
-                <p class="completed-title">Presente já completo!</p>
-                <p class="completed-sub">Este presente já foi totalmente presenteado. Escolha outro para contribuir.</p>
+                <p class="completed-title">Presente indisponível</p>
+                <p class="completed-sub">Este presente não está disponível para contribuição no momento.</p>
               </div>
             </div>
             <div class="completed-actions">
@@ -63,14 +63,14 @@
 
           @switch (step) {
             @case (ModalStep.Contribution) {
-              <app-gift-contribution-form *ngIf="!isCompleted" [gift]="gift()" [coupleName]="coupleName()"
-                [minAmount]="minAmount" [remaining]="remaining" [availableQuickAmounts]="availableQuickAmounts"
+              <app-gift-contribution-form *ngIf="!isUnavailable" [gift]="gift()" [coupleName]="coupleName()"
+                [minAmount]="minAmount" [remaining]="contributionLimit" [availableQuickAmounts]="availableQuickAmounts"
                 (submitted)="onContributionSubmit($event)" (cancelled)="requestClose()">
               </app-gift-contribution-form>
             }
 
             @case (ModalStep.Payment) {
-              <app-gift-payment-step *ngIf="!isCompleted" [giftId]="gift().id" [giftName]="gift().name"
+              <app-gift-payment-step *ngIf="!isUnavailable" [giftId]="gift().id" [giftName]="gift().name"
                 [amount]="contributionAmount" [orderId]="orderId" [contributorName]="contributorName"
                 [message]="contributorMessage" (paymentApproved)="onPaymentApproved()">
               </app-gift-payment-step>

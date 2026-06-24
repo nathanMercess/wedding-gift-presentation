@@ -6,7 +6,7 @@ import { Gift } from '../../models/gift.model';
 function makeGift(over: Partial<Gift> = {}): Gift {
   return {
     id: 'g1', image: '', name: 'Jogo de panelas', price: 300, raised: 0, total: 300,
-    description: '', available: true, allowPartialContribution: true, ...over,
+    fullyFunded: false, description: '', available: true, allowPartialContribution: true, ...over,
   };
 }
 
@@ -47,6 +47,19 @@ describe('GiftContributionFormComponent', () => {
     expect(emitted.length).toBe(1);
     expect(emitted[0].amount).toBe(300);
     expect(emitted[0].guestName).toBe('Nathan Galvão');
+  });
+
+  it('fullyFunded true permite confirmar contribuição quando recebe limite positivo', () => {
+    fixture.componentRef.setInput('gift', makeGift({ fullyFunded: true, raised: 300, total: 300 }));
+    fixture.componentRef.setInput('remaining', 300);
+    component.nameControl.setValue('Nathan');
+    fixture.detectChanges();
+
+    component.onSubmit();
+
+    expect(component.form.invalid).toBe(false);
+    expect(emitted.length).toBe(1);
+    expect(emitted[0].amount).toBe(300);
   });
 
   it('Valor parcial abaixo do mínimo é inválido e não emite', () => {

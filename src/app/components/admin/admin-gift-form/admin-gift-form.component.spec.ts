@@ -8,7 +8,7 @@ import { Gift } from '../../../models/gift.model';
 function makeGift(over: Partial<Gift> = {}): Gift {
   return {
     id: 'g1', image: '', name: 'Item', price: 100, raised: 0, total: 100,
-    description: '', available: true, allowPartialContribution: true, ...over,
+    fullyFunded: false, description: '', available: true, allowPartialContribution: true, ...over,
   };
 }
 

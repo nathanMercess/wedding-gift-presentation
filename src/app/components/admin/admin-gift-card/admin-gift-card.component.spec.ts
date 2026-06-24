@@ -5,7 +5,7 @@ import { Gift } from '../../../models/gift.model';
 function makeGift(over: Partial<Gift> = {}): Gift {
   return {
     id: 'g1', image: '', name: 'Aparelho de Jantar', price: 500, raised: 250, total: 500,
-    description: '', available: true, allowPartialContribution: true, ...over,
+    fullyFunded: false, description: '', available: true, allowPartialContribution: true, ...over,
   };
 }
 
@@ -54,9 +54,9 @@ describe('AdminGiftCardComponent', () => {
     expect(emitted?.id).toBe('g1');
   });
 
-  it('mostra "Concluído" quando indisponível', () => {
+  it('mostra "Indisponível" quando indisponível', () => {
     fixture.componentRef.setInput('gift', makeGift({ available: false }));
     fixture.detectChanges();
-    expect(el.textContent).toContain('Concluído');
+    expect(el.textContent).toContain('Indisponível');
   });
 });

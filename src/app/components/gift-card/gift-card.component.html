@@ -1,8 +1,11 @@
 <div class="gift-card">
   <div class="card-image">
     <img [src]="gift().image" [alt]="gift().name" loading="lazy" decoding="async" (error)="onImgError($event)" />
-    <div class="card-badge" *ngIf="!gift().available">Completo</div>
-    <button type="button" class="card-hover-btn" (click)="onPresent()">Presentear</button>
+    <div class="card-badge unavailable" *ngIf="isUnavailable">Indisponível</div>
+    <div class="card-badge funded" *ngIf="!isUnavailable && isFullyFunded">Meta atingida</div>
+    <button type="button" class="card-hover-btn" [disabled]="isUnavailable" (click)="onPresent()">
+      {{ isUnavailable ? 'Indisponível' : 'Presentear' }}
+    </button>
   </div>
   <div class="card-body">
     <h3 class="card-name">{{ gift().name }}</h3>

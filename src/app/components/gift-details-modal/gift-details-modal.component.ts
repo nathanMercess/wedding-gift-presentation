@@ -46,23 +46,34 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy {
   @ViewChild(GiftContributionFormComponent) private formRef?: GiftContributionFormComponent;
 
   public get remaining(): number {
-    return this.gift().total - this.gift().raised;
+    return Math.max(this.gift().total - this.gift().raised, 0);
   }
 
   public get progress(): number {
     return Math.min((this.gift().raised / this.gift().total) * 100, 100);
   }
 
-  public get isCompleted(): boolean {
-    return !this.gift().available;
+  public get isUnavailable(): boolean {
+    return this.gift().available === false;
+  }
+
+  public get isFullyFunded(): boolean {
+    return this.gift().fullyFunded;
+  }
+
+  public get contributionLimit(): number {
+    if (this.isFullyFunded)
+      return this.gift().total;
+
+    return this.remaining;
   }
 
   public get minAmount(): number {
-    return Math.min(10, this.remaining);
+    return Math.min(10, this.contributionLimit);
   }
 
   public get availableQuickAmounts(): number[] {
-    return [50, 100, 200, 300].filter((a: number): boolean => a <= this.remaining);
+    return [50, 100, 200, 300].filter((a: number): boolean => a <= this.contributionLimit);
   }
 
   public get hasUnsavedInput(): boolean {

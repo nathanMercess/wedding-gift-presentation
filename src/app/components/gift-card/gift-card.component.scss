@@ -56,6 +56,14 @@
   padding: 0.28rem 0.7rem;
   border-radius: var(--radius-pill);
   border: 1px solid rgba(255, 255, 255, 0.12);
+
+  &.funded {
+    background: color-mix(in srgb, var(--primary) 84%, transparent);
+  }
+
+  &.unavailable {
+    background: rgba(20, 20, 20, 0.62);
+  }
 }
 
 .card-hover-btn {
@@ -74,6 +82,11 @@
   opacity: 0;
   transform: translateY(100%);
   transition: opacity var(--duration-base) var(--ease-out), transform var(--duration-base) var(--ease-spring);
+
+  &:disabled {
+    cursor: not-allowed;
+    background: rgba(20, 20, 20, 0.62);
+  }
 }
 
 /* ── Body ── */
