@@ -73,6 +73,19 @@ export class AdminGiftFormComponent {
     return this.form.get('image')!.value ?? '';
   }
 
+  public applySuggestedTotal(): void {
+    const suggestion = this.creditCardPreviewAmount;
+
+    if (suggestion) {
+      this.form.patchValue({
+        total: suggestion
+      });
+
+      this.form.get('total')?.markAsTouched();
+      this.form.get('total')?.markAsDirty();
+    }
+  }
+
   public get creditCardPreviewAmount(): number {
     const total: number = Number(this.form.get('total')!.value ?? 0);
     return CreditCardFeeUtil.calculateGrossAmount(total);
