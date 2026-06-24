@@ -1,20 +1,30 @@
+import { GiftSortField } from '../enums/GiftSortField';
 import { SortDirection } from '../enums/SortDirection';
 
 export interface SortOption {
-  id: SortDirection;
+  id: string;
   label: string;
+  orderBy: GiftSortField;
   orderDir: SortDirection;
 }
 
 export const SORT_OPTIONS: SortOption[] = [
   {
-    id: SortDirection.Asc,
-    label: 'Menor preço',
+    id: 'name-asc',
+    label: 'Nome (A-Z)',
+    orderBy: GiftSortField.Name,
     orderDir: SortDirection.Asc,
   },
   {
-    id: SortDirection.Desc,
+    id: 'total-asc',
+    label: 'Menor preço',
+    orderBy: GiftSortField.Total,
+    orderDir: SortDirection.Asc,
+  },
+  {
+    id: 'total-desc',
     label: 'Maior preço',
+    orderBy: GiftSortField.Total,
     orderDir: SortDirection.Desc,
   },
 ];

@@ -2,8 +2,7 @@ import { CommonModule } from '@angular/common';
 import { AfterViewChecked, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, WritableSignal, effect, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
-import { SORT_OPTIONS } from '../../constants/sort-options.constant';
-import { SortDirection } from '../../enums/SortDirection';
+import { SORT_OPTIONS, SortOption } from '../../constants/sort-options.constant';
 import { CarouselPhoto, Couple } from '../../models/couple.model';
 import { Gift } from '../../models/gift.model';
 import { CoupleService } from '../../services/couple.service';
@@ -29,7 +28,7 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   public displayCouplePhoto: string = this.localCouplePhoto;
   public hasTriedApiCouplePhoto: boolean = false;
   public coupleSignature: string = '';
-  public sortDirection: SortDirection = SortDirection.Asc;
+  public selectedSortId: string = 'name-asc';
   public onlyAvailable: boolean = false;
   public selectedGift: Gift | null = null;
   public filterSheetOpen: boolean = false;
@@ -256,7 +255,8 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
     // Uso del nuevo método tipado
     this.giftService.loadGuestGifts({
       search: this.searchTerm || undefined,
-      orderDir: this.sortDirection,
+      orderBy: this.selectedSort.orderBy,
+      orderDir: this.selectedSort.orderDir,
       onlyAvailable: this.onlyAvailable || undefined,
       page,
       pageSize: 20,
@@ -291,7 +291,8 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
     // Uso del nuevo método tipado
     this.giftService.refreshGuestGiftsSilently({
       search: this.searchTerm || undefined,
-      orderDir: this.sortDirection,
+      orderBy: this.selectedSort.orderBy,
+      orderDir: this.selectedSort.orderDir,
       onlyAvailable: this.onlyAvailable || undefined,
       page: this.currentPage,
       pageSize: 20,
@@ -303,7 +304,11 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
     return gift.id;
   }
 
-  public trackByOptionId(_: number, option: { id: SortDirection }): SortDirection {
+  public get selectedSort(): SortOption {
+    return this.sortOptions.find((option: SortOption): boolean => option.id === this.selectedSortId) ?? this.sortOptions[0];
+  }
+
+  public trackByOptionId(_: number, option: SortOption): string {
     return option.id;
   }
 
@@ -346,7 +351,7 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   public resetFilters(): void {
     this.searchTerm = '';
-    this.sortDirection = SortDirection.Asc;
+    this.selectedSortId = 'name-asc';
     this.onlyAvailable = false;
     this.closeFilterSheet();
     this.loadGifts(1);

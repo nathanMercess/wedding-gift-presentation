@@ -107,7 +107,7 @@
         <div class="filter-row desktop-only">
           <div class="chips-scroll">
             <button *ngFor="let s of sortOptions; trackBy: trackByOptionId" class="chip"
-              [class.active]="sortDirection === s.id" (click)="sortDirection = s.orderDir; onFilterChange()">
+              [class.active]="selectedSortId === s.id" (click)="selectedSortId = s.id; onFilterChange()">
               {{ s.label }}
             </button>
           </div>
@@ -132,8 +132,8 @@
       <div class="filter-sheet-section">
         <p class="filter-sheet-label">Ordenar por</p>
         <div class="filter-sheet-chips">
-          <button *ngFor="let s of sortOptions; trackBy: trackByOptionId" class="chip" [class.active]="sortDirection === s.id"
-            (click)="sortDirection = s.orderDir">{{ s.label }}</button>
+          <button *ngFor="let s of sortOptions; trackBy: trackByOptionId" class="chip" [class.active]="selectedSortId === s.id"
+            (click)="selectedSortId = s.id">{{ s.label }}</button>
         </div>
       </div>
 
