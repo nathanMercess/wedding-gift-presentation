@@ -34,6 +34,7 @@ export class AdminGiftFormComponent {
   public enrichUrl: string = '';
   public enriching: boolean = false;
   public enrichError: string = '';
+  public appliedSuggestionBaseAmount: number = 0;
   private raised: number = 0;
 
   public constructor(
@@ -64,6 +65,7 @@ export class AdminGiftFormComponent {
 
       this.enrichUrl = '';
       this.enrichError = '';
+      this.appliedSuggestionBaseAmount = 0;
       this.giftService.clearAdminGiftError();
       this.giftService.resetAdminGiftSaved();
     }, { allowSignalWrites: true });
@@ -73,26 +75,23 @@ export class AdminGiftFormComponent {
     return this.form.get('image')!.value ?? '';
   }
 
-  public applySuggestedTotal(): void {
-    const suggestion = this.creditCardPreviewAmount;
+  public get totalAmount(): number {
+    return Number(this.form.get('total')!.value ?? 0);
+  }
 
-    if (suggestion) {
-      this.form.patchValue({
-        total: suggestion
-      });
+  public get suggestionApplied(): boolean {
+    if (this.appliedSuggestionBaseAmount <= 0)
+      return false;
 
-      this.form.get('total')?.markAsTouched();
-      this.form.get('total')?.markAsDirty();
-    }
+    return Math.abs(this.totalAmount - CreditCardFeeUtil.calculateGrossAmount(this.appliedSuggestionBaseAmount)) <= 0.01;
   }
 
   public get creditCardPreviewAmount(): number {
-    const total: number = Number(this.form.get('total')!.value ?? 0);
-    return CreditCardFeeUtil.calculateGrossAmount(total);
+    return CreditCardFeeUtil.calculateGrossAmount(this.creditCardPreviewBaseAmount);
   }
 
   public get creditCardInstallmentPreview(): number {
-    return CreditCardFeeUtil.calculateInstallmentAmount(Number(this.form.get('total')!.value ?? 0));
+    return CreditCardFeeUtil.calculateInstallmentAmount(this.creditCardPreviewBaseAmount);
   }
 
   public get creditCardMaxInstallments(): number {
@@ -101,6 +100,23 @@ export class AdminGiftFormComponent {
 
   public get creditCardFeePercent(): number {
     return CreditCardFeeUtil.getTotalFeePercent();
+  }
+
+  public applySuggestedTotal(): void {
+    if (this.creditCardPreviewAmount <= 0)
+      return;
+
+    this.appliedSuggestionBaseAmount = this.creditCardPreviewBaseAmount;
+    this.form.patchValue({ total: this.creditCardPreviewAmount });
+    this.form.get('total')!.markAsTouched();
+    this.form.get('total')!.markAsDirty();
+  }
+
+  private get creditCardPreviewBaseAmount(): number {
+    if (this.suggestionApplied)
+      return this.appliedSuggestionBaseAmount;
+
+    return this.totalAmount;
   }
 
   public enrichFromLink(): void {

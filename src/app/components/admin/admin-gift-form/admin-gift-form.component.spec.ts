@@ -71,6 +71,19 @@ describe('AdminGiftFormComponent', () => {
     );
   });
 
+  it('applySuggestedTotal() aplica a sugestao sem recalcular taxa sobre ela', () => {
+    fixture.detectChanges();
+    component.form.patchValue({ total: 100 });
+
+    const suggestion: number = component.creditCardPreviewAmount;
+
+    component.applySuggestedTotal();
+
+    expect(component.form.get('total')!.value).toBe(suggestion);
+    expect(component.creditCardPreviewAmount).toBe(suggestion);
+    expect(component.suggestionApplied).toBe(true);
+  });
+
   it('editingGift popula o form e save() preserva id e raised existentes', () => {
     fixture.componentRef.setInput('editingGift', makeGift({ id: 'g9', name: 'Existente', total: 150, raised: 50 }));
     fixture.detectChanges();

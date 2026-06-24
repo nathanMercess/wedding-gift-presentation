@@ -30,21 +30,25 @@
     </div>
 
     <div class="card-preview" *ngIf="form.get('total')!.value > 0">
+      <div class="card-preview-info">
+        <span>Valor cadastrado:
+          <strong>{{ (form.get('total')!.value || 0) | currency:'BRL':'symbol':'1.2-2' }}</strong></span>
+      </div>
 
       <div class="card-preview-info">
         <span>Cartão em até {{ creditCardMaxInstallments }}x de
           <strong>{{ creditCardInstallmentPreview | currency:'BRL':'symbol':'1.2-2' }}</strong></span>
       </div>
-      <div class="card-preview-info"
-        *ngIf="creditCardPreviewAmount && creditCardPreviewAmount !== form.get('total')!.value">
+      <div class="card-preview-info suggestion-box" *ngIf="creditCardPreviewAmount">
 
         <div class="suggestion-text">
-          <span>Sugestão ideal:</span>
+          <span>Sugestao com taxa do cartao:</span>
           <strong>{{ creditCardPreviewAmount | currency:'BRL':'symbol':'1.2-2' }}</strong>
-          <small>Taxa global: {{ creditCardFeePercent | number:'1.2-2' }}%</small>
+          <small *ngIf="!suggestionApplied">Taxa global: {{ creditCardFeePercent | number:'1.2-2' }}%</small>
+          <small *ngIf="suggestionApplied">Sugestao aplicada</small>
         </div>
-        <button type="button" class="btn-outline btn-sm" (click)="applySuggestedTotal()">
-          Aplicar valor
+        <button *ngIf="!suggestionApplied" type="button" class="btn-outline btn-sm" (click)="applySuggestedTotal()">
+          Aplicar sugestao
         </button>
       </div>
 
