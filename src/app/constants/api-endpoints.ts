@@ -25,6 +25,10 @@ export class EndpointsUrls {
         return `${this.apiUrl}/admin/gifts`;
     }
 
+    public get adminDashboard(): string {
+        return `${this.apiUrl}/admin/dashboard`;
+    }
+
     public get coupleGet(): string {
         return `${this.apiUrl}/couple`;
     }

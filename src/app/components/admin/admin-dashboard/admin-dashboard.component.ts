@@ -1,6 +1,7 @@
-import { Component, HostListener, OnDestroy, OnInit, effect } from '@angular/core';
+import { Component, OnDestroy, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged, interval, takeUntil } from 'rxjs';
 import { Gift } from '../../../models/gift.model';
 import { GiftService } from '../../../services/gift.service';
@@ -12,13 +13,14 @@ import { AdminGiftFormComponent } from '../admin-gift-form/admin-gift-form.compo
 import { AdminCoupleFormComponent } from '../admin-couple-form/admin-couple-form.component';
 import { SlideOverComponent } from '../../slide-over/slide-over.component';
 import { AdminTab } from '../../../enums/admin-tab.enum';
+import { UserRole } from '../../../enums/user-role.enum';
 
 @Component({
   standalone: true,
   selector: 'app-admin-dashboard',
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss',
-  imports: [CommonModule, FormsModule, ConfirmDialogComponent, AdminGiftCardComponent, AdminGiftFormComponent, AdminCoupleFormComponent, SlideOverComponent],
+  imports: [CommonModule, FormsModule, RouterLink, ConfirmDialogComponent, AdminGiftCardComponent, AdminGiftFormComponent, AdminCoupleFormComponent, SlideOverComponent],
 })
 export class AdminDashboardComponent implements OnInit, OnDestroy {
   public readonly AdminTab: typeof AdminTab = AdminTab;
@@ -65,6 +67,10 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   public get totalCount(): number {
     return this.giftService.adminState().totalCount;
+  }
+
+  public get isSuperAdmin(): boolean {
+    return this.auth.hasRole(UserRole.SuperAdmin);
   }
 
   public ngOnInit(): void {

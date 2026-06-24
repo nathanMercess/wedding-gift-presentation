@@ -6,6 +6,7 @@ import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@a
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { authGuard } from './guards/auth.guard';
+import { superAdminGuard } from './guards/super-admin.guard';
 
 registerLocaleData(localePt, 'pt-BR');
 
@@ -28,10 +29,22 @@ export const appConfig: ApplicationConfig = {
           import('./components/admin/admin-login/admin-login.component').then(m => m.AdminLoginComponent),
       },
       {
+        path: 'admin/access-denied',
+        canActivate: [authGuard],
+        loadComponent: () =>
+          import('./components/admin/access-denied/access-denied.component').then(m => m.AccessDeniedComponent),
+      },
+      {
         path: 'admin',
         canActivate: [authGuard],
         loadComponent: () =>
           import('./components/admin/admin-dashboard/admin-dashboard.component').then(m => m.AdminDashboardComponent),
+      },
+      {
+        path: 'super-admin/dashboard',
+        canActivate: [superAdminGuard],
+        loadComponent: () =>
+          import('./components/admin/super-admin-dashboard/super-admin-dashboard.component').then(m => m.SuperAdminDashboardComponent),
       },
       {
         path: 'checkout',

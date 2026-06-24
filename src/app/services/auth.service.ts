@@ -7,6 +7,7 @@ import { AuthLoginState } from '../models/auth-login-state.model';
 import { LoginApiResponse } from '../models/login-api-response.model';
 import { LoginRequest } from '../models/login-request.model';
 import { JwtUtil } from '../utils/jwt.util';
+import { UserRole } from '../enums/user-role.enum';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -66,6 +67,19 @@ export class AuthService {
       return false;
 
     return !JwtUtil.isExpired(token);
+  }
+
+  public getRoles(): string[] {
+    const token: string | null = this.getToken();
+
+    if (!token)
+      return [];
+
+    return JwtUtil.extractRoles(token);
+  }
+
+  public hasRole(role: UserRole): boolean {
+    return this.getRoles().includes(role);
   }
 
   public extractToken(response: LoginApiResponse): string | null {
