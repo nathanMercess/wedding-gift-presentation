@@ -29,22 +29,21 @@
         maior que zero.</p>
     </div>
 
-    <div class="card-preview">
+    <div class="card-preview" *ngIf="form.get('total')!.value > 0">
 
       <div class="card-preview-info">
         <span>Cartão em até {{ creditCardMaxInstallments }}x de
           <strong>{{ creditCardInstallmentPreview | currency:'BRL':'symbol':'1.2-2' }}</strong></span>
       </div>
-
       <div class="card-preview-info"
         *ngIf="creditCardPreviewAmount && creditCardPreviewAmount !== form.get('total')!.value">
 
         <div class="suggestion-text">
           <span>Sugestão ideal:</span>
           <strong>{{ creditCardPreviewAmount | currency:'BRL':'symbol':'1.2-2' }}</strong>
-          <span>Taxa global: {{ creditCardFeePercent | number:'1.2-2' }}%</span>
+          <small>Taxa global: {{ creditCardFeePercent | number:'1.2-2' }}%</small>
         </div>
-        <button type="button" class="btn-outline btn-sm al" (click)="applySuggestedTotal()">
+        <button type="button" class="btn-outline btn-sm" (click)="applySuggestedTotal()">
           Aplicar valor
         </button>
       </div>
