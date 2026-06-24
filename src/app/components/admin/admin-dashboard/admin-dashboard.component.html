@@ -1,17 +1,3 @@
-@if (coupleService.state().loading) {
-<div class="dash-loading">
-  <div class="dash-loading-spinner"></div>
-  <p>Carregando...</p>
-</div>
-}
-
-@if (!coupleService.state().loading && coupleService.state().error) {
-<div class="dash-load-error">
-  <p>{{ coupleService.state().error }}</p>
-</div>
-}
-
-@if (!coupleService.state().loading && !coupleService.state().error) {
 <div class="dash-root">
   <header class="dash-header">
     <div class="dash-brand">
@@ -82,7 +68,11 @@
       <div class="section-header">
         <h2>Informações do Casal</h2>
       </div>
-      <app-admin-couple-form></app-admin-couple-form>
+      <div *ngIf="coupleService.state().loading" class="status-msg">Carregando...</div>
+      <div *ngIf="!coupleService.state().loading && coupleService.state().error" class="error-msg">
+        {{ coupleService.state().error }}
+      </div>
+      <app-admin-couple-form *ngIf="!coupleService.state().loading && !coupleService.state().error"></app-admin-couple-form>
     </section>
 
   </main>
@@ -97,4 +87,3 @@
     confirmLabel="Remover" cancelLabel="Cancelar" (confirmed)="confirmDeleteGift()" (cancelled)="cancelDeleteGift()">
   </app-confirm-dialog>
 </div>
-}

@@ -163,6 +163,14 @@
   font-size: .85rem;
 }
 
+.field-error {
+  font-family: var(--font-sans);
+  font-size: .78rem;
+  font-weight: 500;
+  color: var(--danger);
+  margin: 0;
+}
+
 .submit-btn {
   margin-top: .35rem;
   min-height: 48px;

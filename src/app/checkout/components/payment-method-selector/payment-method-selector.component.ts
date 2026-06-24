@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, OutputEmitterRef, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OutputEmitterRef, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PaymentMethod } from '../../enums/payment-method.enum';
 
@@ -10,16 +10,12 @@ import { PaymentMethod } from '../../enums/payment-method.enum';
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PaymentMethodSelectorComponent implements OnInit {
+export class PaymentMethodSelectorComponent {
   public readonly methodSelected: OutputEmitterRef<PaymentMethod> = output<PaymentMethod>();
 
-  public activeMethod: PaymentMethod = PaymentMethod.CreditCard;
+  public activeMethod: PaymentMethod | null = null;
 
   public readonly PaymentMethod: typeof PaymentMethod = PaymentMethod;
-
-  public ngOnInit(): void {
-    this.methodSelected.emit(this.activeMethod);
-  }
 
   public select(method: PaymentMethod): void {
     this.activeMethod = method;

@@ -50,6 +50,15 @@
     animation: scaleIn var(--duration-base) var(--ease-spring) both;
   }
 
+  .modal-container.is-payment-step {
+    width: min(70rem, calc(100vw - 3rem));
+    max-height: calc(100vh - 2rem);
+  }
+
+  .modal-container.is-payment-step .modal-header {
+    padding: 0.95rem 1.5rem;
+  }
+
   @keyframes scaleIn {
     from { transform: scale(0.96); opacity: 0; }
     to   { transform: scale(1); opacity: 1; }
@@ -68,10 +77,10 @@
 
 .modal-header h2 {
   font-family: var(--font-sans);
-  font-size: 1.05rem;
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 700;
   letter-spacing: -0.015em;
-  color: var(--foreground);
+  color: var(--neutral-900);
   margin: 0;
 }
 
@@ -106,19 +115,29 @@
 .back-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  padding: 0.4rem 0.75rem;
-  border-radius: var(--radius-sm);
+  gap: 0.4rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: var(--radius-pill);
   font-family: var(--font-sans);
-  font-size: 0.85rem;
-  color: var(--muted-foreground);
-  background: none;
-  border: none;
+  font-size: 0.9rem;
+  font-weight: 650;
+  color: var(--neutral-900);
+  background: var(--secondary);
+  border: 1px solid var(--hairline-strong);
   cursor: pointer;
-  transition: background var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
+  box-shadow: var(--shadow-xs);
+  transition: background var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out), transform var(--duration-base) var(--ease-spring);
   white-space: nowrap;
 
-  &:hover { background: var(--secondary); color: var(--foreground); }
+  &:hover {
+    background: var(--neutral-900);
+    border-color: var(--neutral-900);
+    color: var(--neutral-0);
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
 }
 
 /* ── Content wrapper ── */
@@ -166,6 +185,10 @@
     overflow-y: auto;
     border-right: 1px solid var(--hairline);
     justify-content: center;
+  }
+
+  .modal-container.is-payment-step .gift-info {
+    width: 40%;
   }
 }
 

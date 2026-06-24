@@ -30,9 +30,11 @@
             [(ngModel)]="email"
             name="email"
             placeholder="admin@exemplo.com"
+            autocomplete="email"
             required
             class="text-input"
           />
+          <p class="field-error" *ngIf="showEmailRequired">Informe o e-mail.</p>
         </div>
         <div class="form-group">
           <label for="password">Senha</label>
@@ -42,9 +44,11 @@
             [(ngModel)]="password"
             name="password"
             placeholder="••••••••"
+            autocomplete="current-password"
             required
             class="text-input"
           />
+          <p class="field-error" *ngIf="showPasswordRequired">Informe a senha.</p>
         </div>
 
         <div *ngIf="auth.loginState().error" class="error-msg">{{ auth.loginState().error }}</div>

@@ -89,6 +89,13 @@
   }
 }
 
+@media (hover: none), (pointer: coarse) {
+  .card-hover-btn {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* ── Body ── */
 .card-body {
   padding: 0.95rem 0.95rem 1.05rem;

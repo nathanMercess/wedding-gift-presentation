@@ -1,5 +1,6 @@
 <div class="modal-backdrop" (click)="onBackdropClick($event)">
-  <div class="modal-container">
+  <div #modalContainer class="modal-container" [class.is-payment-step]="step === ModalStep.Payment" role="dialog"
+    aria-modal="true" [attr.aria-labelledby]="modalTitleId" tabindex="-1">
 
     <!-- Grabber: affordance de bottom-sheet no mobile -->
     <div class="sheet-grabber" aria-hidden="true"></div>
@@ -14,14 +15,9 @@
           </svg>
           Voltar
         </button>
-        <h2>{{
-          isUnavailable ? 'Presente indisponível' :
-          step === ModalStep.Contribution ? 'Detalhes do Presente' :
-          step === ModalStep.Payment ? 'Pagamento' :
-          'Pagamento confirmado'
-          }}</h2>
+        <h2 [id]="modalTitleId">{{ modalTitle }}</h2>
       </div>
-      <button class="close-btn" (click)="requestClose()">
+      <button type="button" class="close-btn" aria-label="Fechar" (click)="requestClose()">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2">
           <line x1="18" y1="6" x2="6" y2="18" />
@@ -65,7 +61,8 @@
             @case (ModalStep.Contribution) {
               <app-gift-contribution-form *ngIf="!isUnavailable" [gift]="gift()" [coupleName]="coupleName()"
                 [minAmount]="minAmount" [remaining]="contributionLimit" [availableQuickAmounts]="availableQuickAmounts"
-                (submitted)="onContributionSubmit($event)" (cancelled)="requestClose()">
+                [initialData]="contributionFormData" (submitted)="onContributionSubmit($event)"
+                (cancelled)="requestClose()">
               </app-gift-contribution-form>
             }
 

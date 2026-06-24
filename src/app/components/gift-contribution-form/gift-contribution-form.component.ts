@@ -1,4 +1,4 @@
-import { Component, InputSignal, OutputEmitterRef, input, output } from '@angular/core';
+import { Component, InputSignal, OnInit, OutputEmitterRef, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { Gift } from '../../models/gift.model';
@@ -11,6 +11,15 @@ export interface ContributionSubmitData {
   guestName: string;
   guestMessage: string;
   amount: number;
+  contributionType: ContributionType;
+  customAmount: string;
+}
+
+export interface ContributionFormData {
+  guestName: string;
+  guestMessage: string;
+  contributionType: ContributionType;
+  customAmount: string;
 }
 
 @Component({
@@ -20,12 +29,13 @@ export interface ContributionSubmitData {
   styleUrl: './gift-contribution-form.component.scss',
   imports: [CommonModule, ReactiveFormsModule, ButtonComponent],
 })
-export class GiftContributionFormComponent {
+export class GiftContributionFormComponent implements OnInit {
   public readonly gift: InputSignal<Gift> = input.required<Gift>();
   public readonly coupleName: InputSignal<string> = input<string>('');
   public readonly minAmount: InputSignal<number> = input.required<number>();
   public readonly remaining: InputSignal<number> = input.required<number>();
   public readonly availableQuickAmounts: InputSignal<number[]> = input<number[]>([]);
+  public readonly initialData: InputSignal<ContributionFormData | null> = input<ContributionFormData | null>(null);
 
   public readonly submitted: OutputEmitterRef<ContributionSubmitData> = output<ContributionSubmitData>();
   public readonly cancelled: OutputEmitterRef<void> = output<void>();
@@ -43,6 +53,21 @@ export class GiftContributionFormComponent {
       guestMessage: ['', [Validators.maxLength(500)]],
       customAmount: ['', [this.amountValidator()]],
     });
+  }
+
+  public ngOnInit(): void {
+    const data: ContributionFormData | null = this.initialData();
+
+    if (!data)
+      return;
+
+    this.contributionType = data.contributionType;
+    this.form.patchValue({
+      guestName: data.guestName,
+      guestMessage: data.guestMessage,
+      customAmount: data.customAmount,
+    });
+    this.amountControl.updateValueAndValidity();
   }
 
   public get isDirty(): boolean {
@@ -95,6 +120,8 @@ export class GiftContributionFormComponent {
       guestName: `${this.form.value.guestName ?? ''}`.trim(),
       guestMessage: `${this.form.value.guestMessage ?? ''}`.trim(),
       amount,
+      contributionType: this.contributionType,
+      customAmount: `${this.form.value.customAmount ?? ''}`,
     });
   }
 

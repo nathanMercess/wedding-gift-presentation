@@ -9,11 +9,12 @@ import { AuthService } from '../../../services/auth.service';
   selector: 'app-admin-login',
   templateUrl: './admin-login.component.html',
   styleUrl: './admin-login.component.scss',
-  imports: [CommonModule, FormsModule]
+  imports: [CommonModule, FormsModule],
 })
 export class AdminLoginComponent {
   public email: string = '';
   public password: string = '';
+  public submitted: boolean = false;
 
   public constructor(public readonly auth: AuthService, public readonly router: Router) {
     effect((): void => {
@@ -25,9 +26,19 @@ export class AdminLoginComponent {
   }
 
   public onSubmit(): void {
-    if (!this.email || !this.password) 
+    this.submitted = true;
+
+    if (!this.email.trim() || !this.password)
       return;
-    
+
     this.auth.authenticate({ email: this.email, password: this.password });
+  }
+
+  public get showEmailRequired(): boolean {
+    return this.submitted && !this.email.trim();
+  }
+
+  public get showPasswordRequired(): boolean {
+    return this.submitted && !this.password;
   }
 }

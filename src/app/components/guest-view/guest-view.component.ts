@@ -203,6 +203,7 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   public ngOnDestroy(): void {
     this.stopCarousel();
+    document.body.classList.remove('modal-open');
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -332,6 +333,14 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
     if (window.innerWidth >= 768 && this.filterSheetOpen) {
       this.closeFilterSheet();
     }
+  }
+
+  @HostListener('document:keydown.escape')
+  public onEscapePressed(): void {
+    if (!this.filterSheetOpen)
+      return;
+
+    this.closeFilterSheet();
   }
 
   public openFilterSheet(): void {

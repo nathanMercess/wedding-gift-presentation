@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { GiftDetailsModalComponent } from './gift-details-modal.component';
 import { ContributionSubmitData } from '../gift-contribution-form/gift-contribution-form.component';
 import { ModalStep } from '../../enums/modal-step.enum';
+import { ContributionType } from '../../enums/contribution-type.enum';
 import { Gift } from '../../models/gift.model';
 
 function makeGift(over: Partial<Gift> = {}): Gift {
@@ -62,13 +63,15 @@ describe('GiftDetailsModalComponent', () => {
 
   it('onContributionSubmit avança para Pagamento guardando os dados', () => {
     setup();
-    const data: ContributionSubmitData = { guestName: 'Nathan', guestMessage: 'Parabéns!', amount: 150 };
+    const data: ContributionSubmitData = { guestName: 'Nathan', guestMessage: 'Parabéns!', amount: 150, contributionType: ContributionType.Partial, customAmount: '150' };
     component.onContributionSubmit(data);
 
     expect(component.step).toBe(ModalStep.Payment);
     expect(component.contributorName).toBe('Nathan');
     expect(component.contributorMessage).toBe('Parabéns!');
     expect(component.contributionAmount).toBe(150);
+    expect(component.contributionType).toBe(ContributionType.Partial);
+    expect(component.customAmount).toBe('150');
     expect(component.orderId.length).toBeGreaterThan(0);
   });
 
@@ -85,7 +88,7 @@ describe('GiftDetailsModalComponent', () => {
 
   it('backToContribution retorna ao passo de contribuição', () => {
     setup();
-    component.onContributionSubmit({ guestName: 'N', guestMessage: '', amount: 50 });
+    component.onContributionSubmit({ guestName: 'N', guestMessage: '', amount: 50, contributionType: ContributionType.Full, customAmount: '' });
     component.backToContribution();
     expect(component.step).toBe(ModalStep.Contribution);
   });
@@ -101,10 +104,10 @@ describe('GiftDetailsModalComponent', () => {
 
   it('onContributionSubmit ignora chamadas duplicadas (anti duplo-clique)', () => {
     setup();
-    component.onContributionSubmit({ guestName: 'Nathan', guestMessage: 'Oi', amount: 150 });
+    component.onContributionSubmit({ guestName: 'Nathan', guestMessage: 'Oi', amount: 150, contributionType: ContributionType.Partial, customAmount: '150' });
     const firstOrderId = component.orderId;
 
-    component.onContributionSubmit({ guestName: 'Outro', guestMessage: 'Mudou', amount: 999 });
+    component.onContributionSubmit({ guestName: 'Outro', guestMessage: 'Mudou', amount: 999, contributionType: ContributionType.Partial, customAmount: '999' });
 
     expect(component.step).toBe(ModalStep.Payment);
     expect(component.contributorName).toBe('Nathan');
@@ -114,7 +117,7 @@ describe('GiftDetailsModalComponent', () => {
 
   it('backdrop NÃO fecha o modal durante o Pagamento (evita ir pra home por toque acidental)', () => {
     setup();
-    component.onContributionSubmit({ guestName: 'N', guestMessage: '', amount: 50 });
+    component.onContributionSubmit({ guestName: 'N', guestMessage: '', amount: 50, contributionType: ContributionType.Full, customAmount: '' });
     let closed = false;
     component.close.subscribe((): void => { closed = true; });
 

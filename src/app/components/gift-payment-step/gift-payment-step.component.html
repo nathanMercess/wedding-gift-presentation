@@ -1,9 +1,4 @@
 <div class="payment-step">
-  <div class="payment-summary-bar">
-    <span class="payment-gift-name">{{ giftName() }}</span>
-    <span class="payment-total">{{ amount() | currency:'BRL' }}</span>
-  </div>
-
   <app-payment-method-selector (methodSelected)="activeMethod = $event">
   </app-payment-method-selector>
 

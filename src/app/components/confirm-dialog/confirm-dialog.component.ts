@@ -9,7 +9,7 @@ import { ButtonType } from '../../enums/button-type.enum';
   selector: 'app-confirm-dialog',
   templateUrl: './confirm-dialog.component.html',
   styleUrl: './confirm-dialog.component.scss',
-  imports: [CommonModule, ButtonComponent]
+  imports: [CommonModule, ButtonComponent],
 })
 export class ConfirmDialogComponent {
   public readonly title: InputSignal<string> = input<string>('Tem certeza?');
@@ -18,6 +18,8 @@ export class ConfirmDialogComponent {
   public readonly cancelLabel: InputSignal<string> = input<string>('Cancelar');
   public readonly ButtonVariant: typeof ButtonVariant = ButtonVariant;
   public readonly ButtonType: typeof ButtonType = ButtonType;
+  public readonly titleId: string = 'confirm-dialog-title';
+  public readonly messageId: string = 'confirm-dialog-message';
 
   public readonly confirmed: OutputEmitterRef<void> = output<void>();
   public readonly cancelled: OutputEmitterRef<void> = output<void>();
@@ -28,8 +30,7 @@ export class ConfirmDialogComponent {
   }
 
   public onBackdropClick(event: MouseEvent): void {
-    if ((event.target as HTMLElement).classList.contains('confirm-backdrop')) {
+    if ((event.target as HTMLElement).classList.contains('confirm-backdrop'))
       this.cancelled.emit();
-    }
   }
 }
