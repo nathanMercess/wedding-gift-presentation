@@ -70,7 +70,7 @@ export class GiftService {
 
     let httpParams = new HttpParams();
     if (params.search) httpParams = httpParams.set('search', params.search);
-    httpParams = httpParams.set('orderBy', GiftSortField.Price);
+    httpParams = httpParams.set('orderBy', GiftSortField.Total);
     httpParams = httpParams.set('orderDir', params.orderDir ?? SortDirection.Asc);
     if (params.onlyAvailable !== undefined) httpParams = httpParams.set('onlyAvailable', String(params.onlyAvailable));
     if (params.page) httpParams = httpParams.set('page', String(params.page));
@@ -96,7 +96,7 @@ export class GiftService {
   public refreshGuestGiftsSilently(params: GiftQueryParams = {}): void {
     let httpParams = new HttpParams();
     if (params.search) httpParams = httpParams.set('search', params.search);
-    httpParams = httpParams.set('orderBy', GiftSortField.Price);
+    httpParams = httpParams.set('orderBy', GiftSortField.Total);
     httpParams = httpParams.set('orderDir', params.orderDir ?? SortDirection.Asc);
     if (params.onlyAvailable !== undefined) httpParams = httpParams.set('onlyAvailable', String(params.onlyAvailable));
     if (params.page) httpParams = httpParams.set('page', String(params.page));
@@ -119,7 +119,7 @@ export class GiftService {
 
     let httpParams = new HttpParams();
     if (params.search) httpParams = httpParams.set('search', params.search);
-    httpParams = httpParams.set('orderBy', GiftSortField.Price);
+    httpParams = httpParams.set('orderBy', GiftSortField.Total);
     httpParams = httpParams.set('orderDir', params.orderDir ?? SortDirection.Asc);
     if (params.onlyAvailable !== undefined) httpParams = httpParams.set('onlyAvailable', String(params.onlyAvailable));
     if (params.page) httpParams = httpParams.set('page', String(params.page));
@@ -145,7 +145,7 @@ export class GiftService {
   public refreshAdminGiftsSilently(params: GiftQueryParams = {}): void {
     let httpParams = new HttpParams();
     if (params.search) httpParams = httpParams.set('search', params.search);
-    httpParams = httpParams.set('orderBy', GiftSortField.Price);
+    httpParams = httpParams.set('orderBy', GiftSortField.Total);
     httpParams = httpParams.set('orderDir', params.orderDir ?? SortDirection.Asc);
     if (params.onlyAvailable !== undefined) httpParams = httpParams.set('onlyAvailable', String(params.onlyAvailable));
     if (params.page) httpParams = httpParams.set('page', String(params.page));
