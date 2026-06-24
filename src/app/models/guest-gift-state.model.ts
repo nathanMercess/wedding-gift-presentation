@@ -9,6 +9,7 @@ export interface GuestGiftState {
   error: string;
   overallTotal: number;
   overallCompleted: number;
+  overallContributors: number;
   overallRaised: number;
   overallGoal: number;
 }

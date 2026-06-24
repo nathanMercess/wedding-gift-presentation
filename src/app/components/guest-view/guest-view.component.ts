@@ -167,8 +167,8 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
     return this.giftService.guestState().overallTotal;
   }
 
-  public get completedGifts(): number {
-    return this.giftService.guestState().overallCompleted;
+  public get contributorsCount(): number {
+    return this.giftService.guestState().overallContributors;
   }
 
   public get totalRaised(): number {

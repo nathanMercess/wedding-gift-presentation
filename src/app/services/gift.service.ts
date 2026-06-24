@@ -25,6 +25,7 @@ export interface GiftQueryParams {
 export interface GiftStats {
   total: number;
   completed: number;
+  contributors?: number;
   raised: number;
   goal: number;
 }
@@ -54,6 +55,7 @@ export class GiftService {
     error: '',
     overallTotal: 0,
     overallCompleted: 0,
+    overallContributors: 0,
     overallRaised: 0,
     overallGoal: 0,
   });
@@ -274,6 +276,7 @@ export class GiftService {
         this.patchGuestState({
           overallTotal: stats.total,
           overallCompleted: stats.completed,
+          overallContributors: stats.contributors ?? stats.completed,
           overallRaised: stats.raised,
           overallGoal: stats.goal,
         });
