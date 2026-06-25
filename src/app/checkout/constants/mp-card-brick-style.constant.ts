@@ -18,7 +18,6 @@ export const MP_CARD_BRICK_CUSTOMIZATION = {
         borderRadiusMedium: '10px',
         borderRadiusLarge: '10px',
         borderRadiusFull: '9999px',
-        payButtonHeight: '48px',
         formInputsTextTransform: 'none',
       },
     },

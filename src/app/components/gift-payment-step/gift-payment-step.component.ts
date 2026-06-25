@@ -30,22 +30,11 @@ export class GiftPaymentStepComponent {
 
   public constructor(public readonly paymentService: PaymentService) {}
 
-  public get paymentAmount(): number {
-    if (this.activeMethod === PaymentMethod.CreditCard)
-      return this.creditCardAmount;
-
-    return this.amount();
-  }
-
   public get creditCardAmount(): number {
     return CreditCardFeeUtil.calculateGrossAmount(this.amount());
   }
 
   public get maxInstallments(): number {
     return CreditCardFeeUtil.getMaxInstallments();
-  }
-
-  public get installmentPreview(): number {
-    return CreditCardFeeUtil.calculateInstallmentAmount(this.amount());
   }
 }
