@@ -1,10 +1,12 @@
-import { Injectable, WritableSignal, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { Injectable, WritableSignal, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { EndpointsUrls } from '../constants/api-endpoints';
+import { ApiResponse } from '../models/api-response.model';
 import { DashboardResponse } from '../models/dashboard-response.model';
 import { SuperAdminDashboardState } from '../models/super-admin-dashboard-state.model';
+import { ApiResponseUtil } from '../utils/api-response.util';
 import { HttpErrorUtil } from '../utils/http-error';
 
 export interface DashboardQueryParams {
@@ -29,18 +31,25 @@ export class SuperAdminDashboardService {
     httpParams = httpParams.set('days', String(params.days));
     httpParams = httpParams.set('recentItems', String(params.recentItems));
 
-    this.http.get<DashboardResponse>(this.endpointsUrls.adminDashboard, { params: httpParams })
-      .pipe(finalize((): void => this.patchState({ loading: false })))
+    this.http.get<ApiResponse<DashboardResponse>>(this.endpointsUrls.adminDashboard, { params: httpParams })
+      .pipe(
+        ApiResponseUtil.data<DashboardResponse>('Erro ao carregar dashboard de SuperAdmin.'),
+        finalize((): void => this.patchState({ loading: false })),
+      )
       .subscribe({
         next: (dashboard: DashboardResponse): void => {
           this.patchState({ dashboard });
         },
         error: (err: HttpErrorResponse): void => {
-          if (err.status === 401)
+          if (HttpErrorUtil.isUnauthorized(err)) {
             this.router.navigate(['/admin/login']);
+            return;
+          }
 
-          if (err.status === 403)
+          if (HttpErrorUtil.isForbidden(err)) {
             this.router.navigate(['/admin/access-denied']);
+            return;
+          }
 
           this.patchState({ error: HttpErrorUtil.extract(err, 'Erro ao carregar dashboard de SuperAdmin.') });
         },

@@ -7,5 +7,7 @@ export interface PaymentResponse {
   mpOrderId?: string;
   qrCode?: string;
   qrCodeBase64?: string;
+  pixQrCode?: string;
+  contributionCreated?: boolean;
   message?: string;
 }

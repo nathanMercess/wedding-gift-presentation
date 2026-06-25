@@ -1,17 +1,19 @@
-import { Injectable, WritableSignal, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { Injectable, WritableSignal, signal } from '@angular/core';
 import { finalize } from 'rxjs';
 import { EndpointsUrls } from '../constants/api-endpoints';
-import { ContributionRequest } from '../models/contribution-request.model';
-import { AdminGiftState } from '../models/admin-gift-state.model';
-import { GuestGiftState } from '../models/guest-gift-state.model';
-import { GiftContributionState } from '../models/gift-contribution-state.model';
-import { Gift } from '../models/gift.model';
-import { PagedResult } from '../models/paged-result.model';
-import { ImageUploadResponse } from '../models/image-upload-response.model';
-import { HttpErrorUtil } from '../utils/http-error';
 import { GiftSortField } from '../enums/GiftSortField';
 import { SortDirection } from '../enums/SortDirection';
+import { AdminGiftState } from '../models/admin-gift-state.model';
+import { ApiResponse } from '../models/api-response.model';
+import { ContributionRequest } from '../models/contribution-request.model';
+import { GiftContributionState } from '../models/gift-contribution-state.model';
+import { Gift } from '../models/gift.model';
+import { GuestGiftState } from '../models/guest-gift-state.model';
+import { ImageUploadResponse } from '../models/image-upload-response.model';
+import { PagedResult } from '../models/paged-result.model';
+import { ApiResponseUtil } from '../utils/api-response.util';
+import { HttpErrorUtil } from '../utils/http-error';
 
 export interface GiftQueryParams {
   search?: string;
@@ -71,16 +73,11 @@ export class GiftService {
   public loadGuestGifts(params: GiftQueryParams = {}): void {
     this.patchGuestState({ loading: true, error: '' });
 
-    let httpParams = new HttpParams();
-    if (params.search) httpParams = httpParams.set('search', params.search);
-    httpParams = httpParams.set('orderBy', params.orderBy ?? GiftSortField.Total);
-    httpParams = httpParams.set('orderDir', params.orderDir ?? SortDirection.Asc);
-    if (params.onlyAvailable !== undefined) httpParams = httpParams.set('onlyAvailable', String(params.onlyAvailable));
-    if (params.page) httpParams = httpParams.set('page', String(params.page));
-    if (params.pageSize) httpParams = httpParams.set('pageSize', String(params.pageSize));
-
-    this.http.get<PagedResult<Gift>>(this.endpointsUrls.giftsList, { params: httpParams })
-      .pipe(finalize((): void => this.patchGuestState({ loading: false })))
+    this.http.get<ApiResponse<PagedResult<Gift>>>(this.endpointsUrls.giftsList, { params: this.buildGiftParams(params) })
+      .pipe(
+        ApiResponseUtil.data<PagedResult<Gift>>('Nao foi possivel carregar os presentes.'),
+        finalize((): void => this.patchGuestState({ loading: false })),
+      )
       .subscribe({
         next: (result: PagedResult<Gift>): void => {
           this.patchGuestState({
@@ -91,45 +88,35 @@ export class GiftService {
           });
         },
         error: (err: HttpErrorResponse): void => {
-          this.patchGuestState({ error: HttpErrorUtil.extract(err, 'Não foi possível carregar os presentes.') });
+          this.patchGuestState({ error: HttpErrorUtil.extract(err, 'Nao foi possivel carregar os presentes.') });
         },
       });
   }
 
   public refreshGuestGiftsSilently(params: GiftQueryParams = {}): void {
-    let httpParams = new HttpParams();
-    if (params.search) httpParams = httpParams.set('search', params.search);
-    httpParams = httpParams.set('orderBy', params.orderBy ?? GiftSortField.Total);
-    httpParams = httpParams.set('orderDir', params.orderDir ?? SortDirection.Asc);
-    if (params.onlyAvailable !== undefined) httpParams = httpParams.set('onlyAvailable', String(params.onlyAvailable));
-    if (params.page) httpParams = httpParams.set('page', String(params.page));
-    if (params.pageSize) httpParams = httpParams.set('pageSize', String(params.pageSize));
-
-    this.http.get<PagedResult<Gift>>(this.endpointsUrls.giftsList, { params: httpParams }).subscribe({
-      next: (result: PagedResult<Gift>): void => {
-        this.patchGuestState({
-          gifts: result.items,
-          totalCount: result.totalCount,
-          totalPages: result.totalPages,
-          currentPage: result.page,
-        });
-      },
-    });
+    this.http.get<ApiResponse<PagedResult<Gift>>>(this.endpointsUrls.giftsList, { params: this.buildGiftParams(params) })
+      .pipe(ApiResponseUtil.data<PagedResult<Gift>>('Nao foi possivel carregar os presentes.'))
+      .subscribe({
+        next: (result: PagedResult<Gift>): void => {
+          this.patchGuestState({
+            gifts: result.items,
+            totalCount: result.totalCount,
+            totalPages: result.totalPages,
+            currentPage: result.page,
+          });
+        },
+        error: (): void => {},
+      });
   }
 
   public loadAdminGifts(params: GiftQueryParams = {}): void {
     this.patchAdminState({ giftsLoading: true, giftsError: '' });
 
-    let httpParams = new HttpParams();
-    if (params.search) httpParams = httpParams.set('search', params.search);
-    httpParams = httpParams.set('orderBy', params.orderBy ?? GiftSortField.Total);
-    httpParams = httpParams.set('orderDir', params.orderDir ?? SortDirection.Asc);
-    if (params.onlyAvailable !== undefined) httpParams = httpParams.set('onlyAvailable', String(params.onlyAvailable));
-    if (params.page) httpParams = httpParams.set('page', String(params.page));
-    if (params.pageSize) httpParams = httpParams.set('pageSize', String(params.pageSize));
-
-    this.http.get<PagedResult<Gift>>(this.endpointsUrls.adminGiftsList, { params: httpParams })
-      .pipe(finalize((): void => this.patchAdminState({ giftsLoading: false })))
+    this.http.get<ApiResponse<PagedResult<Gift>>>(this.endpointsUrls.adminGiftsList, { params: this.buildGiftParams(params) })
+      .pipe(
+        ApiResponseUtil.data<PagedResult<Gift>>('Erro ao carregar presentes.'),
+        finalize((): void => this.patchAdminState({ giftsLoading: false })),
+      )
       .subscribe({
         next: (result: PagedResult<Gift>): void => {
           this.patchAdminState({
@@ -146,32 +133,30 @@ export class GiftService {
   }
 
   public refreshAdminGiftsSilently(params: GiftQueryParams = {}): void {
-    let httpParams = new HttpParams();
-    if (params.search) httpParams = httpParams.set('search', params.search);
-    httpParams = httpParams.set('orderBy', params.orderBy ?? GiftSortField.Total);
-    httpParams = httpParams.set('orderDir', params.orderDir ?? SortDirection.Asc);
-    if (params.onlyAvailable !== undefined) httpParams = httpParams.set('onlyAvailable', String(params.onlyAvailable));
-    if (params.page) httpParams = httpParams.set('page', String(params.page));
-    if (params.pageSize) httpParams = httpParams.set('pageSize', String(params.pageSize));
-
-    this.http.get<PagedResult<Gift>>(this.endpointsUrls.adminGiftsList, { params: httpParams }).subscribe({
-      next: (result: PagedResult<Gift>): void => {
-        this.patchAdminState({
-          gifts: result.items,
-          totalCount: result.totalCount,
-          totalPages: result.totalPages,
-          currentPage: result.page,
-        });
-      },
-    });
+    this.http.get<ApiResponse<PagedResult<Gift>>>(this.endpointsUrls.adminGiftsList, { params: this.buildGiftParams(params) })
+      .pipe(ApiResponseUtil.data<PagedResult<Gift>>('Erro ao carregar presentes.'))
+      .subscribe({
+        next: (result: PagedResult<Gift>): void => {
+          this.patchAdminState({
+            gifts: result.items,
+            totalCount: result.totalCount,
+            totalPages: result.totalPages,
+            currentPage: result.page,
+          });
+        },
+        error: (): void => {},
+      });
   }
 
   public saveAdminGift(giftId: string | null, gift: Partial<Gift>): void {
     this.patchAdminState({ giftSaving: true, giftError: '', giftSaved: false });
 
     if (giftId === null) {
-      this.http.post<Gift>(this.endpointsUrls.adminGiftsList, gift)
-        .pipe(finalize((): void => this.patchAdminState({ giftSaving: false })))
+      this.http.post<ApiResponse<Gift>>(this.endpointsUrls.adminGiftsList, gift)
+        .pipe(
+          ApiResponseUtil.data<Gift>('Erro ao salvar presente.'),
+          finalize((): void => this.patchAdminState({ giftSaving: false })),
+        )
         .subscribe({
           next: (created: Gift): void => {
             this.adminState.update((s: AdminGiftState): AdminGiftState => ({
@@ -192,8 +177,11 @@ export class GiftService {
     const optimistic: Gift[] = snapshot.map((g: Gift): Gift => g.id === giftId ? { ...g, ...gift, id: giftId } : g);
     this.patchAdminState({ gifts: optimistic });
 
-    this.http.put<Gift>(this.endpointsUrls.adminGiftsById(giftId), gift)
-      .pipe(finalize((): void => this.patchAdminState({ giftSaving: false })))
+    this.http.put<ApiResponse<Gift>>(this.endpointsUrls.adminGiftsById(giftId), gift)
+      .pipe(
+        ApiResponseUtil.data<Gift>('Erro ao salvar presente.'),
+        finalize((): void => this.patchAdminState({ giftSaving: false })),
+      )
       .subscribe({
         next: (saved: Gift): void => {
           this.adminState.update((s: AdminGiftState): AdminGiftState => ({
@@ -218,11 +206,13 @@ export class GiftService {
       totalCount: Math.max(0, snapshotCount - 1),
     });
 
-    this.http.delete<void>(this.endpointsUrls.adminGiftsById(id)).subscribe({
-      error: (err: HttpErrorResponse): void => {
-        this.patchAdminState({ gifts: snapshot, totalCount: snapshotCount, giftsError: HttpErrorUtil.extract(err, 'Erro ao remover presente.') });
-      },
-    });
+    this.http.delete<ApiResponse<null>>(this.endpointsUrls.adminGiftsById(id))
+      .pipe(ApiResponseUtil.nullableData<null>('Erro ao remover presente.'))
+      .subscribe({
+        error: (err: HttpErrorResponse): void => {
+          this.patchAdminState({ gifts: snapshot, totalCount: snapshotCount, giftsError: HttpErrorUtil.extract(err, 'Erro ao remover presente.') });
+        },
+      });
   }
 
   public clearAdminGiftError(): void {
@@ -235,16 +225,20 @@ export class GiftService {
     const formData = new FormData();
     formData.append('file', file);
 
-    this.http.post<ImageUploadResponse>(this.endpointsUrls.adminUploadImage, formData)
-      .pipe(finalize((): void => this.patchAdminState({ imageUploading: false })))
+    this.http.post<ApiResponse<ImageUploadResponse>>(this.endpointsUrls.adminUploadImage, formData)
+      .pipe(
+        ApiResponseUtil.data<ImageUploadResponse>('Erro ao enviar a imagem.'),
+        finalize((): void => this.patchAdminState({ imageUploading: false })),
+      )
       .subscribe({
-        next: (response: ImageUploadResponse): void => { onSuccess(response.url); },
+        next: (response: ImageUploadResponse): void => {
+          onSuccess(response.url);
+        },
         error: (err: HttpErrorResponse): void => {
-          const message = err.status === 413
-            ? 'A imagem é muito grande para o servidor aceitar.'
-            : HttpErrorUtil.extract(err, 'Erro ao enviar a imagem.');
-          this.patchAdminState({ imageUploadError: message });
-          if (onError) onError();
+          this.patchAdminState({ imageUploadError: HttpErrorUtil.extract(err, 'Erro ao enviar a imagem.') });
+
+          if (onError)
+            onError();
         },
       });
   }
@@ -256,32 +250,40 @@ export class GiftService {
   public contributeToGift(giftId: string, payload: ContributionRequest, onSuccess?: () => void): void {
     this.patchContributionState({ submitting: true, success: false, error: '' });
 
-    this.http.post<void>(this.endpointsUrls.giftsContribute(giftId), payload)
-      .pipe(finalize((): void => this.patchContributionState({ submitting: false })))
+    this.http.post<ApiResponse<null>>(this.endpointsUrls.giftsContribute(giftId), payload)
+      .pipe(
+        ApiResponseUtil.nullableData<null>('Erro ao registrar contribuicao. Tente novamente.'),
+        finalize((): void => this.patchContributionState({ submitting: false })),
+      )
       .subscribe({
         next: (): void => {
           this.patchContributionState({ success: true });
           this.loadGuestGifts();
-          if (onSuccess) onSuccess();
+
+          if (onSuccess)
+            onSuccess();
         },
         error: (err: HttpErrorResponse): void => {
-          this.patchContributionState({ error: HttpErrorUtil.extract(err, 'Erro ao registrar contribuição. Tente novamente.') });
+          this.patchContributionState({ error: HttpErrorUtil.extract(err, 'Erro ao registrar contribuicao. Tente novamente.') });
         },
       });
   }
 
   public loadGuestStats(): void {
-    this.http.get<GiftStats>(this.endpointsUrls.giftsStats).subscribe({
-      next: (stats: GiftStats): void => {
-        this.patchGuestState({
-          overallTotal: stats.total,
-          overallCompleted: stats.completed,
-          overallContributors: stats.contributors ?? stats.completed,
-          overallRaised: stats.raised,
-          overallGoal: stats.goal,
-        });
-      },
-    });
+    this.http.get<ApiResponse<GiftStats>>(this.endpointsUrls.giftsStats)
+      .pipe(ApiResponseUtil.data<GiftStats>('Erro ao carregar estatisticas dos presentes.'))
+      .subscribe({
+        next: (stats: GiftStats): void => {
+          this.patchGuestState({
+            overallTotal: stats.total,
+            overallCompleted: stats.completed,
+            overallContributors: stats.contributors ?? stats.completed,
+            overallRaised: stats.raised,
+            overallGoal: stats.goal,
+          });
+        },
+        error: (): void => {},
+      });
   }
 
   public resetContributionState(): void {
@@ -298,5 +300,26 @@ export class GiftService {
 
   public patchContributionState(partialState: Partial<GiftContributionState>): void {
     this.contributionState.update((s: GiftContributionState): GiftContributionState => ({ ...s, ...partialState }));
+  }
+
+  private buildGiftParams(params: GiftQueryParams): HttpParams {
+    let httpParams = new HttpParams();
+
+    if (params.search)
+      httpParams = httpParams.set('search', params.search);
+
+    httpParams = httpParams.set('orderBy', params.orderBy ?? GiftSortField.Total);
+    httpParams = httpParams.set('orderDir', params.orderDir ?? SortDirection.Asc);
+
+    if (params.onlyAvailable !== undefined)
+      httpParams = httpParams.set('onlyAvailable', String(params.onlyAvailable));
+
+    if (params.page)
+      httpParams = httpParams.set('page', String(params.page));
+
+    if (params.pageSize)
+      httpParams = httpParams.set('pageSize', String(params.pageSize));
+
+    return httpParams;
   }
 }

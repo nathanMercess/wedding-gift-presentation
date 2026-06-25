@@ -51,7 +51,7 @@ export class CheckoutComponent implements OnInit {
 
     if (method === PaymentMethod.CreditCard || method === PaymentMethod.DebitCard) {
       this.cardConfig = {
-        amount: this.totalAmount,
+        amount: method === PaymentMethod.CreditCard ? CreditCardFeeUtil.calculateGrossAmount(this.totalAmount) : this.totalAmount,
         netAmount: this.totalAmount,
         orderId: this.orderId,
         giftId: this.giftId,

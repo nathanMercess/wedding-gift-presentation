@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { GiftService } from './gift.service';
 import { EndpointsUrls } from '../constants/api-endpoints';
+import { ApiResponse } from '../models/api-response.model';
 import { Gift } from '../models/gift.model';
 import { PagedResult } from '../models/paged-result.model';
 
@@ -23,6 +24,14 @@ function makeGift(over: Partial<Gift> = {}): Gift {
 
 function makePage(items: Gift[]): PagedResult<Gift> {
   return { items, totalCount: items.length, page: 1, pageSize: 20, totalPages: 1 };
+}
+
+function apiSuccess<T>(data: T): ApiResponse<T> {
+  return { success: true, data, error: null, correlationId: '0HN' };
+}
+
+function apiError(code: string): ApiResponse<null> {
+  return { success: false, data: null, error: { code, fields: null, details: null }, correlationId: '0HN' };
 }
 
 describe('GiftService', () => {
@@ -55,7 +64,7 @@ describe('GiftService', () => {
 
       const req = httpMock.expectOne((r) => r.url === endpoints.adminGiftsList);
       expect(req.request.method).toBe('GET');
-      req.flush(makePage([makeGift()]));
+      req.flush(apiSuccess(makePage([makeGift()])));
 
       expect(service.adminState().giftsLoading).toBe(false);
       expect(service.adminState().gifts.length).toBe(1);
@@ -65,7 +74,7 @@ describe('GiftService', () => {
     it('seta giftsError em falha de rede, sem deixar o loading preso', () => {
       service.loadAdminGifts();
       const req = httpMock.expectOne((r) => r.url === endpoints.adminGiftsList);
-      req.flush({ detail: 'boom' }, { status: 500, statusText: 'Server Error' });
+      req.flush(apiError('UNHANDLED_ERROR'), { status: 500, statusText: 'Server Error' });
 
       expect(service.adminState().giftsLoading).toBe(false);
       expect(service.adminState().giftsError).toBeTruthy();
@@ -85,7 +94,7 @@ describe('GiftService', () => {
 
       const req = httpMock.expectOne(endpoints.adminGiftsById('g1'));
       expect(req.request.method).toBe('PUT');
-      req.flush(makeGift({ id: 'g1', name: 'Novo nome', raised: 200 }));
+      req.flush(apiSuccess(makeGift({ id: 'g1', name: 'Novo nome', raised: 200 })));
 
       expect(service.adminState().gifts[0].raised).toBe(200);
       expect(service.adminState().giftSaved).toBe(true);
@@ -98,7 +107,7 @@ describe('GiftService', () => {
       expect(service.adminState().gifts[0].name).toBe('Novo nome');
 
       const req = httpMock.expectOne(endpoints.adminGiftsById('g1'));
-      req.flush({ detail: 'falhou' }, { status: 500, statusText: 'Server Error' });
+      req.flush(apiError('UNHANDLED_ERROR'), { status: 500, statusText: 'Server Error' });
 
       expect(service.adminState().gifts[0].name).toBe('Antigo');
       expect(service.adminState().giftError).toBeTruthy();
@@ -113,7 +122,7 @@ describe('GiftService', () => {
 
       const req = httpMock.expectOne(endpoints.adminGiftsList);
       expect(req.request.method).toBe('POST');
-      req.flush(makeGift({ id: 'g2', name: 'Novo' }));
+      req.flush(apiSuccess(makeGift({ id: 'g2', name: 'Novo' })));
 
       expect(service.adminState().gifts[0].id).toBe('g2');
       expect(service.adminState().totalCount).toBe(2);
@@ -136,7 +145,7 @@ describe('GiftService', () => {
 
       const req = httpMock.expectOne(endpoints.adminGiftsById('g1'));
       expect(req.request.method).toBe('DELETE');
-      req.flush(null);
+      req.flush(apiSuccess(null));
 
       expect(service.adminState().gifts.length).toBe(1);
       httpMock.expectNone(endpoints.adminGiftsList);
@@ -147,7 +156,7 @@ describe('GiftService', () => {
       expect(service.adminState().gifts.length).toBe(1);
 
       const req = httpMock.expectOne(endpoints.adminGiftsById('g1'));
-      req.flush({ detail: 'falhou' }, { status: 500, statusText: 'Server Error' });
+      req.flush(apiError('UNHANDLED_ERROR'), { status: 500, statusText: 'Server Error' });
 
       expect(service.adminState().gifts.length).toBe(2);
       expect(service.adminState().giftsError).toBeTruthy();
@@ -163,7 +172,7 @@ describe('GiftService', () => {
 
       const req = httpMock.expectOne((r) => r.url === endpoints.adminGiftsList);
       expect(req.request.method).toBe('GET');
-      req.flush(makePage([makeGift({ id: 'g1', available: false, raised: 500 })]));
+      req.flush(apiSuccess(makePage([makeGift({ id: 'g1', available: false, raised: 500 })])));
 
       expect(service.adminState().giftsLoading).toBe(false);
       expect(service.adminState().gifts[0].available).toBe(false);
@@ -188,7 +197,7 @@ describe('GiftService', () => {
 
       const req = httpMock.expectOne((r) => r.url === endpoints.giftsList);
       expect(req.request.method).toBe('GET');
-      req.flush(makePage([makeGift({ id: 'g1', raised: 500, available: false })]));
+      req.flush(apiSuccess(makePage([makeGift({ id: 'g1', raised: 500, available: false })])));
 
       expect(service.guestState().loading).toBe(false);
       expect(service.guestState().gifts[0].available).toBe(false);

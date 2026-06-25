@@ -9,8 +9,8 @@ import { CardBrickConfig } from '../../models/card-brick-config.model';
 import { PaymentMethod } from '../../enums/payment-method.enum';
 import { PaymentStatus } from '../../enums/payment-status.enum';
 import { MP_CARD_BRICK_CUSTOMIZATION } from '../../constants/mp-card-brick-style.constant';
-import { PAYMENT_ERROR_CODES } from '../../constants/payment-error-codes.constant';
 import { MP_DECLINE_FALLBACK, MP_DECLINE_MESSAGES } from '../../constants/mp-decline-messages.constant';
+import { ApiErrorCode } from '../../../enums/api-error-code.enum';
 import { ColorUtil } from '../../../utils/color.util';
 import { ToastService } from '../../../services/toast.service';
 
@@ -25,7 +25,7 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
   public readonly config: InputSignal<CardBrickConfig> = input.required<CardBrickConfig>();
   public readonly paymentApproved: OutputEmitterRef<void> = output<void>();
 
-  public readonly PAYMENT_ERROR_CODES: typeof PAYMENT_ERROR_CODES = PAYMENT_ERROR_CODES;
+  public readonly ApiErrorCode: typeof ApiErrorCode = ApiErrorCode;
   public brickReady: boolean = false;
   public error: string = '';
 
@@ -71,7 +71,7 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
       const mp = new (window as any)['MercadoPago'](environment.mercadoPagoPublicKey, { locale: 'pt-BR' });
       const bricksBuilder = mp.bricks();
       const cfg = this.config();
-
+      debugger;
       this.brickController = await bricksBuilder.create('cardPayment', 'cardPaymentBrick_container', {
         initialization: {
           amount: cfg.amount,
@@ -179,7 +179,7 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
     this.ngZone.run(() => {
       if (state.error) {
         this.pendingReject?.(new Error('network_error'));
-        this.showError(PAYMENT_ERROR_CODES.PROVIDER_ERROR, 'Erro de comunicação com o provedor de pagamento. Tente novamente.');
+        this.showError(ApiErrorCode.ProviderError, state.error);
         this.clearPending();
         return;
       }
@@ -207,7 +207,7 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
       }
 
       this.pendingReject?.(new Error(response.statusDetail ?? 'declined'));
-      this.showError(response.errorCode ?? PAYMENT_ERROR_CODES.PAYMENT_DECLINED, MP_DECLINE_MESSAGES[response.statusDetail ?? ''] ?? MP_DECLINE_FALLBACK);
+      this.showError(response.errorCode ?? ApiErrorCode.PaymentDeclined, MP_DECLINE_MESSAGES[response.statusDetail ?? ''] ?? MP_DECLINE_FALLBACK);
       this.clearPending();
     });
   }

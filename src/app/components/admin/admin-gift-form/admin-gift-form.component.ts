@@ -1,13 +1,14 @@
-import { Component, InputSignal, OutputEmitterRef, effect, input, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { CommonModule } from '@angular/common';
+import { Component, InputSignal, OutputEmitterRef, effect, input, output } from '@angular/core';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { EndpointsUrls } from '../../../constants/api-endpoints';
+import { CreditCardFeeUtil } from '../../../checkout/utils/credit-card-fee.util';
+import { ApiResponse } from '../../../models/api-response.model';
 import { Gift } from '../../../models/gift.model';
 import { GiftService } from '../../../services/gift.service';
-import { EndpointsUrls } from '../../../constants/api-endpoints';
+import { ApiResponseUtil } from '../../../utils/api-response.util';
 import { HttpErrorUtil } from '../../../utils/http-error';
-import { CreditCardFeeUtil } from '../../../checkout/utils/credit-card-fee.util';
 
 interface GiftEnrichResponse {
   name?: string;
@@ -37,12 +38,7 @@ export class AdminGiftFormComponent {
   public appliedSuggestionBaseAmount: number = 0;
   private raised: number = 0;
 
-  public constructor(
-    public readonly giftService: GiftService,
-    public readonly http: HttpClient,
-    public readonly endpoints: EndpointsUrls,
-    public readonly fb: FormBuilder,
-  ) {
+  public constructor(public readonly giftService: GiftService, public readonly http: HttpClient, public readonly endpoints: EndpointsUrls, public readonly fb: FormBuilder) {
     this.form = this.fb.group({
       name: ['', [Validators.required, Validators.maxLength(120)]],
       total: [null, [Validators.required, Validators.min(0.01)]],
@@ -126,19 +122,29 @@ export class AdminGiftFormComponent {
     this.enriching = true;
     this.enrichError = '';
 
-    this.http.post<GiftEnrichResponse>(this.endpoints.adminGiftsEnrich, { url: this.enrichUrl }).subscribe({
-      next: (data: GiftEnrichResponse): void => {
-        this.enriching = false;
-        if (data.name) this.form.get('name')!.setValue(data.name);
-        if (data.description) this.form.get('description')!.setValue(data.description);
-        if (data.price) this.form.get('total')!.setValue(data.price);
-        if (data.imageUrl) this.form.get('image')!.setValue(data.imageUrl);
-      },
-      error: (err: HttpErrorResponse): void => {
-        this.enriching = false;
-        this.enrichError = HttpErrorUtil.extract(err, 'Não foi possível obter os dados do link.');
-      },
-    });
+    this.http.post<ApiResponse<GiftEnrichResponse>>(this.endpoints.adminGiftsEnrich, { url: this.enrichUrl })
+      .pipe(ApiResponseUtil.data<GiftEnrichResponse>('Nao foi possivel obter os dados do link.'))
+      .subscribe({
+        next: (data: GiftEnrichResponse): void => {
+          this.enriching = false;
+
+          if (data.name)
+            this.form.get('name')!.setValue(data.name);
+
+          if (data.description)
+            this.form.get('description')!.setValue(data.description);
+
+          if (data.price)
+            this.form.get('total')!.setValue(data.price);
+
+          if (data.imageUrl)
+            this.form.get('image')!.setValue(data.imageUrl);
+        },
+        error: (err: HttpErrorResponse): void => {
+          this.enriching = false;
+          this.enrichError = HttpErrorUtil.extract(err, 'Nao foi possivel obter os dados do link.');
+        },
+      });
   }
 
   public save(): void {
@@ -180,7 +186,7 @@ export class AdminGiftFormComponent {
     }
 
     if (file.size > MAX_IMAGE_SIZE_BYTES) {
-      this.giftService.patchAdminState({ imageUploadError: 'O tamanho máximo permitido é 20MB.' });
+      this.giftService.patchAdminState({ imageUploadError: 'O tamanho maximo permitido e 20MB.' });
       return;
     }
 

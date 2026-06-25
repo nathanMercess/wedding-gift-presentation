@@ -1,13 +1,16 @@
-import { Injectable, WritableSignal, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Injectable, WritableSignal, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { EndpointsUrls } from '../constants/api-endpoints';
-import { AuthLoginState } from '../models/auth-login-state.model';
-import { LoginApiResponse } from '../models/login-api-response.model';
-import { LoginRequest } from '../models/login-request.model';
-import { JwtUtil } from '../utils/jwt.util';
 import { UserRole } from '../enums/user-role.enum';
+import { ApiResponse } from '../models/api-response.model';
+import { AuthLoginState } from '../models/auth-login-state.model';
+import { LoginApiTokenData } from '../models/login-api-token-data.model';
+import { LoginRequest } from '../models/login-request.model';
+import { ApiResponseUtil } from '../utils/api-response.util';
+import { HttpErrorUtil } from '../utils/http-error';
+import { JwtUtil } from '../utils/jwt.util';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -18,32 +21,32 @@ export class AuthService {
     success: false,
   });
 
-  public constructor(
-    public readonly http: HttpClient,
-    public readonly router: Router,
-    public readonly endpointsUrls: EndpointsUrls) { }
+  public constructor(public readonly http: HttpClient, public readonly router: Router, public readonly endpointsUrls: EndpointsUrls) {}
 
   public authenticate(credentials: LoginRequest): void {
     this.patchLoginState({ loading: true, error: '', success: false });
 
-    this.http.post<LoginApiResponse>(this.endpointsUrls.authLogin, credentials).pipe(finalize((): void => this.patchLoginState({ loading: false }))).subscribe({
-      next: (response: LoginApiResponse): void => {
-        const token: string | null = this.extractToken(response);
-        if (!token) {
-          this.patchLoginState({ error: 'Token ausente na resposta de login.' });
-          return;
-        }
+    this.http.post<ApiResponse<LoginApiTokenData>>(this.endpointsUrls.authLogin, credentials)
+      .pipe(
+        ApiResponseUtil.data<LoginApiTokenData>('E-mail ou senha invalidos.'),
+        finalize((): void => this.patchLoginState({ loading: false })),
+      )
+      .subscribe({
+        next: (response: LoginApiTokenData): void => {
+          const token: string | null = this.extractToken(response);
 
-        localStorage.setItem(this.tokenKey, token);
-        this.patchLoginState({ success: true });
-      },
-      error: (err: HttpErrorResponse): void => {
-        const error = err.status === 0
-          ? 'Não foi possível conectar. Verifique sua internet e tente novamente.'
-          : 'E-mail ou senha inválidos.';
-        this.patchLoginState({ error });
-      }
-    });
+          if (!token) {
+            this.patchLoginState({ error: 'Token ausente na resposta de login.' });
+            return;
+          }
+
+          localStorage.setItem(this.tokenKey, token);
+          this.patchLoginState({ success: true });
+        },
+        error: (err: HttpErrorResponse): void => {
+          this.patchLoginState({ error: HttpErrorUtil.extract(err, 'E-mail ou senha invalidos.') });
+        },
+      });
   }
 
   public resetLoginState(): void {
@@ -82,19 +85,11 @@ export class AuthService {
     return this.getRoles().includes(role);
   }
 
-  public extractToken(response: LoginApiResponse): string | null {
-    const candidates: Array<string | undefined> = [
-      response.access_token,
-      response.accessToken,
-      response.token,
-      response.jwt,
-      response.data?.access_token,
-      response.data?.accessToken,
-      response.data?.token,
-      response.data?.jwt
-    ];
+  public extractToken(response: LoginApiTokenData): string | null {
+    if (!response.accessToken.trim())
+      return null;
 
-    return candidates.find((token: string | undefined): boolean => typeof token === 'string' && token.trim().length > 0) ?? null;
+    return response.accessToken;
   }
 
   public patchLoginState(partialState: Partial<AuthLoginState>): void {

@@ -1,6 +1,9 @@
+import { UserRole } from '../enums/user-role.enum';
+
 export interface LoginApiTokenData {
-  access_token?: string;
-  accessToken?: string;
-  token?: string;
-  jwt?: string;
+  accessToken: string;
+  expiresAtUtc: string;
+  userName: string;
+  email: string;
+  role: UserRole;
 }

@@ -1,5 +1,4 @@
+import { ApiResponse } from './api-response.model';
 import { LoginApiTokenData } from './login-api-token-data.model';
 
-export interface LoginApiResponse extends LoginApiTokenData {
-  data?: LoginApiTokenData;
-}
+export type LoginApiResponse = ApiResponse<LoginApiTokenData>;

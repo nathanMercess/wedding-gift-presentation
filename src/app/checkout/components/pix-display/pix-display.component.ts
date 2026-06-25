@@ -8,7 +8,7 @@ import { PixPaymentDto } from '../../models/pix-payment-dto.model';
 import { CpfValidators } from '../../utils/cpf-validators';
 import { PixStep } from '../../enums/pix-step.enum';
 import { PaymentStatus } from '../../enums/payment-status.enum';
-import { PAYMENT_ERROR_CODES } from '../../constants/payment-error-codes.constant';
+import { ApiErrorCode } from '../../../enums/api-error-code.enum';
 import { ToastService } from '../../../services/toast.service';
 import { FormFieldErrorComponent } from '../../../components/form-field-error/form-field-error.component';
 
@@ -31,7 +31,7 @@ export class PixDisplayComponent implements OnDestroy {
   public readonly cancelled: OutputEmitterRef<void> = output<void>();
 
   public readonly PixStep: typeof PixStep = PixStep;
-  public readonly PAYMENT_ERROR_CODES: typeof PAYMENT_ERROR_CODES = PAYMENT_ERROR_CODES;
+  public readonly ApiErrorCode: typeof ApiErrorCode = ApiErrorCode;
 
   public readonly pixStep: WritableSignal<PixStep> = signal(PixStep.Form);
   public readonly qrCode: WritableSignal<string> = signal('');
@@ -126,7 +126,7 @@ export class PixDisplayComponent implements OnDestroy {
     this.awaitingPixResponse = false;
 
     if (state.error) {
-      this.showError(PAYMENT_ERROR_CODES.PROVIDER_ERROR, 'Erro de comunicação. Tente novamente.');
+      this.showError(ApiErrorCode.ProviderError, state.error);
       this.pixStep.set(PixStep.Form);
       return;
     }
@@ -136,10 +136,13 @@ export class PixDisplayComponent implements OnDestroy {
 
     const response = state.response;
 
-    if (response.mpOrderId && response.qrCodeBase64) {
+    const qrCode: string = response.qrCode ?? response.pixQrCode ?? '';
+    const qrCodeBase64: string = response.qrCodeBase64 ?? '';
+
+    if (response.mpOrderId && (qrCode || qrCodeBase64)) {
       this.mpOrderId.set(response.mpOrderId);
-      this.qrCode.set(response.qrCode ?? '');
-      this.qrCodeBase64.set(response.qrCodeBase64);
+      this.qrCode.set(qrCode);
+      this.qrCodeBase64.set(qrCodeBase64);
       this.error.set('');
       this.pixStep.set(PixStep.Qr);
       this.startPolling();
@@ -147,7 +150,7 @@ export class PixDisplayComponent implements OnDestroy {
       return;
     }
 
-    this.showError(response.errorCode ?? PAYMENT_ERROR_CODES.PROVIDER_ERROR, 'Erro ao gerar o PIX. Tente novamente.');
+    this.showError(response.errorCode ?? ApiErrorCode.ProviderError, 'Erro ao gerar o PIX. Tente novamente.');
     this.pixStep.set(PixStep.Form);
   }
 
@@ -165,7 +168,7 @@ export class PixDisplayComponent implements OnDestroy {
 
     if (state.response?.status === PaymentStatus.Rejected) {
       this.stopPolling();
-      this.showError(state.response.errorCode ?? PAYMENT_ERROR_CODES.PIX_REJECTED, 'Pagamento PIX rejeitado. Tente novamente.');
+      this.showError(state.response.errorCode ?? ApiErrorCode.PixRejected, 'Pagamento PIX rejeitado. Tente novamente.');
     }
   }
 
