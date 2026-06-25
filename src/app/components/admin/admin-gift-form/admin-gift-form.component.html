@@ -1,17 +1,5 @@
 <div class="form-card">
   <h3>{{ isEditing ? 'Editar presente' : 'Novo presente' }}</h3>
-
-  <ng-container *ngIf="!isEditing">
-    <div class="enrich-row">
-      <input type="url" class="text-input" placeholder="Cole o link do produto para preencher automaticamente..."
-        [(ngModel)]="enrichUrl" name="enrichUrl" />
-      <button type="button" class="btn-outline" (click)="enrichFromLink()" [disabled]="enriching || !enrichUrl.trim()">
-        {{ enriching ? 'Buscando...' : 'Preencher' }}
-      </button>
-    </div>
-    <div *ngIf="enrichError" class="error-msg">{{ enrichError }}</div>
-  </ng-container>
-
   <div class="form-grid" [formGroup]="form">
     <div class="form-group">
       <label>Nome</label>
@@ -83,6 +71,12 @@
       <label class="checkbox-label">
         <input type="checkbox" formControlName="allowPartialContribution" />
         Permitir contribuição parcial
+      </label>
+    </div>
+    <div class="form-group full-width">
+      <label class="checkbox-label">
+        <input type="checkbox" formControlName="available" />
+        Disponível
       </label>
     </div>
   </div>

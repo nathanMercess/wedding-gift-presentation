@@ -1,6 +1,6 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { Component, InputSignal, OutputEmitterRef, effect, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, InputSignal, OutputEmitterRef, effect, input, output } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { EndpointsUrls } from '../../../constants/api-endpoints';
 import { EMPTY_GIFT } from '../../../constants/empty-gift.constant';
@@ -27,25 +27,29 @@ const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
   templateUrl: './admin-gift-form.component.html',
   styleUrl: './admin-gift-form.component.scss',
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AdminGiftFormComponent {
-  public readonly editingGift: InputSignal<Gift> = input<Gift>(EMPTY_GIFT);
+  public readonly editingGift: InputSignal<Gift> = input.required<Gift>();
   public readonly cancel: OutputEmitterRef<void> = output<void>();
 
   public readonly form: FormGroup;
-  public enrichUrl: string = '';
-  public enriching: boolean = false;
-  public enrichError: string = '';
   public appliedSuggestionBaseAmount: number = 0;
   private raised: number = 0;
 
-  public constructor(public readonly giftService: GiftService, public readonly http: HttpClient, public readonly endpoints: EndpointsUrls, public readonly fb: FormBuilder) {
+  public constructor(
+    public readonly giftService: GiftService, 
+    public readonly http: HttpClient, 
+    public readonly endpoints: EndpointsUrls, 
+    public readonly fb: FormBuilder) {
+      
     this.form = this.fb.group({
       name: ['', [Validators.required, Validators.maxLength(120)]],
       total: [null, [Validators.required, Validators.min(0.01)]],
       image: [''],
       description: ['', [Validators.maxLength(1000)]],
       allowPartialContribution: [true],
+      avavailable: [true],
     });
 
     effect((): void => {
@@ -58,10 +62,9 @@ export class AdminGiftFormComponent {
         image: gift.image,
         description: gift.description ?? '',
         allowPartialContribution: gift.allowPartialContribution,
+        available: gift.available,
       });
 
-      this.enrichUrl = '';
-      this.enrichError = '';
       this.appliedSuggestionBaseAmount = 0;
       this.giftService.clearAdminGiftError();
       this.giftService.resetAdminGiftSaved();
@@ -120,38 +123,6 @@ export class AdminGiftFormComponent {
     return this.totalAmount;
   }
 
-  public enrichFromLink(): void {
-    if (!this.enrichUrl.trim())
-      return;
-
-    this.enriching = true;
-    this.enrichError = '';
-
-    this.http.post<ApiResponse<GiftEnrichResponse>>(this.endpoints.adminGiftsEnrich, { url: this.enrichUrl })
-      .pipe(ApiResponseUtil.data<GiftEnrichResponse>('Nao foi possivel obter os dados do link.'))
-      .subscribe({
-        next: (data: GiftEnrichResponse): void => {
-          this.enriching = false;
-
-          if (data.name)
-            this.form.get('name')!.setValue(data.name);
-
-          if (data.description)
-            this.form.get('description')!.setValue(data.description);
-
-          if (data.price)
-            this.form.get('total')!.setValue(data.price);
-
-          if (data.imageUrl)
-            this.form.get('image')!.setValue(data.imageUrl);
-        },
-        error: (err: HttpErrorResponse): void => {
-          this.enriching = false;
-          this.enrichError = HttpErrorUtil.extract(err, 'Nao foi possivel obter os dados do link.');
-        },
-      });
-  }
-
   public save(): void {
     if (this.giftService.adminState().giftSaving)
       return;
@@ -170,6 +141,7 @@ export class AdminGiftFormComponent {
       image: value.image ?? '',
       description: `${value.description ?? ''}`.trim(),
       allowPartialContribution: !!value.allowPartialContribution,
+      available: !!value.available,
       raised: this.raised,
     };
 
