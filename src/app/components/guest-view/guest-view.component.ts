@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { AfterViewChecked, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, WritableSignal, effect, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
+import { EMPTY_GIFT } from '../../constants/empty-gift.constant';
 import { SORT_OPTIONS, SortOption } from '../../constants/sort-options.constant';
 import { CarouselPhoto, Couple } from '../../models/couple.model';
 import { Gift } from '../../models/gift.model';
@@ -30,12 +31,13 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   public coupleSignature: string = '';
   public selectedSortId: string = 'name-asc';
   public onlyAvailable: boolean = false;
-  public selectedGift: Gift | null = null;
+  public selectedGift: Gift = EMPTY_GIFT;
+  public showGiftDetailsModal: boolean = false;
   public filterSheetOpen: boolean = false;
 
   public readonly carouselIndex: WritableSignal<number> = signal(0);
   public readonly carouselReady: WritableSignal<boolean> = signal(false);
-  private carouselInterval: ReturnType<typeof setInterval> | null = null;
+  private carouselInterval: number = 0;
   private touchStartX: number = 0;
 
   @ViewChild('carouselTrack') public carouselTrack?: ElementRef<HTMLDivElement>;
@@ -220,7 +222,7 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
     if (!this.loopCenteringSettled)
       this.carouselReady.set(false);
     this.stopCarousel();
-    this.carouselInterval = setInterval((): void => {
+    this.carouselInterval = window.setInterval((): void => {
       if (document.hidden)
         return;
 
@@ -229,10 +231,11 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   public stopCarousel(): void {
-    if (this.carouselInterval) {
-      clearInterval(this.carouselInterval);
-      this.carouselInterval = null;
-    }
+    if (this.carouselInterval === 0)
+      return;
+
+    clearInterval(this.carouselInterval);
+    this.carouselInterval = 0;
   }
 
   public goToSlide(index: number): void {
@@ -303,6 +306,16 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   public trackByGiftId(_: number, gift: Gift): string {
     return gift.id;
+  }
+
+  public openGiftDetails(gift: Gift): void {
+    this.selectedGift = gift;
+    this.showGiftDetailsModal = true;
+  }
+
+  public closeGiftDetails(): void {
+    this.showGiftDetailsModal = false;
+    this.selectedGift = EMPTY_GIFT;
   }
 
   public get selectedSort(): SortOption {

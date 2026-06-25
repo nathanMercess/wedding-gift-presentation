@@ -167,8 +167,8 @@
             presente{{ giftService.guestState().totalCount !== 1 ? 's' : '' }}</p>
           <div class="gifts-grid">
             <div *ngFor="let gift of giftService.guestState().gifts; trackBy: trackByGiftId" class="gift-grid-item"
-              (click)="selectedGift = gift">
-              <app-gift-card [gift]="gift" (presentClick)="selectedGift = gift"></app-gift-card>
+              (click)="openGiftDetails(gift)">
+              <app-gift-card [gift]="gift" (presentClick)="openGiftDetails(gift)"></app-gift-card>
             </div>
           </div>
 
@@ -203,8 +203,8 @@
 
   </ng-container>
 
-  <app-gift-details-modal *ngIf="selectedGift" [gift]="selectedGift" [coupleName]="coupleService.state().couple.names"
-    (close)="selectedGift = null" (paymentCompleted)="onGiftPaymentCompleted()">
+  <app-gift-details-modal *ngIf="showGiftDetailsModal" [gift]="selectedGift" [coupleName]="coupleService.state().couple.names"
+    (close)="closeGiftDetails()" (paymentCompleted)="onGiftPaymentCompleted()">
   </app-gift-details-modal>
 
 </div>

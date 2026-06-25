@@ -44,7 +44,7 @@
       <div *ngIf="!giftService.adminState().giftsLoading && giftService.adminState().gifts.length > 0"
         class="gifts-cards-grid">
         <app-admin-gift-card *ngFor="let gift of giftService.adminState().gifts; trackBy: trackByGiftId"
-          [gift]="gift" [isEditing]="editingGift?.id === gift.id"
+          [gift]="gift" [isEditing]="editingGift.id === gift.id"
           (edit)="openEditGift($event)" (delete)="requestDeleteGift($event)"></app-admin-gift-card>
       </div>
 
@@ -78,12 +78,12 @@
 
   </main>
 
-  <app-slide-over *ngIf="showGiftForm" [title]="editingGift ? 'Editar presente' : 'Novo presente'"
+  <app-slide-over *ngIf="showGiftForm" [title]="isEditingGift ? 'Editar presente' : 'Novo presente'"
     (closed)="closeGiftForm()">
     <app-admin-gift-form [editingGift]="editingGift" (cancel)="closeGiftForm()"></app-admin-gift-form>
   </app-slide-over>
 
-  <app-confirm-dialog *ngIf="giftPendingDeletion" title="Remover presente?"
+  <app-confirm-dialog *ngIf="showDeleteConfirm" title="Remover presente?"
     [message]="'Tem certeza que deseja remover \'' + giftPendingDeletion.name + '\'? Essa ação não pode ser desfeita.'"
     confirmLabel="Remover" cancelLabel="Cancelar" (confirmed)="confirmDeleteGift()" (cancelled)="cancelDeleteGift()">
   </app-confirm-dialog>

@@ -61,12 +61,12 @@ describe('AdminGiftFormComponent', () => {
     expect(component.form.get('name')!.touched).toBe(true);
   });
 
-  it('save() válido (criação) chama saveAdminGift com id null e raised 0', () => {
+  it('save() válido (criação) chama saveAdminGift com id vazio e raised 0', () => {
     fixture.detectChanges();
     component.form.setValue(validValue());
     component.save();
     expect(giftServiceMock.saveAdminGift).toHaveBeenCalledWith(
-      null,
+      '',
       expect.objectContaining({ name: 'Air Fryer', total: 200, raised: 0, allowPartialContribution: true }),
     );
   });

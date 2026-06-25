@@ -148,10 +148,10 @@ export class GiftService {
       });
   }
 
-  public saveAdminGift(giftId: string | null, gift: Partial<Gift>): void {
+  public saveAdminGift(giftId: string, gift: Partial<Gift>): void {
     this.patchAdminState({ giftSaving: true, giftError: '', giftSaved: false });
 
-    if (giftId === null) {
+    if (!giftId) {
       this.http.post<ApiResponse<Gift>>(this.endpointsUrls.adminGiftsList, gift)
         .pipe(
           ApiResponseUtil.data<Gift>('Erro ao salvar presente.'),

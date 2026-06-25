@@ -4,6 +4,7 @@ import { PaymentService } from './payment.service';
 import { EndpointsUrls } from '../../constants/api-endpoints';
 import { ApiResponse } from '../../models/api-response.model';
 import { CardPaymentDto } from '../models/card-payment-dto.model';
+import { EMPTY_PAYMENT_RESPONSE } from '../constants/empty-payment-response.constant';
 import { PaymentResponse } from '../models/payment-response.model';
 import { PixPaymentDto } from '../models/pix-payment-dto.model';
 
@@ -36,7 +37,7 @@ describe('PaymentService — resiliência de rede', () => {
   afterEach(() => http.verify());
 
   it('estado inicial limpo', () => {
-    expect(service.paymentState()).toEqual({ submitting: false, response: null, error: '' });
+    expect(service.paymentState()).toEqual({ submitting: false, hasResponse: false, response: EMPTY_PAYMENT_RESPONSE, error: '' });
   });
 
   describe('payWithCard', () => {
@@ -49,6 +50,7 @@ describe('PaymentService — resiliência de rede', () => {
       req.flush(apiSuccess({ status: 'approved' } as PaymentResponse));
 
       expect(service.paymentState().submitting).toBe(false);
+      expect(service.paymentState().hasResponse).toBe(true);
       expect(service.paymentState().response).toBeTruthy();
       expect(service.paymentState().error).toBe('');
     });
@@ -60,7 +62,8 @@ describe('PaymentService — resiliência de rede', () => {
 
       expect(service.paymentState().submitting).toBe(false);
       expect(service.paymentState().error).toContain('Sem conexao');
-      expect(service.paymentState().response).toBeNull();
+      expect(service.paymentState().hasResponse).toBe(false);
+      expect(service.paymentState().response).toEqual(EMPTY_PAYMENT_RESPONSE);
     });
 
     it('erro do servidor com error.code traduz localmente', () => {
@@ -81,6 +84,7 @@ describe('PaymentService — resiliência de rede', () => {
       req.flush(apiSuccess({ status: 'pending', mpOrderId: 'mp1', qrCodeBase64: 'abc' } as PaymentResponse));
 
       expect(service.paymentState().response).toBeTruthy();
+      expect(service.paymentState().hasResponse).toBe(true);
       expect(service.paymentState().submitting).toBe(false);
     });
 
@@ -101,6 +105,7 @@ describe('PaymentService — resiliência de rede', () => {
       req.flush(apiSuccess({ status: 'approved' } as PaymentResponse));
 
       expect(service.statusState().response).toBeTruthy();
+      expect(service.statusState().hasResponse).toBe(true);
       expect(service.statusState().error).toBe('');
     });
 

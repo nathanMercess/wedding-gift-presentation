@@ -1,7 +1,7 @@
 <div class="form-card">
-  <h3>{{ editingGift() ? 'Editar presente' : 'Novo presente' }}</h3>
+  <h3>{{ isEditing ? 'Editar presente' : 'Novo presente' }}</h3>
 
-  <ng-container *ngIf="!editingGift()">
+  <ng-container *ngIf="!isEditing">
     <div class="enrich-row">
       <input type="url" class="text-input" placeholder="Cole o link do produto para preencher automaticamente..."
         [(ngModel)]="enrichUrl" name="enrichUrl" />

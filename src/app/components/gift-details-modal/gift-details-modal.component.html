@@ -61,7 +61,7 @@
             @case (ModalStep.Contribution) {
               <app-gift-contribution-form *ngIf="!isUnavailable" [gift]="gift()" [coupleName]="coupleName()"
                 [minAmount]="minAmount" [remaining]="contributionLimit" [availableQuickAmounts]="availableQuickAmounts"
-                [initialData]="contributionFormData" (submitted)="onContributionSubmit($event)"
+                [initialData]="contributionFormData" [hasInitialData]="hasStoredContribution" (submitted)="onContributionSubmit($event)"
                 (cancelled)="requestClose()">
               </app-gift-contribution-form>
             }

@@ -26,7 +26,7 @@ export class GiftPaymentStepComponent {
 
   public readonly PaymentMethod: typeof PaymentMethod = PaymentMethod;
 
-  public activeMethod: PaymentMethod | null = null;
+  public activeMethod: PaymentMethod = PaymentMethod.None;
 
   public constructor(public readonly paymentService: PaymentService) {}
 

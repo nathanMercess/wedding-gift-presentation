@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Component, InputSignal, OutputEmitterRef, effect, input, output } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { EndpointsUrls } from '../../../constants/api-endpoints';
+import { EMPTY_GIFT } from '../../../constants/empty-gift.constant';
 import { CreditCardFeeUtil } from '../../../checkout/utils/credit-card-fee.util';
 import { ApiResponse } from '../../../models/api-response.model';
 import { Gift } from '../../../models/gift.model';
@@ -28,7 +29,7 @@ const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
 })
 export class AdminGiftFormComponent {
-  public readonly editingGift: InputSignal<Gift | null> = input<Gift | null>(null);
+  public readonly editingGift: InputSignal<Gift> = input<Gift>(EMPTY_GIFT);
   public readonly cancel: OutputEmitterRef<void> = output<void>();
 
   public readonly form: FormGroup;
@@ -48,15 +49,15 @@ export class AdminGiftFormComponent {
     });
 
     effect((): void => {
-      const gift: Gift | null = this.editingGift();
+      const gift: Gift = this.editingGift();
 
-      this.raised = gift?.raised ?? 0;
+      this.raised = gift.raised;
       this.form.reset({
-        name: gift?.name ?? '',
-        total: gift?.total ?? null,
-        image: gift?.image ?? '',
-        description: gift?.description ?? '',
-        allowPartialContribution: gift?.allowPartialContribution ?? true,
+        name: gift.name,
+        total: this.isEditing ? gift.total : null,
+        image: gift.image,
+        description: gift.description ?? '',
+        allowPartialContribution: gift.allowPartialContribution,
       });
 
       this.enrichUrl = '';
@@ -69,6 +70,10 @@ export class AdminGiftFormComponent {
 
   public get imageUrl(): string {
     return this.form.get('image')!.value ?? '';
+  }
+
+  public get isEditing(): boolean {
+    return this.editingGift().id.trim().length > 0;
   }
 
   public get totalAmount(): number {
@@ -156,7 +161,7 @@ export class AdminGiftFormComponent {
       return;
     }
 
-    const giftId: string | null = this.editingGift() ? this.editingGift()!.id : null;
+    const giftId: string = this.editingGift().id;
     const value = this.form.value;
 
     const payload: Partial<Gift> = {

@@ -17,18 +17,18 @@ import { CreditCardFeeUtil } from './utils/credit-card-fee.util';
 })
 export class CheckoutComponent implements OnInit {
   public readonly PaymentMethod: typeof PaymentMethod = PaymentMethod;
-  public activeMethod: PaymentMethod | null = null;
+  public activeMethod: PaymentMethod = PaymentMethod.None;
   public orderId: string = '';
   public totalAmount: number = 0;
   public paymentApproved: boolean = false;
-  public cardConfig: CardBrickConfig | null = null;
+  public cardConfig: CardBrickConfig = this.createCardConfig(PaymentMethod.CreditCard);
 
   public giftId: string = '';
   public contributorName: string = '';
   public message: string = '';
   private payerEmail: string = '';
 
-  public constructor(public readonly route: ActivatedRoute, private readonly router: Router) {}
+  public constructor(public readonly route: ActivatedRoute, public readonly router: Router) {}
 
   public ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
@@ -49,23 +49,28 @@ export class CheckoutComponent implements OnInit {
     this.paymentApproved = false;
     this.activeMethod = method;
 
-    if (method === PaymentMethod.CreditCard || method === PaymentMethod.DebitCard) {
-      this.cardConfig = {
-        amount: method === PaymentMethod.CreditCard ? CreditCardFeeUtil.calculateGrossAmount(this.totalAmount) : this.totalAmount,
-        netAmount: this.totalAmount,
-        orderId: this.orderId,
-        giftId: this.giftId,
-        contributorName: this.contributorName,
-        message: this.message,
-        cardType: method,
-        payerEmail: this.payerEmail,
-        maxInstallments: CreditCardFeeUtil.getMaxInstallments(),
-      };
-    }
+    if (method !== PaymentMethod.CreditCard && method !== PaymentMethod.DebitCard)
+      return;
+
+    this.cardConfig = this.createCardConfig(method);
   }
 
   public onPaymentApproved(): void {
     this.paymentApproved = true;
-    this.activeMethod = null;
+    this.activeMethod = PaymentMethod.None;
+  }
+
+  private createCardConfig(method: PaymentMethod.CreditCard | PaymentMethod.DebitCard): CardBrickConfig {
+    return {
+      amount: method === PaymentMethod.CreditCard ? CreditCardFeeUtil.calculateGrossAmount(this.totalAmount) : this.totalAmount,
+      netAmount: this.totalAmount,
+      orderId: this.orderId,
+      giftId: this.giftId,
+      contributorName: this.contributorName,
+      message: this.message,
+      cardType: method,
+      payerEmail: this.payerEmail,
+      maxInstallments: CreditCardFeeUtil.getMaxInstallments(),
+    };
   }
 }

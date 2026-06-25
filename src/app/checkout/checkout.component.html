@@ -7,9 +7,9 @@
     (methodSelected)="onMethodSelected($event)">
   </app-payment-method-selector>
 
-  <div class="checkout-form" *ngIf="activeMethod && !paymentApproved">
+  <div class="checkout-form" *ngIf="activeMethod !== PaymentMethod.None && !paymentApproved">
     <app-card-brick
-      *ngIf="cardConfig && (activeMethod === PaymentMethod.CreditCard || activeMethod === PaymentMethod.DebitCard)"
+      *ngIf="activeMethod === PaymentMethod.CreditCard || activeMethod === PaymentMethod.DebitCard"
       [config]="cardConfig"
       (paymentApproved)="onPaymentApproved()">
     </app-card-brick>

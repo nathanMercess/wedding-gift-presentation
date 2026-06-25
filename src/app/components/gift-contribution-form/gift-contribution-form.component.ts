@@ -22,6 +22,13 @@ export interface ContributionFormData {
   customAmount: string;
 }
 
+export const EMPTY_CONTRIBUTION_FORM_DATA: ContributionFormData = {
+  guestName: '',
+  guestMessage: '',
+  contributionType: ContributionType.Full,
+  customAmount: '',
+};
+
 @Component({
   standalone: true,
   selector: 'app-gift-contribution-form',
@@ -35,7 +42,8 @@ export class GiftContributionFormComponent implements OnInit {
   public readonly minAmount: InputSignal<number> = input.required<number>();
   public readonly remaining: InputSignal<number> = input.required<number>();
   public readonly availableQuickAmounts: InputSignal<number[]> = input<number[]>([]);
-  public readonly initialData: InputSignal<ContributionFormData | null> = input<ContributionFormData | null>(null);
+  public readonly initialData: InputSignal<ContributionFormData> = input<ContributionFormData>(EMPTY_CONTRIBUTION_FORM_DATA);
+  public readonly hasInitialData: InputSignal<boolean> = input<boolean>(false);
 
   public readonly submitted: OutputEmitterRef<ContributionSubmitData> = output<ContributionSubmitData>();
   public readonly cancelled: OutputEmitterRef<void> = output<void>();
@@ -56,10 +64,10 @@ export class GiftContributionFormComponent implements OnInit {
   }
 
   public ngOnInit(): void {
-    const data: ContributionFormData | null = this.initialData();
-
-    if (!data)
+    if (!this.hasInitialData())
       return;
+
+    const data: ContributionFormData = this.initialData();
 
     this.contributionType = data.contributionType;
     this.form.patchValue({

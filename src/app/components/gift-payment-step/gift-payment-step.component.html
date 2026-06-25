@@ -2,7 +2,7 @@
   <app-payment-method-selector (methodSelected)="activeMethod = $event">
   </app-payment-method-selector>
 
-  <ng-container *ngIf="activeMethod">
+  <ng-container *ngIf="activeMethod !== PaymentMethod.None">
     <app-card-brick
       *ngIf="activeMethod === PaymentMethod.CreditCard || activeMethod === PaymentMethod.DebitCard"
       [config]="{ cardType: activeMethod, orderId: orderId(), giftId: giftId(), contributorName: contributorName(), message: message(), amount: paymentAmount, netAmount: amount(), payerEmail: '', maxInstallments: maxInstallments }"
@@ -17,11 +17,11 @@
       [message]="message()"
       [amount]="amount()"
       (paymentApproved)="paymentApproved.emit()"
-      (cancelled)="activeMethod = null">
+      (cancelled)="activeMethod = PaymentMethod.None">
     </app-pix-display>
   </ng-container>
 
-  <p *ngIf="!activeMethod" class="payment-hint">
+  <p *ngIf="activeMethod === PaymentMethod.None" class="payment-hint">
     Escolha como deseja pagar para continuar.
   </p>
 </div>

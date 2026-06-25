@@ -3,6 +3,7 @@ import { Injectable, WritableSignal, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { EndpointsUrls } from '../constants/api-endpoints';
+import { EMPTY_DASHBOARD_RESPONSE } from '../constants/empty-dashboard-response.constant';
 import { ApiResponse } from '../models/api-response.model';
 import { DashboardResponse } from '../models/dashboard-response.model';
 import { SuperAdminDashboardState } from '../models/super-admin-dashboard-state.model';
@@ -17,7 +18,8 @@ export interface DashboardQueryParams {
 @Injectable({ providedIn: 'root' })
 export class SuperAdminDashboardService {
   public readonly state: WritableSignal<SuperAdminDashboardState> = signal<SuperAdminDashboardState>({
-    dashboard: null,
+    hasDashboard: false,
+    dashboard: EMPTY_DASHBOARD_RESPONSE,
     loading: false,
     error: '',
   });
@@ -38,7 +40,7 @@ export class SuperAdminDashboardService {
       )
       .subscribe({
         next: (dashboard: DashboardResponse): void => {
-          this.patchState({ dashboard });
+          this.patchState({ hasDashboard: true, dashboard });
         },
         error: (err: HttpErrorResponse): void => {
           if (HttpErrorUtil.isUnauthorized(err)) {

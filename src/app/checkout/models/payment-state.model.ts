@@ -2,6 +2,7 @@ import { PaymentResponse } from './payment-response.model';
 
 export interface PaymentState {
   submitting: boolean;
-  response: PaymentResponse | null;
+  hasResponse: boolean;
+  response: PaymentResponse;
   error: string;
 }

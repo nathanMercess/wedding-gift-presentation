@@ -45,8 +45,12 @@ export class SuperAdminDashboardComponent implements OnInit {
     this.loadDashboard();
   }
 
-  public get dashboard(): DashboardResponse | null {
+  public get dashboard(): DashboardResponse {
     return this.dashboardService.state().dashboard;
+  }
+
+  public get hasDashboard(): boolean {
+    return this.dashboardService.state().hasDashboard;
   }
 
   public loadDashboard(): void {

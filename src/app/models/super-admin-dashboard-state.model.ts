@@ -1,7 +1,8 @@
 import { DashboardResponse } from './dashboard-response.model';
 
 export interface SuperAdminDashboardState {
-  dashboard: DashboardResponse | null;
+  hasDashboard: boolean;
+  dashboard: DashboardResponse;
   loading: boolean;
   error: string;
 }

@@ -4,7 +4,7 @@ import { Gift } from '../../models/gift.model';
 import { ButtonComponent } from '../button/button.component';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { GiftPhotoCardComponent } from '../gift-photo-card/gift-photo-card.component';
-import { ContributionFormData, GiftContributionFormComponent, ContributionSubmitData } from '../gift-contribution-form/gift-contribution-form.component';
+import { ContributionFormData, EMPTY_CONTRIBUTION_FORM_DATA, GiftContributionFormComponent, ContributionSubmitData } from '../gift-contribution-form/gift-contribution-form.component';
 import { GiftPaymentStepComponent } from '../gift-payment-step/gift-payment-step.component';
 import { GiftSuccessStepComponent } from '../gift-success-step/gift-success-step.component';
 import { ModalStep } from '../../enums/modal-step.enum';
@@ -50,7 +50,7 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy, AfterViewIn
   @ViewChild(GiftContributionFormComponent) private formRef?: GiftContributionFormComponent;
   @ViewChild('modalContainer') public modalContainer?: ElementRef<HTMLDivElement>;
 
-  private previousFocusedElement: HTMLElement | null = null;
+  private previousFocusedElement: HTMLElement = document.body;
   private readonly hiddenSiblings: HTMLElement[] = [];
   private readonly focusableSelector: string = 'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
@@ -98,9 +98,9 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy, AfterViewIn
     return this.contributorName.trim().length > 0 || this.contributorMessage.trim().length > 0 || this.contributionAmount > 0;
   }
 
-  public get contributionFormData(): ContributionFormData | null {
+  public get contributionFormData(): ContributionFormData {
     if (!this.hasStoredContribution)
-      return null;
+      return EMPTY_CONTRIBUTION_FORM_DATA;
 
     return {
       guestName: this.contributorName,
@@ -124,7 +124,7 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy, AfterViewIn
   }
 
   public ngOnInit(): void {
-    this.previousFocusedElement = document.activeElement as HTMLElement | null;
+    this.previousFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : document.body;
     document.body.classList.add('modal-open');
     this.hidePageSiblings();
   }
@@ -136,7 +136,7 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy, AfterViewIn
   public ngOnDestroy(): void {
     document.body.classList.remove('modal-open');
     this.restorePageSiblings();
-    this.previousFocusedElement?.focus();
+    this.previousFocusedElement.focus();
   }
 
   @HostListener('document:keydown.escape')
@@ -246,7 +246,7 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy, AfterViewIn
 
   private hidePageSiblings(): void {
     const hostElement: HTMLElement = this.host.nativeElement;
-    const parentElement: HTMLElement | null = hostElement.parentElement;
+    const parentElement = hostElement.parentElement;
 
     if (!parentElement)
       return;

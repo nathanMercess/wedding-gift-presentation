@@ -13,7 +13,7 @@ import { PaymentMethod } from '../../enums/payment-method.enum';
 export class PaymentMethodSelectorComponent {
   public readonly methodSelected: OutputEmitterRef<PaymentMethod> = output<PaymentMethod>();
 
-  public activeMethod: PaymentMethod | null = null;
+  public activeMethod: PaymentMethod = PaymentMethod.None;
 
   public readonly PaymentMethod: typeof PaymentMethod = PaymentMethod;
 

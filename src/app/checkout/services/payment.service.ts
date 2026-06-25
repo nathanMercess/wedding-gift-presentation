@@ -5,6 +5,7 @@ import { EndpointsUrls } from '../../constants/api-endpoints';
 import { ApiResponse } from '../../models/api-response.model';
 import { ApiResponseUtil } from '../../utils/api-response.util';
 import { HttpErrorUtil } from '../../utils/http-error';
+import { EMPTY_PAYMENT_RESPONSE } from '../constants/empty-payment-response.constant';
 import { CardPaymentDto } from '../models/card-payment-dto.model';
 import { PaymentResponse } from '../models/payment-response.model';
 import { PaymentState } from '../models/payment-state.model';
@@ -17,19 +18,21 @@ const PAYMENT_TIMEOUT_MS = 25000;
 export class PaymentService {
   public readonly paymentState: WritableSignal<PaymentState> = signal<PaymentState>({
     submitting: false,
-    response: null,
+    hasResponse: false,
+    response: EMPTY_PAYMENT_RESPONSE,
     error: '',
   });
 
   public readonly statusState: WritableSignal<PaymentStatusState> = signal<PaymentStatusState>({
-    response: null,
+    hasResponse: false,
+    response: EMPTY_PAYMENT_RESPONSE,
     error: '',
   });
 
   public constructor(public readonly http: HttpClient, public readonly endpointsUrls: EndpointsUrls) {}
 
   public payWithCard(dto: CardPaymentDto): void {
-    this.patchPaymentState({ submitting: true, response: null, error: '' });
+    this.patchPaymentState({ submitting: true, hasResponse: false, response: EMPTY_PAYMENT_RESPONSE, error: '' });
 
     this.http.post<ApiResponse<PaymentResponse>>(this.endpointsUrls.paymentCard, dto)
       .pipe(
@@ -39,7 +42,7 @@ export class PaymentService {
       )
       .subscribe({
         next: (response: PaymentResponse): void => {
-          this.patchPaymentState({ response });
+          this.patchPaymentState({ hasResponse: true, response });
         },
         error: (err: HttpErrorResponse): void => {
           this.patchPaymentState({ error: HttpErrorUtil.extract(err, 'Erro ao processar o pagamento. Tente novamente.') });
@@ -48,7 +51,7 @@ export class PaymentService {
   }
 
   public payWithPix(dto: PixPaymentDto): void {
-    this.patchPaymentState({ submitting: true, response: null, error: '' });
+    this.patchPaymentState({ submitting: true, hasResponse: false, response: EMPTY_PAYMENT_RESPONSE, error: '' });
 
     this.http.post<ApiResponse<PaymentResponse>>(this.endpointsUrls.paymentPix, dto)
       .pipe(
@@ -58,7 +61,7 @@ export class PaymentService {
       )
       .subscribe({
         next: (response: PaymentResponse): void => {
-          this.patchPaymentState({ response });
+          this.patchPaymentState({ hasResponse: true, response });
         },
         error: (err: HttpErrorResponse): void => {
           this.patchPaymentState({ error: HttpErrorUtil.extract(err, 'Erro ao gerar o PIX. Tente novamente.') });
@@ -71,7 +74,7 @@ export class PaymentService {
       .pipe(ApiResponseUtil.data<PaymentResponse>('Erro ao consultar status do pagamento.'))
       .subscribe({
         next: (response: PaymentResponse): void => {
-          this.patchStatusState({ response, error: '' });
+          this.patchStatusState({ hasResponse: true, response, error: '' });
         },
         error: (err: HttpErrorResponse): void => {
           this.patchStatusState({ error: HttpErrorUtil.extract(err, 'Erro ao consultar status do pagamento.') });

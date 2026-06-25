@@ -118,7 +118,7 @@ describe('GiftService', () => {
   describe('saveAdminGift — criação', () => {
     it('insere o item retornado no topo e incrementa o total sem recarregar', () => {
       service.patchAdminState({ gifts: [makeGift({ id: 'g1' })], totalCount: 1 });
-      service.saveAdminGift(null, { name: 'Novo' });
+      service.saveAdminGift('', { name: 'Novo' });
 
       const req = httpMock.expectOne(endpoints.adminGiftsList);
       expect(req.request.method).toBe('POST');

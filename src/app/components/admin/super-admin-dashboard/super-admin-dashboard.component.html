@@ -20,7 +20,7 @@
       <div>
         <span class="eyebrow">Operação</span>
         <h1>Dashboard SuperAdmin</h1>
-        <p *ngIf="dashboard as data">Gerado em {{ formatDate(data.generatedAtUtc) }} · {{ formatDate(data.period.fromUtc) }} até {{ formatDate(data.period.toUtc) }}</p>
+        <p *ngIf="hasDashboard">Gerado em {{ formatDate(dashboard.generatedAtUtc) }} · {{ formatDate(dashboard.period.fromUtc) }} até {{ formatDate(dashboard.period.toUtc) }}</p>
       </div>
 
       <div class="filters">
@@ -54,7 +54,7 @@
     </section>
 
     <ng-container *ngIf="!dashboardService.state().loading && !dashboardService.state().error">
-      <ng-container *ngIf="dashboard as data">
+      <ng-container *ngIf="hasDashboard">
         <nav class="tabs" aria-label="Seções do dashboard">
           <button *ngFor="let tab of tabs; trackBy: trackByTab" type="button" [class.active]="activeTab === tab" (click)="setActiveTab(tab)">
             {{ getTabLabel(tab) }}
@@ -62,22 +62,22 @@
         </nav>
 
         <section class="tab-panel" *ngIf="activeTab === SuperAdminDashboardTab.Overview">
-          <app-super-admin-summary [dashboard]="data"></app-super-admin-summary>
+          <app-super-admin-summary [dashboard]="dashboard"></app-super-admin-summary>
           <div class="overview-grid">
-            <app-super-admin-charts [dashboard]="data"></app-super-admin-charts>
+            <app-super-admin-charts [dashboard]="dashboard"></app-super-admin-charts>
           </div>
         </section>
 
         <section class="tab-panel" *ngIf="activeTab === SuperAdminDashboardTab.Charts">
-          <app-super-admin-charts [dashboard]="data"></app-super-admin-charts>
+          <app-super-admin-charts [dashboard]="dashboard"></app-super-admin-charts>
         </section>
 
         <section class="tab-panel" *ngIf="activeTab === SuperAdminDashboardTab.Tables">
-          <app-super-admin-tables [dashboard]="data"></app-super-admin-tables>
+          <app-super-admin-tables [dashboard]="dashboard"></app-super-admin-tables>
         </section>
 
         <section class="tab-panel" *ngIf="activeTab === SuperAdminDashboardTab.Monitoring">
-          <app-super-admin-monitoring [dashboard]="data"></app-super-admin-monitoring>
+          <app-super-admin-monitoring [dashboard]="dashboard"></app-super-admin-monitoring>
         </section>
       </ng-container>
     </ng-container>

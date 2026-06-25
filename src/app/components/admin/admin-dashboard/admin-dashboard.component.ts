@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged, interval, takeUntil } from 'rxjs';
+import { EMPTY_GIFT } from '../../../constants/empty-gift.constant';
 import { Gift } from '../../../models/gift.model';
 import { GiftService } from '../../../services/gift.service';
 import { CoupleService } from '../../../services/couple.service';
@@ -27,8 +28,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   public activeTab: AdminTab = AdminTab.Gifts;
   public showGiftForm: boolean = false;
-  public editingGift: Gift | null = null;
-  public giftPendingDeletion: Gift | null = null;
+  public editingGift: Gift = EMPTY_GIFT;
+  public giftPendingDeletion: Gift = EMPTY_GIFT;
+  public showDeleteConfirm: boolean = false;
   public searchTerm: string = '';
 
   private readonly destroy$ = new Subject<void>();
@@ -43,7 +45,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     effect((): void => {
       if (this.giftService.adminState().giftSaved) {
         this.showGiftForm = false;
-        this.editingGift = null;
+        this.editingGift = EMPTY_GIFT;
         this.giftService.resetAdminGiftSaved();
       }
     }, { allowSignalWrites: true });
@@ -71,6 +73,10 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   public get isSuperAdmin(): boolean {
     return this.auth.hasRole(UserRole.SuperAdmin);
+  }
+
+  public get isEditingGift(): boolean {
+    return this.editingGift.id.trim().length > 0;
   }
 
   public ngOnInit(): void {
@@ -104,7 +110,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   }
 
   public openNewGift(): void {
-    this.editingGift = null;
+    this.editingGift = EMPTY_GIFT;
     this.showGiftForm = true;
   }
 
@@ -115,7 +121,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   public closeGiftForm(): void {
     this.showGiftForm = false;
-    this.editingGift = null;
+    this.editingGift = EMPTY_GIFT;
     this.giftService.clearAdminGiftError();
   }
 
@@ -138,17 +144,24 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   public requestDeleteGift(gift: Gift): void {
     this.giftPendingDeletion = gift;
+    this.showDeleteConfirm = true;
   }
 
   public confirmDeleteGift(): void {
-    if (this.giftPendingDeletion)
-      this.giftService.deleteAdminGift(this.giftPendingDeletion.id);
+    const giftId: string = this.giftPendingDeletion.id;
 
-    this.giftPendingDeletion = null;
+    this.showDeleteConfirm = false;
+    this.giftPendingDeletion = EMPTY_GIFT;
+
+    if (!giftId)
+      return;
+
+    this.giftService.deleteAdminGift(giftId);
   }
 
   public cancelDeleteGift(): void {
-    this.giftPendingDeletion = null;
+    this.showDeleteConfirm = false;
+    this.giftPendingDeletion = EMPTY_GIFT;
   }
 
   public trackByGiftId(_: number, gift: Gift): string {

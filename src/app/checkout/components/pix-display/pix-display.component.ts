@@ -51,8 +51,8 @@ export class PixDisplayComponent implements OnDestroy {
 
   public readonly payerForm: FormGroup;
 
-  private pollingInterval: ReturnType<typeof setInterval> | null = null;
-  private countdownInterval: ReturnType<typeof setInterval> | null = null;
+  private pollingInterval: number = 0;
+  private countdownInterval: number = 0;
   private awaitingPixResponse: boolean = false;
   private awaitingStatusCheck: boolean = false;
 
@@ -131,7 +131,7 @@ export class PixDisplayComponent implements OnDestroy {
       return;
     }
 
-    if (!state.response)
+    if (!state.hasResponse)
       return;
 
     const response = state.response;
@@ -160,20 +160,20 @@ export class PixDisplayComponent implements OnDestroy {
 
     this.awaitingStatusCheck = false;
 
-    if (state.response?.status === PaymentStatus.Approved) {
+    if (state.hasResponse && state.response.status === PaymentStatus.Approved) {
       this.stopPolling();
       this.paymentApproved.emit();
       return;
     }
 
-    if (state.response?.status === PaymentStatus.Rejected) {
+    if (state.hasResponse && state.response.status === PaymentStatus.Rejected) {
       this.stopPolling();
       this.showError(state.response.errorCode ?? ApiErrorCode.PixRejected, 'Pagamento PIX rejeitado. Tente novamente.');
     }
   }
 
   private startPolling(): void {
-    this.pollingInterval = setInterval(() => {
+    this.pollingInterval = window.setInterval((): void => {
       this.awaitingStatusCheck = true;
       this.paymentService.checkStatus(this.mpOrderId());
     }, 5000);
@@ -181,7 +181,7 @@ export class PixDisplayComponent implements OnDestroy {
 
   private startCountdown(): void {
     this.remainingSeconds.set(PIX_EXPIRATION_SECONDS);
-    this.countdownInterval = setInterval(() => {
+    this.countdownInterval = window.setInterval((): void => {
       this.remainingSeconds.update(s => s - 1);
       if (this.remainingSeconds() <= 0) {
         this.stopPolling();
@@ -212,13 +212,13 @@ export class PixDisplayComponent implements OnDestroy {
   }
 
   private stopPolling(): void {
-    if (this.pollingInterval !== null) {
+    if (this.pollingInterval !== 0) {
       clearInterval(this.pollingInterval);
-      this.pollingInterval = null;
+      this.pollingInterval = 0;
     }
-    if (this.countdownInterval !== null) {
+    if (this.countdownInterval !== 0) {
       clearInterval(this.countdownInterval);
-      this.countdownInterval = null;
+      this.countdownInterval = 0;
     }
   }
 
