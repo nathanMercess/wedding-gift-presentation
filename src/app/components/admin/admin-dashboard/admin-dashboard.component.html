@@ -10,7 +10,7 @@
     <nav class="dash-nav">
       <button [class.active]="activeTab === AdminTab.Gifts" (click)="activeTab = AdminTab.Gifts">Presentes</button>
       <button [class.active]="activeTab === AdminTab.Couple" (click)="activeTab = AdminTab.Couple">Casal</button>
-      <a *ngIf="isSuperAdmin" routerLink="/super-admin/dashboard">SuperAdmin</a>
+      <a *ngIf="isSuperAdmin" routerLink="/super-admin/dashboard">Dashboard</a>
     </nav>
     <button class="logout-btn" (click)="logout()">Sair</button>
   </header>

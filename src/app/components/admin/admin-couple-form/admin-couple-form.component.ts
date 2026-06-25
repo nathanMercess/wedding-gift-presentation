@@ -14,7 +14,7 @@ import { ColorUtil } from '../../../utils/color.util';
   imports: [CommonModule, FormsModule],
 })
 export class AdminCoupleFormComponent {
-  public couple: Couple = { names: '', weddingDate: '', photoUrl: '', message: '', primaryColor: '#C79A6D', secondaryColor: '#F7F0EA', carouselPhotos: [] };
+  public couple: Couple = { names: '', weddingDate: '', photoUrl: '', message: '', primaryColor: '#000000', secondaryColor: '#d9d9d9', carouselPhotos: [] };
   public carouselUploading: boolean = false;
   public carouselUploadError: string = '';
   public isDraggingFiles: boolean = false;
@@ -30,7 +30,7 @@ export class AdminCoupleFormComponent {
         return;
 
       this.coupleSignature = signature;
-      const primaryColor: string = loaded.primaryColor || '#C79A6D';
+      const primaryColor: string = loaded.primaryColor || '#000000';
 
       // Formatar a data para garantir a compatibilidade com o <input type="datetime-local">
       let formattedDate = loaded.weddingDate || '';

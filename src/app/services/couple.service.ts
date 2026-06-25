@@ -14,7 +14,7 @@ import { ThemeService } from './theme.service';
 @Injectable({ providedIn: 'root' })
 export class CoupleService {
   public readonly state: WritableSignal<CoupleState> = signal<CoupleState>({
-    couple: { names: '', weddingDate: '', photoUrl: '', message: '', primaryColor: '#C79A6D', secondaryColor: '#F7F0EA', carouselPhotos: [] },
+    couple: { names: '', weddingDate: '', photoUrl: '', message: '', primaryColor: '#000000', secondaryColor: '#d9d9d9', carouselPhotos: [] },
     loading: false,
     saving: false,
     success: false,

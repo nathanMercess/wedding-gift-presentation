@@ -49,7 +49,7 @@ export class AdminGiftFormComponent {
       image: [''],
       description: ['', [Validators.maxLength(1000)]],
       allowPartialContribution: [true],
-      avavailable: [true],
+      available: [true],
     });
 
     effect((): void => {

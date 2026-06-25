@@ -68,4 +68,4 @@ src/
 - **Angular 17** com Standalone Components
 - **CSS puro** (sem Tailwind, sem dependências de UI)
 - **Fontes**: Playfair Display + Lato (Google Fonts)
-- **Paleta**: Dourado rosé (#C79A6D) + Bege (#F7F0EA)
+- **Paleta**: Dourado rosé (#000000) + Bege (#d9d9d9)

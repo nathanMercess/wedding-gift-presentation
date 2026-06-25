@@ -9,15 +9,15 @@
   --card: #FFFFFF;
   --card-foreground: #6B6B6B;
 
-  --primary: #C79A6D;
+  --primary: #000000;
   --primary-foreground: #FFFFFF;
-  --secondary: #F7F0EA;
+  --secondary: #d9d9d9;
   --secondary-foreground: #6B6B6B;
-  --muted: #F7F0EA;
+  --muted: #d9d9d9;
   --muted-foreground: #9A9A9A;
 
   --border: rgba(107, 107, 107, 0.15);
-  --ring: #C79A6D;
+  --ring: #000000;
   --radius: 0.625rem;
 
   /* ── Apple design system: motion ── */

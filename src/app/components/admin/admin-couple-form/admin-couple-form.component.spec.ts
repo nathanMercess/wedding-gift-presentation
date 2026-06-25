@@ -15,7 +15,7 @@ describe('AdminCoupleFormComponent — carrossel', () => {
   beforeEach(() => {
     const coupleStub = {
       state: signal({
-        couple: { names: '', weddingDate: '', photoUrl: '', message: '', primaryColor: '#C79A6D', secondaryColor: '#F7F0EA', carouselPhotos: [] },
+        couple: { names: '', weddingDate: '', photoUrl: '', message: '', primaryColor: '#000000', secondaryColor: '#d9d9d9', carouselPhotos: [] },
         loading: false, saving: false, success: false, error: '', photoUploading: false, photoUploadError: '',
       }),
       uploadCouplePhoto: jest.fn(),

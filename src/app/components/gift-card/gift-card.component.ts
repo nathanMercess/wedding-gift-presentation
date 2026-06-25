@@ -40,6 +40,6 @@ export class GiftCardComponent {
 
   public onImgError(event: Event): void {
     const img = event.target as HTMLImageElement;
-    img.style.background = '#F7F0EA';
+    img.style.background = '#d9d9d9';
   }
 }

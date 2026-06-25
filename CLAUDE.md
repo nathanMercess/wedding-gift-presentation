@@ -45,8 +45,8 @@ Infraestrutura
 - Proibido Tailwind, Bootstrap ou classes utilitárias de terceiros.
 
 Design system
-- Dourado rosé: #C79A6D.
-- Bege: #F7F0EA.
+- Dourado rosé: #000000.
+- Bege: #d9d9d9.
 - Fontes: Playfair Display e Lato.
 
 3. REGRAS OBRIGATÓRIAS DE CÓDIGO

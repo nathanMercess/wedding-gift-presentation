@@ -9,8 +9,8 @@ export abstract class CoupleUtil {
       weddingDate: CoupleUtil.text(data['weddingDate']),
       photoUrl: CoupleUtil.text(data['photoUrl'] ?? data['photo']),
       message: CoupleUtil.text(data['message']),
-      primaryColor: CoupleUtil.text(data['primaryColor']) || '#C79A6D',
-      secondaryColor: CoupleUtil.text(data['secondaryColor']) || '#F7F0EA',
+      primaryColor: CoupleUtil.text(data['primaryColor']) || '#000000',
+      secondaryColor: CoupleUtil.text(data['secondaryColor']) || '#d9d9d9',
       carouselPhotos: CoupleUtil.normalizeCarouselPhotos(data['carouselPhotos'] ?? data['CarouselPhotos']),
     };
   }
