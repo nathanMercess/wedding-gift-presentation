@@ -1,0 +1,120 @@
+<section class="panel-grid">
+  <article class="panel panel-wide">
+    <div class="panel-header">
+      <div>
+        <h2>Contribuições por dia</h2>
+        <p>{{ dashboard().contributions.periodPaidCount }} pagas · {{ formatMoney(dashboard().contributions.periodPaidAmount) }}</p>
+      </div>
+    </div>
+
+    <div *ngIf="dashboard().contributionsByDay.length > 0" class="line-chart">
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        <polygon [attr.points]="contributionsAreaPoints()"></polygon>
+        <polyline [attr.points]="contributionsLinePoints()"></polyline>
+      </svg>
+      <div class="daily-strip">
+        <div *ngFor="let item of dashboard().contributionsByDay; trackBy: trackByIndex" class="daily-point">
+          <span>{{ formatShortDate(item.dateUtc) }}</span>
+          <strong>{{ formatMoney(item.amount) }}</strong>
+          <small>{{ item.count }} contrib.</small>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="dashboard().contributionsByDay.length === 0" class="empty-state">Nenhuma contribuição no período.</div>
+  </article>
+
+  <article class="panel">
+    <div class="panel-header">
+      <div>
+        <h2>Pagamentos por status</h2>
+        <p>{{ dashboard().payments.total }} pagamentos</p>
+      </div>
+    </div>
+
+    <div *ngIf="dashboard().paymentsByStatus.length > 0" class="bar-list">
+      <div *ngFor="let item of dashboard().paymentsByStatus; trackBy: trackByPaymentStatus" class="bar-row">
+        <div class="bar-label">
+          <span>{{ displayValue(item.status) }}</span>
+          <strong>{{ item.count }}</strong>
+        </div>
+        <div class="bar-track"><span [style.width.%]="barWidth(item.count, maxPaymentStatusCount())"></span></div>
+        <small>{{ formatMoney(item.amount) }}</small>
+      </div>
+    </div>
+
+    <div *ngIf="dashboard().paymentsByStatus.length === 0" class="empty-state">Sem pagamentos por status.</div>
+  </article>
+
+  <article class="panel">
+    <div class="panel-header">
+      <div>
+        <h2>Pagamentos por método</h2>
+        <p>{{ dashboard().payments.pix }} PIX · {{ dashboard().payments.card }} cartão</p>
+      </div>
+    </div>
+
+    <div *ngIf="dashboard().paymentsByMethod.length > 0" class="bar-list">
+      <div *ngFor="let item of dashboard().paymentsByMethod; trackBy: trackByPaymentMethod" class="bar-row">
+        <div class="bar-label">
+          <span>{{ displayValue(item.method) }}</span>
+          <strong>{{ item.count }}</strong>
+        </div>
+        <div class="bar-track"><span [style.width.%]="barWidth(item.count, maxPaymentMethodCount())"></span></div>
+        <small>{{ formatMoney(item.amount) }}</small>
+      </div>
+    </div>
+
+    <div *ngIf="dashboard().paymentsByMethod.length === 0" class="empty-state">Sem pagamentos por método.</div>
+  </article>
+
+  <article class="panel panel-wide">
+    <div class="panel-header">
+      <div>
+        <h2>Presentes por categoria</h2>
+        <p>{{ dashboard().gifts.total }} presentes · {{ dashboard().gifts.available }} disponíveis</p>
+      </div>
+    </div>
+
+    <div *ngIf="dashboard().giftsByCategory.length > 0" class="category-chart">
+      <div *ngFor="let item of dashboard().giftsByCategory; trackBy: trackByGiftCategory" class="category-row">
+        <div class="category-title">
+          <span>{{ item.category }}</span>
+          <small>{{ item.count }} presentes</small>
+        </div>
+        <div class="dual-bars">
+          <div class="bar-track muted"><span [style.width.%]="barWidth(item.goalAmount, maxGiftCategoryAmount())"></span></div>
+          <div class="bar-track"><span [style.width.%]="barWidth(item.raisedAmount, maxGiftCategoryAmount())"></span></div>
+        </div>
+        <div class="category-values">
+          <span>Meta {{ formatMoney(item.goalAmount) }}</span>
+          <strong>{{ formatMoney(item.raisedAmount) }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="dashboard().giftsByCategory.length === 0" class="empty-state">Sem presentes por categoria.</div>
+  </article>
+
+  <article class="panel">
+    <div class="panel-header">
+      <div>
+        <h2>Requests por status</h2>
+        <p>{{ dashboard().requests.total }} requests</p>
+      </div>
+    </div>
+
+    <div *ngIf="dashboard().requestsByStatus.length > 0" class="bar-list">
+      <div *ngFor="let item of dashboard().requestsByStatus; trackBy: trackByRequestStatus" class="bar-row">
+        <div class="bar-label">
+          <span [class]="statusGroupBadgeClass(item.statusGroup)">{{ item.statusGroup }}</span>
+          <strong>{{ item.count }}</strong>
+        </div>
+        <div class="bar-track"><span [style.width.%]="barWidth(item.count, maxRequestStatusCount())"></span></div>
+        <small>{{ formatMilliseconds(item.averageDurationMilliseconds) }}</small>
+      </div>
+    </div>
+
+    <div *ngIf="dashboard().requestsByStatus.length === 0" class="empty-state">Sem requests por status.</div>
+  </article>
+</section>

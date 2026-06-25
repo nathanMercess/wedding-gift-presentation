@@ -1,4 +1,7 @@
 export abstract class DateUtil {
+  public static readonly dateTimeFormatter: Intl.DateTimeFormat = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+  public static readonly shortDateFormatter: Intl.DateTimeFormat = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' });
+
   public static formatWeddingDate(rawValue: string): string {
     const value = rawValue?.trim();
 
@@ -18,5 +21,26 @@ export abstract class DateUtil {
       year: 'numeric',
       timeZone: 'UTC',
     }).format(date);
+  }
+
+  public static formatDateTime(value: string | null | undefined): string {
+    if (!value)
+      return '-';
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime()))
+      return '-';
+
+    return this.dateTimeFormatter.format(date);
+  }
+
+  public static formatShortDate(value: string): string {
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime()))
+      return '-';
+
+    return this.shortDateFormatter.format(date);
   }
 }

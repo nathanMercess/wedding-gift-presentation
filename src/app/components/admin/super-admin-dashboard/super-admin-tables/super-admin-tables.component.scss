@@ -1,0 +1,146 @@
+.table-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.table-section {
+  padding: 1rem;
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+}
+
+.requests-section {
+  margin-top: 1rem;
+}
+
+.panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0 0 0.25rem;
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    font-weight: 800;
+  }
+
+  p {
+    color: var(--muted-foreground);
+    font-size: 0.84rem;
+  }
+}
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+}
+
+table {
+  width: 100%;
+  min-width: 58rem;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+}
+
+th {
+  padding: 0.75rem;
+  background: var(--neutral-50);
+  color: var(--muted-foreground);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+td {
+  max-width: 18rem;
+  padding: 0.75rem;
+  border-top: 1px solid var(--hairline);
+  color: var(--foreground);
+  vertical-align: top;
+}
+
+tr.is-danger td {
+  background: color-mix(in srgb, var(--danger-bg) 62%, transparent);
+}
+
+tr.is-warning td {
+  background: color-mix(in srgb, #fff7ed 72%, transparent);
+}
+
+tr.is-slow td {
+  box-shadow: inset 3px 0 0 #f97316;
+}
+
+.path-cell,
+.message-cell {
+  min-width: 14rem;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.status-badge,
+.method-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.55rem;
+  padding: 0 0.55rem;
+  border-radius: var(--radius-pill);
+  background: var(--neutral-100);
+  color: var(--neutral-700);
+  font-size: 0.73rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.status-badge.is-success {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.status-badge.is-warning {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.status-badge.is-danger {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.method-badge {
+  background: var(--secondary);
+  color: var(--primary);
+}
+
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 6rem;
+  padding: 1rem;
+  border: 1px dashed var(--hairline-strong);
+  border-radius: var(--radius-md);
+  color: var(--muted-foreground);
+  font-size: 0.88rem;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .table-grid {
+    grid-template-columns: 1fr;
+  }
+}

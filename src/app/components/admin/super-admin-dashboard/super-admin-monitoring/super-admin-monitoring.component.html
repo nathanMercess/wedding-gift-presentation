@@ -1,0 +1,124 @@
+<section class="ops-grid">
+  <article class="ops-card">
+    <h2>Presentes</h2>
+    <dl>
+      <div><dt>Total</dt><dd>{{ dashboard().gifts.total }}</dd></div>
+      <div><dt>Sem contribuições</dt><dd>{{ dashboard().gifts.withoutContributions }}</dd></div>
+      <div><dt>Indisponíveis</dt><dd>{{ dashboard().gifts.unavailable }}</dd></div>
+      <div><dt>Média financiada</dt><dd>{{ formatPercent(dashboard().gifts.averageFundingPercent) }}</dd></div>
+    </dl>
+  </article>
+
+  <article class="ops-card">
+    <h2>Contribuições</h2>
+    <dl>
+      <div><dt>Pagas</dt><dd>{{ dashboard().contributions.paid }}</dd></div>
+      <div><dt>Pendentes</dt><dd>{{ dashboard().contributions.pending }}</dd></div>
+      <div><dt>Canceladas</dt><dd>{{ dashboard().contributions.cancelled }}</dd></div>
+      <div><dt>Ticket médio</dt><dd>{{ formatMoney(dashboard().contributions.averagePaidAmount) }}</dd></div>
+    </dl>
+  </article>
+
+  <article class="ops-card">
+    <h2>Pagamentos</h2>
+    <dl>
+      <div><dt>Aprovados sem contribuição</dt><dd>{{ dashboard().payments.approvedWithoutContribution }}</dd></div>
+      <div><dt>Pendentes</dt><dd>{{ dashboard().payments.pending }}</dd></div>
+      <div><dt>Falhas</dt><dd>{{ dashboard().payments.failed }}</dd></div>
+      <div><dt>Taxa de sucesso</dt><dd>{{ formatPercent(dashboard().payments.successRate) }}</dd></div>
+    </dl>
+  </article>
+
+  <article class="ops-card">
+    <h2>Monitoramento</h2>
+    <dl>
+      <div><dt>Banco</dt><dd>{{ displayValue(dashboard().monitoring.databaseStatus) }}</dd></div>
+      <div><dt>Logs</dt><dd>{{ displayValue(dashboard().monitoring.applicationLogsStatus) }}</dd></div>
+      <div><dt>Métricas</dt><dd>{{ displayValue(dashboard().monitoring.metricsStatus) }}</dd></div>
+      <div><dt>Último request</dt><dd>{{ formatDate(dashboard().monitoring.lastRequestAtUtc) }}</dd></div>
+    </dl>
+  </article>
+</section>
+
+<section class="rank-grid">
+  <article class="panel">
+    <div class="panel-header">
+      <div>
+        <h2>Ranking de presentes</h2>
+        <p>Top por valor arrecadado</p>
+      </div>
+    </div>
+
+    <div *ngIf="dashboard().topGiftsByRaised.length > 0" class="ranking-list">
+      <div *ngFor="let item of dashboard().topGiftsByRaised; trackBy: trackByTopGift" class="ranking-item">
+        <div>
+          <strong>{{ item.giftName }}</strong>
+          <span>{{ item.category }} · {{ item.paidContributions }} contrib.</span>
+        </div>
+        <div class="ranking-progress">
+          <span>{{ formatMoney(item.raised) }}</span>
+          <div class="mini-progress"><span [style.width.%]="progressPercent(item.fundingPercent)"></span></div>
+          <small>{{ formatPercent(item.fundingPercent) }} · faltam {{ formatMoney(item.remaining) }}</small>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="dashboard().topGiftsByRaised.length === 0" class="empty-state">Sem ranking de presentes.</div>
+  </article>
+
+  <article class="panel">
+    <div class="panel-header">
+      <div>
+        <h2>Notas de monitoramento</h2>
+        <p>{{ dashboard().monitoring.pendingPayments }} pagamentos pendentes</p>
+      </div>
+    </div>
+
+    <ul *ngIf="dashboard().monitoring.notes.length > 0" class="notes-list">
+      <li *ngFor="let note of dashboard().monitoring.notes; trackBy: trackByIndex">{{ safeOperationalText(note) }}</li>
+    </ul>
+
+    <div *ngIf="dashboard().monitoring.notes.length === 0" class="empty-state">Sem notas no momento.</div>
+  </article>
+</section>
+
+<section class="table-section">
+  <div class="panel-header">
+    <div>
+      <h2>Requests por rota</h2>
+      <p>Erros de servidor e duração máxima em destaque</p>
+    </div>
+  </div>
+
+  <div *ngIf="dashboard().requestsByPath.length > 0" class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Método</th>
+          <th>Path</th>
+          <th>Requests</th>
+          <th>Erros 5xx</th>
+          <th>Média</th>
+          <th>Máx.</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of dashboard().requestsByPath; trackBy: trackByRequestPath" [class.is-danger]="item.serverErrors > 0" [class.is-slow]="isSlowRequest(item.maxDurationMilliseconds)">
+          <td><span class="method-badge">{{ item.method }}</span></td>
+          <td class="path-cell">{{ displayPath(item.path) }}</td>
+          <td>
+            <div class="inline-bar">
+              <span [style.width.%]="barWidth(item.count, maxRequestPathCount())"></span>
+            </div>
+            {{ item.count }}
+          </td>
+          <td>{{ item.serverErrors }}</td>
+          <td>{{ formatMilliseconds(item.averageDurationMilliseconds) }}</td>
+          <td>{{ formatMilliseconds(item.maxDurationMilliseconds) }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="dashboard().requestsByPath.length === 0" class="empty-state">Sem requests por rota.</div>
+</section>

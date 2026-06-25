@@ -1,0 +1,201 @@
+<section class="table-grid">
+  <article class="table-section">
+    <div class="panel-header">
+      <div>
+        <h2>Mensagens recentes</h2>
+        <p>{{ dashboard().recentMessages.length }} itens</p>
+      </div>
+    </div>
+
+    <div *ngIf="dashboard().recentMessages.length > 0" class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Contribuidor</th>
+            <th>Presente</th>
+            <th>Mensagem</th>
+            <th>Valor</th>
+            <th>Status</th>
+            <th>Criada em</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of dashboard().recentMessages; trackBy: trackByRecentMessage">
+            <td>{{ displayValue(item.contributorName) }}</td>
+            <td>{{ displayValue(item.giftName) }}</td>
+            <td class="message-cell">{{ displayValue(item.message) }}</td>
+            <td>{{ formatMoney(item.amount) }}</td>
+            <td><span [class]="statusBadgeClass(item.status)">{{ displayValue(item.status) }}</span></td>
+            <td>{{ formatDate(item.createdAtUtc) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="dashboard().recentMessages.length === 0" class="empty-state">Nenhuma mensagem recente.</div>
+  </article>
+
+  <article class="table-section">
+    <div class="panel-header">
+      <div>
+        <h2>Pagamentos recentes</h2>
+        <p>{{ dashboard().recentPayments.length }} itens</p>
+      </div>
+    </div>
+
+    <div *ngIf="dashboard().recentPayments.length > 0" class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Contribuidor</th>
+            <th>Presente</th>
+            <th>Método</th>
+            <th>Valor</th>
+            <th>Parcelas</th>
+            <th>Status</th>
+            <th>Detalhe</th>
+            <th>Contribuição</th>
+            <th>Atualizado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of dashboard().recentPayments; trackBy: trackByRecentPayment">
+            <td>{{ displayValue(item.contributorName) }}</td>
+            <td>{{ displayValue(item.giftName) }}</td>
+            <td>{{ displayValue(item.method) }}</td>
+            <td>{{ formatMoney(item.amount) }}</td>
+            <td>{{ item.installments }}</td>
+            <td><span [class]="statusBadgeClass(item.status)">{{ displayValue(item.status) }}</span></td>
+            <td>{{ displayValue(item.statusDetail) }}</td>
+            <td>{{ formatBoolean(item.contributionCreated) }}</td>
+            <td>{{ formatDate(item.updatedAtUtc) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="dashboard().recentPayments.length === 0" class="empty-state">Nenhum pagamento recente.</div>
+  </article>
+
+  <article class="table-section">
+    <div class="panel-header">
+      <div>
+        <h2>Pagamentos com falha</h2>
+        <p>{{ dashboard().recentFailedPayments.length }} itens</p>
+      </div>
+    </div>
+
+    <div *ngIf="dashboard().recentFailedPayments.length > 0" class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Contribuidor</th>
+            <th>Presente</th>
+            <th>Método</th>
+            <th>Valor</th>
+            <th>Status</th>
+            <th>Detalhe</th>
+            <th>Order ID</th>
+            <th>MP Payment</th>
+            <th>Atualizado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of dashboard().recentFailedPayments; trackBy: trackByRecentPayment" class="is-danger">
+            <td>{{ displayValue(item.contributorName) }}</td>
+            <td>{{ displayValue(item.giftName) }}</td>
+            <td>{{ displayValue(item.method) }}</td>
+            <td>{{ formatMoney(item.amount) }}</td>
+            <td><span [class]="statusBadgeClass(item.status)">{{ displayValue(item.status) }}</span></td>
+            <td>{{ displayValue(item.statusDetail) }}</td>
+            <td>{{ displayValue(item.orderId) }}</td>
+            <td>{{ displayValue(item.mpPaymentId) }}</td>
+            <td>{{ formatDate(item.updatedAtUtc) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="dashboard().recentFailedPayments.length === 0" class="empty-state">Nenhum pagamento com falha.</div>
+  </article>
+
+  <article class="table-section">
+    <div class="panel-header">
+      <div>
+        <h2>Contribuições recentes</h2>
+        <p>{{ dashboard().recentContributions.length }} itens</p>
+      </div>
+    </div>
+
+    <div *ngIf="dashboard().recentContributions.length > 0" class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Contribuidor</th>
+            <th>Presente</th>
+            <th>Valor</th>
+            <th>Método</th>
+            <th>Status</th>
+            <th>Pago em</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of dashboard().recentContributions; trackBy: trackByRecentContribution">
+            <td>{{ displayValue(item.contributorName) }}</td>
+            <td>{{ displayValue(item.giftName) }}</td>
+            <td>{{ formatMoney(item.amount) }}</td>
+            <td>{{ displayValue(item.paymentMethod) }}</td>
+            <td><span [class]="statusBadgeClass(item.status)">{{ displayValue(item.status) }}</span></td>
+            <td>{{ formatDate(item.paidAtUtc) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="dashboard().recentContributions.length === 0" class="empty-state">Nenhuma contribuição recente.</div>
+  </article>
+</section>
+
+<section class="table-section requests-section">
+  <div class="panel-header">
+    <div>
+      <h2>Requests recentes</h2>
+      <p>{{ dashboard().recentRequests.length }} itens</p>
+    </div>
+  </div>
+
+  <div *ngIf="dashboard().recentRequests.length > 0" class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Método</th>
+          <th>Path</th>
+          <th>Status</th>
+          <th>Duração</th>
+          <th>Autenticado</th>
+          <th>Role</th>
+          <th>Correlation ID</th>
+          <th>Exception</th>
+          <th>Mensagem</th>
+          <th>Iniciado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of dashboard().recentRequests; trackBy: trackByRecentRequest" [class.is-danger]="item.statusCode >= 500" [class.is-warning]="item.statusCode >= 400 && item.statusCode < 500" [class.is-slow]="isSlowRequest(item.durationMilliseconds)">
+          <td><span class="method-badge">{{ item.method }}</span></td>
+          <td class="path-cell">{{ displayPath(item.path) }}</td>
+          <td><span [class]="statusCodeBadgeClass(item.statusCode)">{{ item.statusCode }}</span></td>
+          <td>{{ formatMilliseconds(item.durationMilliseconds) }}</td>
+          <td>{{ formatBoolean(item.isAuthenticated) }}</td>
+          <td>{{ displayValue(item.userRole) }}</td>
+          <td>{{ displayValue(item.correlationId) }}</td>
+          <td>{{ safeOperationalText(item.exceptionType) }}</td>
+          <td class="message-cell">{{ safeOperationalText(item.exceptionMessage) }}</td>
+          <td>{{ formatDate(item.startedAtUtc) }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="dashboard().recentRequests.length === 0" class="empty-state">Nenhum request recente.</div>
+</section>

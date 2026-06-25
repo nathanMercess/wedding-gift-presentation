@@ -1,0 +1,85 @@
+<section class="summary-grid">
+  <article class="metric-card">
+    <span>Total arrecadado</span>
+    <strong>{{ formatMoney(dashboard().overview.totalRaised) }}</strong>
+    <small>{{ formatMoney(dashboard().contributions.periodPaidAmount) }} no período</small>
+  </article>
+
+  <article class="metric-card">
+    <span>Meta total</span>
+    <strong>{{ formatMoney(dashboard().overview.totalGoal) }}</strong>
+    <small>{{ formatMoney(dashboard().gifts.remainingAmount) }} restantes</small>
+  </article>
+
+  <article class="metric-card tone-success">
+    <span>Percentual arrecadado</span>
+    <strong>{{ formatPercent(dashboard().overview.fundingPercent) }}</strong>
+    <div class="mini-progress"><span [style.width.%]="progressPercent(dashboard().overview.fundingPercent)"></span></div>
+  </article>
+
+  <article class="metric-card">
+    <span>Presentes pagos</span>
+    <strong>{{ dashboard().overview.fullyFundedGifts }}</strong>
+    <small>{{ dashboard().gifts.partiallyFunded }} parciais</small>
+  </article>
+
+  <article class="metric-card">
+    <span>Contribuições pagas</span>
+    <strong>{{ dashboard().overview.paidContributions }}</strong>
+    <small>{{ dashboard().contributions.pending }} pendentes</small>
+  </article>
+
+  <article class="metric-card">
+    <span>Contribuidores únicos</span>
+    <strong>{{ dashboard().overview.uniqueContributors }}</strong>
+    <small>{{ dashboard().messages.total }} mensagens</small>
+  </article>
+
+  <article class="metric-card tone-success">
+    <span>Pagamentos aprovados</span>
+    <strong>{{ dashboard().overview.approvedPayments }}</strong>
+    <small>{{ formatMoney(dashboard().payments.approvedAmount) }}</small>
+  </article>
+
+  <article class="metric-card tone-danger">
+    <span>Pagamentos com falha</span>
+    <strong>{{ dashboard().overview.failedPayments }}</strong>
+    <small>{{ formatPercent(dashboard().payments.failureRate) }} de falha</small>
+  </article>
+
+  <article class="metric-card">
+    <span>Total de requests</span>
+    <strong>{{ dashboard().requests.total }}</strong>
+    <small>{{ dashboard().requests.authenticated }} autenticadas</small>
+  </article>
+
+  <article class="metric-card tone-success">
+    <span>Sucesso da API</span>
+    <strong>{{ formatPercent(dashboard().requests.successRate) }}</strong>
+    <small>{{ dashboard().requests.successful }} requests</small>
+  </article>
+
+  <article class="metric-card tone-warning">
+    <span>Erros 4xx</span>
+    <strong>{{ dashboard().requests.clientErrors }}</strong>
+    <small>{{ formatPercent(dashboard().requests.clientErrorRate) }}</small>
+  </article>
+
+  <article class="metric-card tone-danger">
+    <span>Erros 5xx</span>
+    <strong>{{ dashboard().requests.serverErrors }}</strong>
+    <small>{{ formatPercent(dashboard().requests.serverErrorRate) }}</small>
+  </article>
+
+  <article class="metric-card tone-warning">
+    <span>Requests lentos</span>
+    <strong>{{ dashboard().requests.slowRequests }}</strong>
+    <small>Acima de {{ slowRequestThresholdMilliseconds }} ms</small>
+  </article>
+
+  <article class="metric-card">
+    <span>Duração média</span>
+    <strong>{{ formatMilliseconds(dashboard().requests.averageDurationMilliseconds) }}</strong>
+    <small>Máx. {{ formatMilliseconds(dashboard().requests.maxDurationMilliseconds) }}</small>
+  </article>
+</section>

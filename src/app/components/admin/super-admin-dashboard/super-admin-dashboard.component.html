@@ -6,11 +6,13 @@
       </svg>
       <span>SuperAdmin</span>
     </div>
+
     <nav class="dash-nav">
       <a routerLink="/admin">Admin</a>
       <button class="active" type="button">Dashboard</button>
     </nav>
-    <button class="logout-btn" type="button" (click)="logout()">Sair</button>
+
+    <app-button [variant]="ButtonVariant.Outline" [size]="ButtonSize.Sm" (click)="logout()">Sair</app-button>
   </header>
 
   <main class="super-main">
@@ -28,13 +30,15 @@
             <option *ngFor="let option of dayOptions; trackBy: trackByIndex" [ngValue]="option">{{ option }} dias</option>
           </select>
         </label>
+
         <label>
           <span>Itens</span>
           <select [(ngModel)]="recentItems" name="recentItems" (ngModelChange)="onFiltersChange()">
             <option *ngFor="let option of recentItemsOptions; trackBy: trackByIndex" [ngValue]="option">{{ option }}</option>
           </select>
         </label>
-        <button class="refresh-btn" type="button" [disabled]="dashboardService.state().loading" (click)="loadDashboard()">Atualizar</button>
+
+        <app-button [variant]="ButtonVariant.Outline" [size]="ButtonSize.Sm" [disabled]="dashboardService.state().loading" (click)="loadDashboard()">Atualizar</app-button>
       </div>
     </section>
 
@@ -46,530 +50,34 @@
     <section *ngIf="!dashboardService.state().loading && dashboardService.state().error" class="dashboard-error">
       <strong>Não foi possível carregar o dashboard.</strong>
       <span>{{ dashboardService.state().error }}</span>
-      <button type="button" (click)="loadDashboard()">Tentar novamente</button>
+      <app-button [variant]="ButtonVariant.Outline" [size]="ButtonSize.Sm" (click)="loadDashboard()">Tentar novamente</app-button>
     </section>
 
     <ng-container *ngIf="!dashboardService.state().loading && !dashboardService.state().error">
       <ng-container *ngIf="dashboard as data">
-        <section class="summary-grid">
-          <article class="metric-card">
-            <span>Total arrecadado</span>
-            <strong>{{ formatMoney(data.overview.totalRaised) }}</strong>
-            <small>{{ formatMoney(data.contributions.periodPaidAmount) }} no período</small>
-          </article>
-          <article class="metric-card">
-            <span>Meta total</span>
-            <strong>{{ formatMoney(data.overview.totalGoal) }}</strong>
-            <small>{{ formatMoney(data.gifts.remainingAmount) }} restantes</small>
-          </article>
-          <article class="metric-card tone-success">
-            <span>Percentual arrecadado</span>
-            <strong>{{ formatPercent(data.overview.fundingPercent) }}</strong>
-            <div class="mini-progress"><span [style.width.%]="progressPercent(data.overview.fundingPercent)"></span></div>
-          </article>
-          <article class="metric-card">
-            <span>Presentes pagos</span>
-            <strong>{{ data.overview.fullyFundedGifts }}</strong>
-            <small>{{ data.gifts.partiallyFunded }} parciais</small>
-          </article>
-          <article class="metric-card">
-            <span>Contribuições pagas</span>
-            <strong>{{ data.overview.paidContributions }}</strong>
-            <small>{{ data.contributions.pending }} pendentes</small>
-          </article>
-          <article class="metric-card">
-            <span>Contribuidores únicos</span>
-            <strong>{{ data.overview.uniqueContributors }}</strong>
-            <small>{{ data.messages.total }} mensagens</small>
-          </article>
-          <article class="metric-card tone-success">
-            <span>Pagamentos aprovados</span>
-            <strong>{{ data.overview.approvedPayments }}</strong>
-            <small>{{ formatMoney(data.payments.approvedAmount) }}</small>
-          </article>
-          <article class="metric-card tone-danger">
-            <span>Pagamentos com falha</span>
-            <strong>{{ data.overview.failedPayments }}</strong>
-            <small>{{ formatPercent(data.payments.failureRate) }} de falha</small>
-          </article>
-          <article class="metric-card">
-            <span>Total de requests</span>
-            <strong>{{ data.requests.total }}</strong>
-            <small>{{ data.requests.authenticated }} autenticadas</small>
-          </article>
-          <article class="metric-card tone-success">
-            <span>Sucesso da API</span>
-            <strong>{{ formatPercent(data.requests.successRate) }}</strong>
-            <small>{{ data.requests.successful }} requests</small>
-          </article>
-          <article class="metric-card tone-warning">
-            <span>Erros 4xx</span>
-            <strong>{{ data.requests.clientErrors }}</strong>
-            <small>{{ formatPercent(data.requests.clientErrorRate) }}</small>
-          </article>
-          <article class="metric-card tone-danger">
-            <span>Erros 5xx</span>
-            <strong>{{ data.requests.serverErrors }}</strong>
-            <small>{{ formatPercent(data.requests.serverErrorRate) }}</small>
-          </article>
-          <article class="metric-card tone-warning">
-            <span>Requests lentos</span>
-            <strong>{{ data.requests.slowRequests }}</strong>
-            <small>Acima de {{ slowRequestThresholdMilliseconds }} ms</small>
-          </article>
-          <article class="metric-card">
-            <span>Duração média</span>
-            <strong>{{ formatMilliseconds(data.requests.averageDurationMilliseconds) }}</strong>
-            <small>Máx. {{ formatMilliseconds(data.requests.maxDurationMilliseconds) }}</small>
-          </article>
-        </section>
+        <nav class="tabs" aria-label="Seções do dashboard">
+          <button *ngFor="let tab of tabs; trackBy: trackByTab" type="button" [class.active]="activeTab === tab" (click)="setActiveTab(tab)">
+            {{ getTabLabel(tab) }}
+          </button>
+        </nav>
 
-        <section class="panel-grid">
-          <article class="panel panel-wide">
-            <div class="panel-header">
-              <div>
-                <h2>Contribuições por dia</h2>
-                <p>{{ data.contributions.periodPaidCount }} pagas · {{ formatMoney(data.contributions.periodPaidAmount) }}</p>
-              </div>
-            </div>
-
-            <div *ngIf="data.contributionsByDay.length > 0" class="line-chart">
-              <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-                <polygon [attr.points]="contributionsAreaPoints(data)"></polygon>
-                <polyline [attr.points]="contributionsLinePoints(data)"></polyline>
-              </svg>
-              <div class="daily-strip">
-                <div *ngFor="let item of data.contributionsByDay; trackBy: trackByIndex" class="daily-point">
-                  <span>{{ formatShortDate(item.dateUtc) }}</span>
-                  <strong>{{ formatMoney(item.amount) }}</strong>
-                  <small>{{ item.count }} contrib.</small>
-                </div>
-              </div>
-            </div>
-
-            <div *ngIf="data.contributionsByDay.length === 0" class="empty-state">Nenhuma contribuição no período.</div>
-          </article>
-
-          <article class="panel">
-            <div class="panel-header">
-              <div>
-                <h2>Pagamentos por status</h2>
-                <p>{{ data.payments.total }} pagamentos</p>
-              </div>
-            </div>
-
-            <div *ngIf="data.paymentsByStatus.length > 0" class="bar-list">
-              <div *ngFor="let item of data.paymentsByStatus; trackBy: trackByPaymentStatus" class="bar-row">
-                <div class="bar-label">
-                  <span>{{ displayValue(item.status) }}</span>
-                  <strong>{{ item.count }}</strong>
-                </div>
-                <div class="bar-track"><span [style.width.%]="barWidth(item.count, maxPaymentStatusCount(data))"></span></div>
-                <small>{{ formatMoney(item.amount) }}</small>
-              </div>
-            </div>
-
-            <div *ngIf="data.paymentsByStatus.length === 0" class="empty-state">Sem pagamentos por status.</div>
-          </article>
-
-          <article class="panel">
-            <div class="panel-header">
-              <div>
-                <h2>Pagamentos por método</h2>
-                <p>{{ data.payments.pix }} PIX · {{ data.payments.card }} cartão</p>
-              </div>
-            </div>
-
-            <div *ngIf="data.paymentsByMethod.length > 0" class="bar-list">
-              <div *ngFor="let item of data.paymentsByMethod; trackBy: trackByPaymentMethod" class="bar-row">
-                <div class="bar-label">
-                  <span>{{ displayValue(item.method) }}</span>
-                  <strong>{{ item.count }}</strong>
-                </div>
-                <div class="bar-track"><span [style.width.%]="barWidth(item.count, maxPaymentMethodCount(data))"></span></div>
-                <small>{{ formatMoney(item.amount) }}</small>
-              </div>
-            </div>
-
-            <div *ngIf="data.paymentsByMethod.length === 0" class="empty-state">Sem pagamentos por método.</div>
-          </article>
-
-          <article class="panel panel-wide">
-            <div class="panel-header">
-              <div>
-                <h2>Presentes por categoria</h2>
-                <p>{{ data.gifts.total }} presentes · {{ data.gifts.available }} disponíveis</p>
-              </div>
-            </div>
-
-            <div *ngIf="data.giftsByCategory.length > 0" class="category-chart">
-              <div *ngFor="let item of data.giftsByCategory; trackBy: trackByGiftCategory" class="category-row">
-                <div class="category-title">
-                  <span>{{ item.category }}</span>
-                  <small>{{ item.count }} presentes</small>
-                </div>
-                <div class="dual-bars">
-                  <div class="bar-track muted"><span [style.width.%]="barWidth(item.goalAmount, maxGiftCategoryAmount(data))"></span></div>
-                  <div class="bar-track"><span [style.width.%]="barWidth(item.raisedAmount, maxGiftCategoryAmount(data))"></span></div>
-                </div>
-                <div class="category-values">
-                  <span>Meta {{ formatMoney(item.goalAmount) }}</span>
-                  <strong>{{ formatMoney(item.raisedAmount) }}</strong>
-                </div>
-              </div>
-            </div>
-
-            <div *ngIf="data.giftsByCategory.length === 0" class="empty-state">Sem presentes por categoria.</div>
-          </article>
-
-          <article class="panel">
-            <div class="panel-header">
-              <div>
-                <h2>Requests por status</h2>
-                <p>{{ data.requests.total }} requests</p>
-              </div>
-            </div>
-
-            <div *ngIf="data.requestsByStatus.length > 0" class="bar-list">
-              <div *ngFor="let item of data.requestsByStatus; trackBy: trackByRequestStatus" class="bar-row">
-                <div class="bar-label">
-                  <span [class]="statusGroupBadgeClass(item.statusGroup)">{{ item.statusGroup }}</span>
-                  <strong>{{ item.count }}</strong>
-                </div>
-                <div class="bar-track"><span [style.width.%]="barWidth(item.count, maxRequestStatusCount(data))"></span></div>
-                <small>{{ formatMilliseconds(item.averageDurationMilliseconds) }}</small>
-              </div>
-            </div>
-
-            <div *ngIf="data.requestsByStatus.length === 0" class="empty-state">Sem requests por status.</div>
-          </article>
-        </section>
-
-        <section class="ops-grid">
-          <article class="ops-card">
-            <h2>Presentes</h2>
-            <dl>
-              <div><dt>Total</dt><dd>{{ data.gifts.total }}</dd></div>
-              <div><dt>Sem contribuições</dt><dd>{{ data.gifts.withoutContributions }}</dd></div>
-              <div><dt>Indisponíveis</dt><dd>{{ data.gifts.unavailable }}</dd></div>
-              <div><dt>Média financiada</dt><dd>{{ formatPercent(data.gifts.averageFundingPercent) }}</dd></div>
-            </dl>
-          </article>
-
-          <article class="ops-card">
-            <h2>Contribuições</h2>
-            <dl>
-              <div><dt>Pagas</dt><dd>{{ data.contributions.paid }}</dd></div>
-              <div><dt>Pendentes</dt><dd>{{ data.contributions.pending }}</dd></div>
-              <div><dt>Canceladas</dt><dd>{{ data.contributions.cancelled }}</dd></div>
-              <div><dt>Ticket médio</dt><dd>{{ formatMoney(data.contributions.averagePaidAmount) }}</dd></div>
-            </dl>
-          </article>
-
-          <article class="ops-card">
-            <h2>Pagamentos</h2>
-            <dl>
-              <div><dt>Aprovados sem contribuição</dt><dd>{{ data.payments.approvedWithoutContribution }}</dd></div>
-              <div><dt>Pendentes</dt><dd>{{ data.payments.pending }}</dd></div>
-              <div><dt>Falhas</dt><dd>{{ data.payments.failed }}</dd></div>
-              <div><dt>Taxa de sucesso</dt><dd>{{ formatPercent(data.payments.successRate) }}</dd></div>
-            </dl>
-          </article>
-
-          <article class="ops-card">
-            <h2>Monitoramento</h2>
-            <dl>
-              <div><dt>Banco</dt><dd>{{ displayValue(data.monitoring.databaseStatus) }}</dd></div>
-              <div><dt>Logs</dt><dd>{{ displayValue(data.monitoring.applicationLogsStatus) }}</dd></div>
-              <div><dt>Métricas</dt><dd>{{ displayValue(data.monitoring.metricsStatus) }}</dd></div>
-              <div><dt>Último request</dt><dd>{{ formatDate(data.monitoring.lastRequestAtUtc) }}</dd></div>
-            </dl>
-          </article>
-        </section>
-
-        <section class="rank-grid">
-          <article class="panel">
-            <div class="panel-header">
-              <div>
-                <h2>Ranking de presentes</h2>
-                <p>Top por valor arrecadado</p>
-              </div>
-            </div>
-
-            <div *ngIf="data.topGiftsByRaised.length > 0" class="ranking-list">
-              <div *ngFor="let item of data.topGiftsByRaised; trackBy: trackByTopGift" class="ranking-item">
-                <div>
-                  <strong>{{ item.giftName }}</strong>
-                  <span>{{ item.category }} · {{ item.paidContributions }} contrib.</span>
-                </div>
-                <div class="ranking-progress">
-                  <span>{{ formatMoney(item.raised) }}</span>
-                  <div class="mini-progress"><span [style.width.%]="progressPercent(item.fundingPercent)"></span></div>
-                  <small>{{ formatPercent(item.fundingPercent) }} · faltam {{ formatMoney(item.remaining) }}</small>
-                </div>
-              </div>
-            </div>
-
-            <div *ngIf="data.topGiftsByRaised.length === 0" class="empty-state">Sem ranking de presentes.</div>
-          </article>
-
-          <article class="panel">
-            <div class="panel-header">
-              <div>
-                <h2>Notas de monitoramento</h2>
-                <p>{{ data.monitoring.pendingPayments }} pagamentos pendentes</p>
-              </div>
-            </div>
-
-            <ul *ngIf="data.monitoring.notes.length > 0" class="notes-list">
-              <li *ngFor="let note of data.monitoring.notes; trackBy: trackByIndex">{{ safeOperationalText(note) }}</li>
-            </ul>
-
-            <div *ngIf="data.monitoring.notes.length === 0" class="empty-state">Sem notas no momento.</div>
-          </article>
-        </section>
-
-        <section class="table-section">
-          <div class="panel-header">
-            <div>
-              <h2>Requests por rota</h2>
-              <p>Erros de servidor e duração máxima em destaque</p>
-            </div>
+        <section class="tab-panel" *ngIf="activeTab === SuperAdminDashboardTab.Overview">
+          <app-super-admin-summary [dashboard]="data"></app-super-admin-summary>
+          <div class="overview-grid">
+            <app-super-admin-charts [dashboard]="data"></app-super-admin-charts>
           </div>
-
-          <div *ngIf="data.requestsByPath.length > 0" class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Método</th>
-                  <th>Path</th>
-                  <th>Requests</th>
-                  <th>Erros 5xx</th>
-                  <th>Média</th>
-                  <th>Máx.</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let item of data.requestsByPath; trackBy: trackByRequestPath" [class.is-danger]="item.serverErrors > 0" [class.is-slow]="isSlowRequest(item.maxDurationMilliseconds)">
-                  <td><span class="method-badge">{{ item.method }}</span></td>
-                  <td class="path-cell">{{ displayPath(item.path) }}</td>
-                  <td>
-                    <div class="inline-bar">
-                      <span [style.width.%]="barWidth(item.count, maxRequestPathCount(data))"></span>
-                    </div>
-                    {{ item.count }}
-                  </td>
-                  <td>{{ item.serverErrors }}</td>
-                  <td>{{ formatMilliseconds(item.averageDurationMilliseconds) }}</td>
-                  <td>{{ formatMilliseconds(item.maxDurationMilliseconds) }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div *ngIf="data.requestsByPath.length === 0" class="empty-state">Sem requests por rota.</div>
         </section>
 
-        <section class="table-grid">
-          <article class="table-section">
-            <div class="panel-header">
-              <div>
-                <h2>Mensagens recentes</h2>
-                <p>{{ data.recentMessages.length }} itens</p>
-              </div>
-            </div>
-
-            <div *ngIf="data.recentMessages.length > 0" class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Contribuidor</th>
-                    <th>Presente</th>
-                    <th>Mensagem</th>
-                    <th>Valor</th>
-                    <th>Status</th>
-                    <th>Criada em</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let item of data.recentMessages; trackBy: trackByRecentMessage">
-                    <td>{{ displayValue(item.contributorName) }}</td>
-                    <td>{{ displayValue(item.giftName) }}</td>
-                    <td class="message-cell">{{ displayValue(item.message) }}</td>
-                    <td>{{ formatMoney(item.amount) }}</td>
-                    <td><span [class]="statusBadgeClass(item.status)">{{ displayValue(item.status) }}</span></td>
-                    <td>{{ formatDate(item.createdAtUtc) }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div *ngIf="data.recentMessages.length === 0" class="empty-state">Nenhuma mensagem recente.</div>
-          </article>
-
-          <article class="table-section">
-            <div class="panel-header">
-              <div>
-                <h2>Pagamentos recentes</h2>
-                <p>{{ data.recentPayments.length }} itens</p>
-              </div>
-            </div>
-
-            <div *ngIf="data.recentPayments.length > 0" class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Contribuidor</th>
-                    <th>Presente</th>
-                    <th>Método</th>
-                    <th>Valor</th>
-                    <th>Parcelas</th>
-                    <th>Status</th>
-                    <th>Detalhe</th>
-                    <th>Contribuição</th>
-                    <th>Atualizado</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let item of data.recentPayments; trackBy: trackByRecentPayment">
-                    <td>{{ displayValue(item.contributorName) }}</td>
-                    <td>{{ displayValue(item.giftName) }}</td>
-                    <td>{{ displayValue(item.method) }}</td>
-                    <td>{{ formatMoney(item.amount) }}</td>
-                    <td>{{ item.installments }}</td>
-                    <td><span [class]="statusBadgeClass(item.status)">{{ displayValue(item.status) }}</span></td>
-                    <td>{{ displayValue(item.statusDetail) }}</td>
-                    <td>{{ formatBoolean(item.contributionCreated) }}</td>
-                    <td>{{ formatDate(item.updatedAtUtc) }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div *ngIf="data.recentPayments.length === 0" class="empty-state">Nenhum pagamento recente.</div>
-          </article>
-
-          <article class="table-section">
-            <div class="panel-header">
-              <div>
-                <h2>Pagamentos com falha</h2>
-                <p>{{ data.recentFailedPayments.length }} itens</p>
-              </div>
-            </div>
-
-            <div *ngIf="data.recentFailedPayments.length > 0" class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Contribuidor</th>
-                    <th>Presente</th>
-                    <th>Método</th>
-                    <th>Valor</th>
-                    <th>Status</th>
-                    <th>Detalhe</th>
-                    <th>Order ID</th>
-                    <th>MP Payment</th>
-                    <th>Atualizado</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let item of data.recentFailedPayments; trackBy: trackByRecentPayment" class="is-danger">
-                    <td>{{ displayValue(item.contributorName) }}</td>
-                    <td>{{ displayValue(item.giftName) }}</td>
-                    <td>{{ displayValue(item.method) }}</td>
-                    <td>{{ formatMoney(item.amount) }}</td>
-                    <td><span [class]="statusBadgeClass(item.status)">{{ displayValue(item.status) }}</span></td>
-                    <td>{{ displayValue(item.statusDetail) }}</td>
-                    <td>{{ displayValue(item.orderId) }}</td>
-                    <td>{{ displayValue(item.mpPaymentId) }}</td>
-                    <td>{{ formatDate(item.updatedAtUtc) }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div *ngIf="data.recentFailedPayments.length === 0" class="empty-state">Nenhum pagamento com falha.</div>
-          </article>
-
-          <article class="table-section">
-            <div class="panel-header">
-              <div>
-                <h2>Contribuições recentes</h2>
-                <p>{{ data.recentContributions.length }} itens</p>
-              </div>
-            </div>
-
-            <div *ngIf="data.recentContributions.length > 0" class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Contribuidor</th>
-                    <th>Presente</th>
-                    <th>Valor</th>
-                    <th>Método</th>
-                    <th>Status</th>
-                    <th>Pago em</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let item of data.recentContributions; trackBy: trackByRecentContribution">
-                    <td>{{ displayValue(item.contributorName) }}</td>
-                    <td>{{ displayValue(item.giftName) }}</td>
-                    <td>{{ formatMoney(item.amount) }}</td>
-                    <td>{{ displayValue(item.paymentMethod) }}</td>
-                    <td><span [class]="statusBadgeClass(item.status)">{{ displayValue(item.status) }}</span></td>
-                    <td>{{ formatDate(item.paidAtUtc) }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div *ngIf="data.recentContributions.length === 0" class="empty-state">Nenhuma contribuição recente.</div>
-          </article>
+        <section class="tab-panel" *ngIf="activeTab === SuperAdminDashboardTab.Charts">
+          <app-super-admin-charts [dashboard]="data"></app-super-admin-charts>
         </section>
 
-        <section class="table-section">
-          <div class="panel-header">
-            <div>
-              <h2>Requests recentes</h2>
-              <p>{{ data.recentRequests.length }} itens</p>
-            </div>
-          </div>
+        <section class="tab-panel" *ngIf="activeTab === SuperAdminDashboardTab.Tables">
+          <app-super-admin-tables [dashboard]="data"></app-super-admin-tables>
+        </section>
 
-          <div *ngIf="data.recentRequests.length > 0" class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Método</th>
-                  <th>Path</th>
-                  <th>Status</th>
-                  <th>Duração</th>
-                  <th>Autenticado</th>
-                  <th>Role</th>
-                  <th>Correlation ID</th>
-                  <th>Exception</th>
-                  <th>Mensagem</th>
-                  <th>Iniciado</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let item of data.recentRequests; trackBy: trackByRecentRequest" [class.is-danger]="item.statusCode >= 500" [class.is-warning]="item.statusCode >= 400 && item.statusCode < 500" [class.is-slow]="isSlowRequest(item.durationMilliseconds)">
-                  <td><span class="method-badge">{{ item.method }}</span></td>
-                  <td class="path-cell">{{ displayPath(item.path) }}</td>
-                  <td><span [class]="statusCodeBadgeClass(item.statusCode)">{{ item.statusCode }}</span></td>
-                  <td>{{ formatMilliseconds(item.durationMilliseconds) }}</td>
-                  <td>{{ formatBoolean(item.isAuthenticated) }}</td>
-                  <td>{{ displayValue(item.userRole) }}</td>
-                  <td>{{ displayValue(item.correlationId) }}</td>
-                  <td>{{ safeOperationalText(item.exceptionType) }}</td>
-                  <td class="message-cell">{{ safeOperationalText(item.exceptionMessage) }}</td>
-                  <td>{{ formatDate(item.startedAtUtc) }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div *ngIf="data.recentRequests.length === 0" class="empty-state">Nenhum request recente.</div>
+        <section class="tab-panel" *ngIf="activeTab === SuperAdminDashboardTab.Monitoring">
+          <app-super-admin-monitoring [dashboard]="data"></app-super-admin-monitoring>
         </section>
       </ng-container>
     </ng-container>
