@@ -1,10 +1,17 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
 .table-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
+  min-width: 0;
 }
 
 .table-section {
+  min-width: 0;
   padding: 1rem;
   overflow: hidden;
   border: 1px solid var(--hairline);
@@ -40,6 +47,7 @@
 
 .table-wrap {
   width: 100%;
+  max-width: 100%;
   overflow-x: auto;
   overscroll-behavior-inline: contain;
   border: 1px solid var(--hairline);
@@ -234,4 +242,5 @@ tr.is-slow td {
     gap: 0.25rem;
   }
 }
+
 
