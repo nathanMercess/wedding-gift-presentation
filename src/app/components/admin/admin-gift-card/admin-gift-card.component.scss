@@ -156,3 +156,15 @@
     background: var(--danger-bg);
   }
 }
+
+@media (max-width: 420px) {
+  .gift-card-actions {
+    flex-direction: column;
+    padding: 0.5rem 0.85rem 0.85rem;
+  }
+
+  .btn-icon {
+    width: 100%;
+    min-height: 44px;
+  }
+}
