@@ -613,3 +613,73 @@ app-slide-over ::ng-deep .form-card h3 {
 }
 
 .progress-label { font-size: 0.75rem; color: var(--muted-foreground); }
+
+@media (max-width: 767px) {
+  .dash-header {
+    position: static;
+  }
+
+  .dash-header .dash-nav {
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 0.15rem;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .dash-header .dash-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .dash-header .dash-nav button,
+  .dash-header .dash-nav a {
+    flex: 0 0 auto;
+    min-height: 2.5rem;
+    padding: 0.55rem 0.9rem;
+    white-space: nowrap;
+  }
+
+  .logout-btn {
+    min-height: 2.5rem;
+  }
+
+  .form-card {
+    padding: 1.15rem;
+    border-radius: var(--radius-md);
+  }
+
+  .form-actions,
+  .pagination {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .form-actions .btn-primary,
+  .form-actions .btn-outline,
+  .page-btn {
+    width: 100%;
+    min-height: 2.75rem;
+  }
+
+  .results-count {
+    width: 100%;
+    margin-left: 0;
+    white-space: normal;
+  }
+
+  .gifts-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .dash-main {
+    padding-inline: 0.75rem;
+  }
+
+  .chips-scroll {
+    margin-inline: -0.75rem;
+    padding-inline: 0.75rem;
+  }
+}

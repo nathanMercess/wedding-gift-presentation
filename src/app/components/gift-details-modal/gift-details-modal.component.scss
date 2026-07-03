@@ -258,7 +258,14 @@
 .gift-progress-strip { display: none; }
 
 @media (max-width: 767px) {
+  .modal-backdrop {
+    align-items: flex-end;
+    min-height: 100dvh;
+  }
+
   .modal-container {
+    width: 100%;
+    height: auto;
     max-height: calc(100dvh - env(safe-area-inset-bottom, 0px));
     border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
     position: relative;
@@ -287,7 +294,7 @@
 
   /* Foto = header dinâmico que rola para fora ao subir o conteúdo */
   .gift-info {
-    height: clamp(200px, 42vh, 300px);
+    height: clamp(180px, 36dvh, 280px);
     overflow: hidden;
   }
 
@@ -307,7 +314,7 @@
     flex: none;
     min-height: 0;
     overflow: visible;
-    height: 30rem;
+    height: auto;
   }
 
   /* CTA + total sempre visíveis, colados na base do sheet */
@@ -315,6 +322,7 @@
     position: sticky;
     bottom: 0;
     z-index: 3;
+    padding: 0.9rem 1rem max(1rem, env(safe-area-inset-bottom));
   }
 
   /* Header sem barra: botões flutuam sobre a foto */
@@ -418,5 +426,20 @@
     border-radius: var(--radius-pill);
     max-width: 100%;
     transition: width 0.7s var(--ease-spring);
+  }
+}
+
+
+@media (max-width: 420px) {
+  .completed-panel {
+    padding: 1.25rem 1rem;
+  }
+
+  .completed-notice {
+    padding: 1rem;
+  }
+
+  .back-btn {
+    max-width: calc(100vw - 5rem);
   }
 }

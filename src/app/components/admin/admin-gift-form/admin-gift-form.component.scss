@@ -334,3 +334,41 @@
   margin-bottom: 1rem;
   margin-top: .5rem;
 }
+
+@media (max-width: 640px) {
+  .form-card {
+    padding: 1.15rem;
+  }
+
+  .enrich-row,
+  .form-actions,
+  .image-upload {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .form-actions .btn-primary,
+  .form-actions .btn-outline,
+  .image-upload-actions,
+  .upload-btn,
+  .suggestion-box .btn-outline {
+    width: 100%;
+  }
+
+  .image-preview {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
+  }
+
+  .card-preview-info span {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .card-preview-info strong {
+    text-align: left;
+    white-space: normal;
+  }
+}
