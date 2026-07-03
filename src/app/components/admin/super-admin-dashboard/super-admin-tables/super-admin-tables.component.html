@@ -21,12 +21,12 @@
         </thead>
         <tbody>
           <tr *ngFor="let item of dashboard().recentMessages; trackBy: trackByRecentMessage">
-            <td>{{ displayValue(item.contributorName) }}</td>
-            <td>{{ displayValue(item.giftName) }}</td>
-            <td class="message-cell">{{ displayValue(item.message) }}</td>
-            <td>{{ formatMoney(item.amount) }}</td>
-            <td><span [class]="statusBadgeClass(item.status)">{{ displayValue(item.status) }}</span></td>
-            <td>{{ formatDate(item.createdAtUtc) }}</td>
+            <td data-label="Contribuidor">{{ displayValue(item.contributorName) }}</td>
+            <td data-label="Presente">{{ displayValue(item.giftName) }}</td>
+            <td class="message-cell" data-label="Mensagem">{{ displayValue(item.message) }}</td>
+            <td data-label="Valor">{{ formatMoney(item.amount) }}</td>
+            <td data-label="Status"><span [class]="statusBadgeClass(item.status)">{{ displayValue(item.status) }}</span></td>
+            <td data-label="Criada em">{{ formatDate(item.createdAtUtc) }}</td>
           </tr>
         </tbody>
       </table>
@@ -49,26 +49,26 @@
           <tr>
             <th>Contribuidor</th>
             <th>Presente</th>
-            <th>Método</th>
+            <th>MÃ©todo</th>
             <th>Valor</th>
             <th>Parcelas</th>
             <th>Status</th>
             <th>Detalhe</th>
-            <th>Contribuição</th>
+            <th>ContribuiÃ§Ã£o</th>
             <th>Atualizado</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let item of dashboard().recentPayments; trackBy: trackByRecentPayment">
-            <td>{{ displayValue(item.contributorName) }}</td>
-            <td>{{ displayValue(item.giftName) }}</td>
-            <td>{{ displayValue(item.method) }}</td>
-            <td>{{ formatMoney(item.amount) }}</td>
-            <td>{{ item.installments }}</td>
-            <td><span [class]="statusBadgeClass(item.status)">{{ displayValue(item.status) }}</span></td>
-            <td>{{ displayValue(item.statusDetail) }}</td>
-            <td>{{ formatBoolean(item.contributionCreated) }}</td>
-            <td>{{ formatDate(item.updatedAtUtc) }}</td>
+            <td data-label="Contribuidor">{{ displayValue(item.contributorName) }}</td>
+            <td data-label="Presente">{{ displayValue(item.giftName) }}</td>
+            <td data-label="MÃ©todo">{{ displayValue(item.method) }}</td>
+            <td data-label="Valor">{{ formatMoney(item.amount) }}</td>
+            <td data-label="Parcelas">{{ item.installments }}</td>
+            <td data-label="Status"><span [class]="statusBadgeClass(item.status)">{{ displayValue(item.status) }}</span></td>
+            <td data-label="Detalhe">{{ displayValue(item.statusDetail) }}</td>
+            <td data-label="ContribuiÃ§Ã£o">{{ formatBoolean(item.contributionCreated) }}</td>
+            <td data-label="Atualizado">{{ formatDate(item.updatedAtUtc) }}</td>
           </tr>
         </tbody>
       </table>
@@ -91,7 +91,7 @@
           <tr>
             <th>Contribuidor</th>
             <th>Presente</th>
-            <th>Método</th>
+            <th>MÃ©todo</th>
             <th>Valor</th>
             <th>Status</th>
             <th>Detalhe</th>
@@ -102,15 +102,15 @@
         </thead>
         <tbody>
           <tr *ngFor="let item of dashboard().recentFailedPayments; trackBy: trackByRecentPayment" class="is-danger">
-            <td>{{ displayValue(item.contributorName) }}</td>
-            <td>{{ displayValue(item.giftName) }}</td>
-            <td>{{ displayValue(item.method) }}</td>
-            <td>{{ formatMoney(item.amount) }}</td>
-            <td><span [class]="statusBadgeClass(item.status)">{{ displayValue(item.status) }}</span></td>
-            <td>{{ displayValue(item.statusDetail) }}</td>
-            <td>{{ displayValue(item.orderId) }}</td>
-            <td>{{ displayValue(item.mpPaymentId) }}</td>
-            <td>{{ formatDate(item.updatedAtUtc) }}</td>
+            <td data-label="Contribuidor">{{ displayValue(item.contributorName) }}</td>
+            <td data-label="Presente">{{ displayValue(item.giftName) }}</td>
+            <td data-label="MÃ©todo">{{ displayValue(item.method) }}</td>
+            <td data-label="Valor">{{ formatMoney(item.amount) }}</td>
+            <td data-label="Status"><span [class]="statusBadgeClass(item.status)">{{ displayValue(item.status) }}</span></td>
+            <td data-label="Detalhe">{{ displayValue(item.statusDetail) }}</td>
+            <td data-label="Order ID">{{ displayValue(item.orderId) }}</td>
+            <td data-label="MP Payment">{{ displayValue(item.mpPaymentId) }}</td>
+            <td data-label="Atualizado">{{ formatDate(item.updatedAtUtc) }}</td>
           </tr>
         </tbody>
       </table>
@@ -122,7 +122,7 @@
   <article class="table-section">
     <div class="panel-header">
       <div>
-        <h2>Contribuições recentes</h2>
+        <h2>ContribuiÃ§Ãµes recentes</h2>
         <p>{{ dashboard().recentContributions.length }} itens</p>
       </div>
     </div>
@@ -134,25 +134,25 @@
             <th>Contribuidor</th>
             <th>Presente</th>
             <th>Valor</th>
-            <th>Método</th>
+            <th>MÃ©todo</th>
             <th>Status</th>
             <th>Pago em</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let item of dashboard().recentContributions; trackBy: trackByRecentContribution">
-            <td>{{ displayValue(item.contributorName) }}</td>
-            <td>{{ displayValue(item.giftName) }}</td>
-            <td>{{ formatMoney(item.amount) }}</td>
-            <td>{{ displayValue(item.paymentMethod) }}</td>
-            <td><span [class]="statusBadgeClass(item.status)">{{ displayValue(item.status) }}</span></td>
-            <td>{{ formatDate(item.paidAtUtc) }}</td>
+            <td data-label="Contribuidor">{{ displayValue(item.contributorName) }}</td>
+            <td data-label="Presente">{{ displayValue(item.giftName) }}</td>
+            <td data-label="Valor">{{ formatMoney(item.amount) }}</td>
+            <td data-label="MÃ©todo">{{ displayValue(item.paymentMethod) }}</td>
+            <td data-label="Status"><span [class]="statusBadgeClass(item.status)">{{ displayValue(item.status) }}</span></td>
+            <td data-label="Pago em">{{ formatDate(item.paidAtUtc) }}</td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <div *ngIf="dashboard().recentContributions.length === 0" class="empty-state">Nenhuma contribuição recente.</div>
+    <div *ngIf="dashboard().recentContributions.length === 0" class="empty-state">Nenhuma contribuiÃ§Ã£o recente.</div>
   </article>
 </section>
 
@@ -168,10 +168,10 @@
     <table>
       <thead>
         <tr>
-          <th>Método</th>
+          <th>MÃ©todo</th>
           <th>Path</th>
           <th>Status</th>
-          <th>Duração</th>
+          <th>DuraÃ§Ã£o</th>
           <th>Autenticado</th>
           <th>Role</th>
           <th>Correlation ID</th>
@@ -182,16 +182,16 @@
       </thead>
       <tbody>
         <tr *ngFor="let item of dashboard().recentRequests; trackBy: trackByRecentRequest" [class.is-danger]="item.statusCode >= 500" [class.is-warning]="item.statusCode >= 400 && item.statusCode < 500" [class.is-slow]="isSlowRequest(item.durationMilliseconds)">
-          <td><span class="method-badge">{{ item.method }}</span></td>
-          <td class="path-cell">{{ displayPath(item.path) }}</td>
-          <td><span [class]="statusCodeBadgeClass(item.statusCode)">{{ item.statusCode }}</span></td>
-          <td>{{ formatMilliseconds(item.durationMilliseconds) }}</td>
-          <td>{{ formatBoolean(item.isAuthenticated) }}</td>
-          <td>{{ displayValue(item.userRole) }}</td>
-          <td>{{ displayValue(item.correlationId) }}</td>
-          <td>{{ safeOperationalText(item.exceptionType) }}</td>
-          <td class="message-cell">{{ safeOperationalText(item.exceptionMessage) }}</td>
-          <td>{{ formatDate(item.startedAtUtc) }}</td>
+          <td data-label="MÃ©todo"><span class="method-badge">{{ item.method }}</span></td>
+          <td class="path-cell" data-label="Path">{{ displayPath(item.path) }}</td>
+          <td data-label="Status"><span [class]="statusCodeBadgeClass(item.statusCode)">{{ item.statusCode }}</span></td>
+          <td data-label="DuraÃ§Ã£o">{{ formatMilliseconds(item.durationMilliseconds) }}</td>
+          <td data-label="Autenticado">{{ formatBoolean(item.isAuthenticated) }}</td>
+          <td data-label="Role">{{ displayValue(item.userRole) }}</td>
+          <td data-label="Correlation ID">{{ displayValue(item.correlationId) }}</td>
+          <td data-label="Exception">{{ safeOperationalText(item.exceptionType) }}</td>
+          <td class="message-cell" data-label="Mensagem">{{ safeOperationalText(item.exceptionMessage) }}</td>
+          <td data-label="Iniciado">{{ formatDate(item.startedAtUtc) }}</td>
         </tr>
       </tbody>
     </table>
@@ -199,3 +199,4 @@
 
   <div *ngIf="dashboard().recentRequests.length === 0" class="empty-state">Nenhum request recente.</div>
 </section>
+
