@@ -1,0 +1,37 @@
+<section class="ops-panel action-center">
+  <div class="panel-header">
+    <div>
+      <span class="panel-kicker">Prioridade</span>
+      <h2>Action Center</h2>
+    </div>
+    <span [class]="severityBadgeClass(dashboard().actionCenter.healthStatus)">{{ healthLabel(dashboard().actionCenter.healthStatus) }}</span>
+  </div>
+
+  <div class="alert-summary">
+    <div>
+      <strong>{{ dashboard().actionCenter.criticalCount }}</strong>
+      <span>críticos</span>
+    </div>
+    <div>
+      <strong>{{ dashboard().actionCenter.warningCount }}</strong>
+      <span>atenção</span>
+    </div>
+  </div>
+
+  <div *ngIf="dashboard().actionCenter.items.length > 0" class="action-list">
+    <article *ngFor="let item of dashboard().actionCenter.items; trackBy: trackByActionItem" class="action-item" [class.is-critical]="item.severity === 'critical'" [class.is-warning]="item.severity === 'warning'">
+      <div class="action-topline">
+        <span [class]="severityBadgeClass(item.severity)">{{ severityLabel(item.severity) }}</span>
+        <strong>{{ item.metric }}</strong>
+      </div>
+      <h3>{{ item.title }}</h3>
+      <p>{{ item.description }}</p>
+      <div class="action-meta">
+        <span>{{ item.category }}</span>
+        <span *ngIf="item.createdAtUtc">{{ formatDate(item.createdAtUtc) }}</span>
+      </div>
+    </article>
+  </div>
+
+  <div *ngIf="dashboard().actionCenter.items.length === 0" class="empty-state">Nenhum alerta operacional no período.</div>
+</section>

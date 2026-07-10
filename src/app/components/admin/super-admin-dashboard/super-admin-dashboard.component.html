@@ -4,7 +4,7 @@
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
       </svg>
-      <span>Dashboard</span>
+      <span>Super Admin</span>
     </div>
 
     <nav class="dash-nav">
@@ -17,9 +17,10 @@
 
   <main class="super-main">
     <section class="dashboard-toolbar">
-      <div>
+      <div class="toolbar-copy">
         <span class="eyebrow">Operação</span>
-        <p *ngIf="hasDashboard">Gerado em {{ formatDate(dashboard.generatedAtUtc) }} · {{ formatDate(dashboard.period.fromUtc) }} até {{ formatDate(dashboard.period.toUtc) }}</p>
+        <h1>Painel operacional</h1>
+        <p *ngIf="hasDashboard">Atualizado em {{ formatDate(dashboard.generatedAtUtc) }} · {{ formatDate(dashboard.period.fromUtc) }} até {{ formatDate(dashboard.period.toUtc) }}</p>
       </div>
 
       <div class="filters">
@@ -54,29 +55,51 @@
 
     <ng-container *ngIf="!dashboardService.state().loading && !dashboardService.state().error">
       <ng-container *ngIf="hasDashboard">
-        <nav class="tabs" aria-label="Seções do dashboard">
-          <button *ngFor="let tab of tabs; trackBy: trackByTab" type="button" [class.active]="activeTab === tab" (click)="setActiveTab(tab)">
-            {{ getTabLabel(tab) }}
-          </button>
-        </nav>
+        <section class="status-strip">
+          <article class="status-tile">
+            <span>Entrou</span>
+            <strong>{{ formatMoney(dashboard.revenue.totalRaised) }}</strong>
+            <small>{{ formatMoney(dashboard.revenue.periodRaised) }} no período</small>
+          </article>
+          <article class="status-tile">
+            <span>Falta</span>
+            <strong>{{ formatMoney(dashboard.revenue.remainingAmount) }}</strong>
+            <small>{{ formatPercent(dashboard.revenue.fundingPercent) }} financiado</small>
+          </article>
+          <article class="status-tile">
+            <span>Sistema</span>
+            <strong [class]="severityBadgeClass(dashboard.actionCenter.healthStatus)">{{ healthLabel(dashboard.actionCenter.healthStatus) }}</strong>
+            <small>{{ dashboard.actionCenter.criticalCount }} críticos · {{ dashboard.actionCenter.warningCount }} atenção</small>
+          </article>
+          <article class="status-tile">
+            <span>Mercado Pago</span>
+            <strong [class]="categoryStatusBadgeClass('payments')">{{ categoryStatusLabel('payments') }}</strong>
+            <small>{{ dashboard.paymentHealth.failedLast24Hours }} falhas 24h · {{ dashboard.paymentHealth.approvedWithoutContribution }} sem contribuição</small>
+          </article>
+          <article class="status-tile">
+            <span>API</span>
+            <strong [class]="categoryStatusBadgeClass('api')">{{ categoryStatusLabel('api') }}</strong>
+            <small>{{ dashboard.apiHealth.serverErrors }} erros 5xx · {{ dashboard.apiHealth.slowRequests }} lentos</small>
+          </article>
+          <article class="status-tile">
+            <span>E-mail</span>
+            <strong [class]="categoryStatusBadgeClass('email')">{{ categoryStatusLabel('email') }}</strong>
+            <small>Falhas registradas via logs da API</small>
+          </article>
+        </section>
 
-        <section class="tab-panel" *ngIf="activeTab === SuperAdminDashboardTab.Overview">
-          <app-super-admin-summary [dashboard]="dashboard"></app-super-admin-summary>
-          <div class="overview-grid">
-            <app-super-admin-charts [dashboard]="dashboard"></app-super-admin-charts>
+        <section class="dashboard-layout">
+          <div class="main-column">
+            <app-super-admin-revenue-panel [dashboard]="dashboard"></app-super-admin-revenue-panel>
+            <app-super-admin-payment-health [dashboard]="dashboard"></app-super-admin-payment-health>
+            <app-super-admin-gift-insights [dashboard]="dashboard"></app-super-admin-gift-insights>
+            <app-super-admin-api-health [dashboard]="dashboard"></app-super-admin-api-health>
           </div>
-        </section>
 
-        <section class="tab-panel" *ngIf="activeTab === SuperAdminDashboardTab.Charts">
-          <app-super-admin-charts [dashboard]="dashboard"></app-super-admin-charts>
-        </section>
-
-        <section class="tab-panel" *ngIf="activeTab === SuperAdminDashboardTab.Tables">
-          <app-super-admin-tables [dashboard]="dashboard"></app-super-admin-tables>
-        </section>
-
-        <section class="tab-panel" *ngIf="activeTab === SuperAdminDashboardTab.Monitoring">
-          <app-super-admin-monitoring [dashboard]="dashboard"></app-super-admin-monitoring>
+          <aside class="side-column">
+            <app-super-admin-action-center [dashboard]="dashboard"></app-super-admin-action-center>
+            <app-super-admin-activity-feed [dashboard]="dashboard"></app-super-admin-activity-feed>
+          </aside>
         </section>
       </ng-container>
     </ng-container>

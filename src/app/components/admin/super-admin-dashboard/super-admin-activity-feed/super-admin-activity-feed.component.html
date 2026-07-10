@@ -1,0 +1,28 @@
+<section class="ops-panel activity-feed">
+  <div class="panel-header">
+    <div>
+      <span class="panel-kicker">Linha do tempo</span>
+      <h2>Atividade recente</h2>
+    </div>
+    <span class="count-badge">{{ dashboard().activityFeed.length }}</span>
+  </div>
+
+  <div *ngIf="dashboard().activityFeed.length > 0" class="feed-list">
+    <article *ngFor="let item of dashboard().activityFeed; trackBy: trackByActivity" class="feed-item" [class.is-critical]="item.severity === 'critical'" [class.is-warning]="item.severity === 'warning'" [class.is-success]="item.severity === 'success'">
+      <div class="feed-topline">
+        <span [class]="severityBadgeClass(item.severity)">{{ severityLabel(item.severity) }}</span>
+        <time>{{ formatDate(item.occurredAtUtc) }}</time>
+      </div>
+      <h3>{{ item.title }}</h3>
+      <p>{{ safeOperationalText(item.description) }}</p>
+      <div class="feed-meta">
+        <span>{{ item.type }}</span>
+        <strong *ngIf="item.amount !== null">{{ formatMoney(item.amount) }}</strong>
+        <span *ngIf="item.status">{{ displayValue(item.status) }}</span>
+      </div>
+      <small *ngIf="item.correlationId">Correlation {{ item.correlationId }}</small>
+    </article>
+  </div>
+
+  <div *ngIf="dashboard().activityFeed.length === 0" class="empty-state">Nenhuma atividade recente no período.</div>
+</section>

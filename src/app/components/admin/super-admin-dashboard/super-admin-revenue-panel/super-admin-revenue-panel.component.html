@@ -1,0 +1,62 @@
+<section class="ops-panel revenue-panel">
+  <div class="panel-header">
+    <div>
+      <span class="panel-kicker">Arrecadação</span>
+      <h2>Receita e progresso</h2>
+    </div>
+    <span class="period-badge">{{ dashboard().period.days }} dias</span>
+  </div>
+
+  <div class="revenue-headline">
+    <div>
+      <span>Total recebido</span>
+      <strong>{{ formatMoney(dashboard().revenue.totalRaised) }}</strong>
+      <small>{{ formatMoney(dashboard().revenue.periodRaised) }} no período</small>
+    </div>
+    <div>
+      <span>Falta arrecadar</span>
+      <strong>{{ formatMoney(dashboard().revenue.remainingAmount) }}</strong>
+      <small>{{ formatPercent(dashboard().revenue.fundingPercent) }} financiado</small>
+    </div>
+  </div>
+
+  <div class="progress-row">
+    <div class="progress-track"><span [style.width.%]="progressPercent(dashboard().revenue.fundingPercent)"></span></div>
+    <span>{{ formatPercent(dashboard().revenue.fundingPercent) }}</span>
+  </div>
+
+  <div class="metric-grid">
+    <div>
+      <span>Ticket médio</span>
+      <strong>{{ formatMoney(dashboard().revenue.averageTicket) }}</strong>
+    </div>
+    <div>
+      <span>Maior contribuição</span>
+      <strong>{{ formatMoney(dashboard().revenue.largestContribution) }}</strong>
+    </div>
+    <div>
+      <span>Média diária</span>
+      <strong>{{ formatMoney(dashboard().revenue.dailyAverage) }}</strong>
+    </div>
+    <div>
+      <span>Melhor dia</span>
+      <strong>{{ formatMoney(dashboard().revenue.bestDayAmount) }}</strong>
+      <small>{{ formatDate(dashboard().revenue.bestDayUtc) }}</small>
+    </div>
+  </div>
+
+  <div *ngIf="dashboard().contributionsByDay.length > 0" class="chart-block">
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      <polygon [attr.points]="contributionsAreaPoints()"></polygon>
+      <polyline [attr.points]="contributionsLinePoints()"></polyline>
+    </svg>
+    <div class="daily-strip">
+      <div *ngFor="let item of dashboard().contributionsByDay; trackBy: trackByDay" class="daily-point">
+        <span>{{ formatShortDate(item.dateUtc) }}</span>
+        <strong>{{ formatMoney(item.amount) }}</strong>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="dashboard().contributionsByDay.length === 0" class="empty-state">Nenhuma contribuição no período.</div>
+</section>

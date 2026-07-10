@@ -100,6 +100,89 @@ export interface DashboardMonitoring {
   notes: string[];
 }
 
+export interface DashboardActionCenter {
+  healthStatus: string;
+  criticalCount: number;
+  warningCount: number;
+  items: DashboardActionItem[];
+}
+
+export interface DashboardActionItem {
+  severity: string;
+  title: string;
+  description: string;
+  metric: string;
+  actionLabel: string;
+  category: string;
+  createdAtUtc: string | null;
+}
+
+export interface DashboardRevenue {
+  totalRaised: number;
+  periodRaised: number;
+  remainingAmount: number;
+  averageTicket: number;
+  largestContribution: number;
+  periodPaidCount: number;
+  fundingPercent: number;
+  dailyAverage: number;
+  bestDayAmount: number;
+  bestDayUtc: string | null;
+}
+
+export interface DashboardPaymentHealth {
+  approvalRate: number;
+  failureRate: number;
+  pendingCount: number;
+  pendingAmount: number;
+  pendingOlderThan30Minutes: number;
+  approvedWithoutContribution: number;
+  failedLast24Hours: number;
+  topFailureReasons: DashboardPaymentFailureReason[];
+  lastFailureAtUtc: string | null;
+}
+
+export interface DashboardPaymentFailureReason {
+  statusDetail: string;
+  count: number;
+}
+
+export interface DashboardGiftInsights {
+  total: number;
+  fullyFunded: number;
+  available: number;
+  fullyFundedButAvailable: number;
+  withoutContributions: number;
+  overfunded: number;
+  topRemainingGifts: DashboardTopGiftByRaised[];
+  topRaisedGifts: DashboardTopGiftByRaised[];
+  stalledGifts: DashboardTopGiftByRaised[];
+}
+
+export interface DashboardApiHealth {
+  successRate: number;
+  serverErrors: number;
+  clientErrors: number;
+  slowRequests: number;
+  averageDurationMilliseconds: number;
+  p95DurationMilliseconds: number;
+  slowestEndpoints: DashboardApiEndpointHealth[];
+  topErrorEndpoints: DashboardApiEndpointHealth[];
+  lastServerErrorAtUtc: string | null;
+}
+
+export interface DashboardApiEndpointHealth {
+  method: string;
+  path: string;
+  count: number;
+  serverErrors: number;
+  clientErrors: number;
+  slowRequests: number;
+  averageDurationMilliseconds: number;
+  p95DurationMilliseconds: number;
+  maxDurationMilliseconds: number;
+}
+
 export interface DashboardContributionByDay {
   dateUtc: string;
   count: number;
@@ -210,6 +293,38 @@ export interface DashboardRecentContribution {
   paidAtUtc: string;
 }
 
+export interface DashboardActivityFeedItem {
+  type: string;
+  severity: string;
+  title: string;
+  description: string;
+  amount: number | null;
+  status: string | null;
+  correlationId: string | null;
+  occurredAtUtc: string;
+}
+
+export interface DashboardOverviewResponse {
+  generatedAtUtc: string;
+  period: DashboardPeriod;
+  overview: DashboardOverview;
+  gifts: DashboardGifts;
+  contributions: DashboardContributions;
+  payments: DashboardPayments;
+  messages: DashboardMessages;
+  requests: DashboardRequests;
+  monitoring: DashboardMonitoring;
+}
+
+export interface DashboardCharts {
+  contributionsByDay: DashboardContributionByDay[];
+  paymentsByStatus: DashboardPaymentByStatus[];
+  paymentsByMethod: DashboardPaymentByMethod[];
+  giftsByCategory: DashboardGiftByCategory[];
+  requestsByStatus: DashboardRequestByStatus[];
+  requestsByPath: DashboardRequestByPath[];
+}
+
 export interface DashboardResponse {
   generatedAtUtc: string;
   period: DashboardPeriod;
@@ -220,6 +335,11 @@ export interface DashboardResponse {
   messages: DashboardMessages;
   requests: DashboardRequests;
   monitoring: DashboardMonitoring;
+  actionCenter: DashboardActionCenter;
+  revenue: DashboardRevenue;
+  paymentHealth: DashboardPaymentHealth;
+  giftInsights: DashboardGiftInsights;
+  apiHealth: DashboardApiHealth;
   contributionsByDay: DashboardContributionByDay[];
   paymentsByStatus: DashboardPaymentByStatus[];
   paymentsByMethod: DashboardPaymentByMethod[];
@@ -232,4 +352,5 @@ export interface DashboardResponse {
   recentPayments: DashboardRecentPayment[];
   recentFailedPayments: DashboardRecentPayment[];
   recentContributions: DashboardRecentContribution[];
+  activityFeed: DashboardActivityFeedItem[];
 }

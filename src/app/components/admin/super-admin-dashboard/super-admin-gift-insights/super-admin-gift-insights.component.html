@@ -1,0 +1,77 @@
+<section class="ops-panel gift-insights">
+  <div class="panel-header">
+    <div>
+      <span class="panel-kicker">Lista de presentes</span>
+      <h2>Presentes que pedem atenção</h2>
+    </div>
+    <span [class]="dashboard().giftInsights.fullyFundedButAvailable > 0 || dashboard().giftInsights.overfunded > 0 ? 'health-badge is-critical' : dashboard().giftInsights.withoutContributions > 0 ? 'health-badge is-warning' : 'health-badge is-success'">
+      {{ dashboard().giftInsights.fullyFundedButAvailable > 0 || dashboard().giftInsights.overfunded > 0 ? 'Crítico' : dashboard().giftInsights.withoutContributions > 0 ? 'Atenção' : 'Ok' }}
+    </span>
+  </div>
+
+  <div class="insight-strip">
+    <div>
+      <span>Fully funded + available</span>
+      <strong>{{ dashboard().giftInsights.fullyFundedButAvailable }}</strong>
+    </div>
+    <div>
+      <span>Overfunded</span>
+      <strong>{{ dashboard().giftInsights.overfunded }}</strong>
+    </div>
+    <div>
+      <span>Sem contribuição</span>
+      <strong>{{ dashboard().giftInsights.withoutContributions }}</strong>
+    </div>
+    <div>
+      <span>Disponíveis</span>
+      <strong>{{ dashboard().giftInsights.available }}</strong>
+    </div>
+  </div>
+
+  <div class="gift-tables">
+    <div class="table-block">
+      <div class="table-title">Maior saldo restante</div>
+      <div *ngIf="dashboard().giftInsights.topRemainingGifts.length > 0" class="compact-table">
+        <div class="table-row" *ngFor="let item of dashboard().giftInsights.topRemainingGifts; trackBy: trackByGift">
+          <div>
+            <strong>{{ item.giftName }}</strong>
+            <span>{{ item.category }}</span>
+          </div>
+          <div class="money-cell">
+            <strong>{{ formatMoney(item.remaining) }}</strong>
+            <span>{{ formatPercent(item.fundingPercent) }}</span>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="dashboard().giftInsights.topRemainingGifts.length === 0" class="empty-state">Nenhum saldo restante.</div>
+    </div>
+
+    <div class="table-block">
+      <div class="table-title">Sem tração</div>
+      <div *ngIf="dashboard().giftInsights.stalledGifts.length > 0" class="compact-table">
+        <div class="table-row" *ngFor="let item of dashboard().giftInsights.stalledGifts; trackBy: trackByGift">
+          <div>
+            <strong>{{ item.giftName }}</strong>
+            <span>{{ item.category }}</span>
+          </div>
+          <div class="money-cell">
+            <strong>{{ formatMoney(item.total) }}</strong>
+            <span>{{ item.paidContributions }} pagas</span>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="dashboard().giftInsights.stalledGifts.length === 0" class="empty-state">Nenhum presente parado.</div>
+    </div>
+  </div>
+
+  <div class="raised-list" *ngIf="dashboard().giftInsights.topRaisedGifts.length > 0">
+    <div class="table-title">Top arrecadação</div>
+    <div *ngFor="let item of dashboard().giftInsights.topRaisedGifts; trackBy: trackByGift" class="raised-row">
+      <div>
+        <strong>{{ item.giftName }}</strong>
+        <span>{{ formatMoney(item.raised) }} de {{ formatMoney(item.total) }}</span>
+      </div>
+      <div class="mini-progress"><span [style.width.%]="progressPercent(item.fundingPercent)"></span></div>
+    </div>
+  </div>
+</section>

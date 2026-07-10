@@ -1,0 +1,87 @@
+<section class="ops-panel api-health">
+  <div class="panel-header">
+    <div>
+      <span class="panel-kicker">API</span>
+      <h2>Saúde dos endpoints</h2>
+    </div>
+    <span [class]="dashboard().apiHealth.serverErrors > 0 ? 'health-badge is-critical' : dashboard().apiHealth.slowRequests > 0 || dashboard().apiHealth.clientErrors > 0 ? 'health-badge is-warning' : 'health-badge is-success'">
+      {{ dashboard().apiHealth.serverErrors > 0 ? 'Crítico' : dashboard().apiHealth.slowRequests > 0 || dashboard().apiHealth.clientErrors > 0 ? 'Atenção' : 'Ok' }}
+    </span>
+  </div>
+
+  <div class="api-metrics">
+    <div>
+      <span>Sucesso</span>
+      <strong>{{ formatPercent(dashboard().apiHealth.successRate) }}</strong>
+    </div>
+    <div>
+      <span>5xx</span>
+      <strong>{{ dashboard().apiHealth.serverErrors }}</strong>
+    </div>
+    <div>
+      <span>4xx</span>
+      <strong>{{ dashboard().apiHealth.clientErrors }}</strong>
+    </div>
+    <div>
+      <span>P95</span>
+      <strong>{{ formatMilliseconds(dashboard().apiHealth.p95DurationMilliseconds) }}</strong>
+    </div>
+  </div>
+
+  <div class="table-grid">
+    <div class="table-block">
+      <div class="table-title">Erros por endpoint</div>
+      <div *ngIf="dashboard().apiHealth.topErrorEndpoints.length > 0" class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Endpoint</th>
+              <th>5xx</th>
+              <th>4xx</th>
+              <th>P95</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of dashboard().apiHealth.topErrorEndpoints; trackBy: trackByEndpoint" [class.is-danger]="item.serverErrors > 0">
+              <td><span class="method-badge">{{ item.method }}</span> {{ displayPath(item.path) }}</td>
+              <td>{{ item.serverErrors }}</td>
+              <td>{{ item.clientErrors }}</td>
+              <td>{{ formatMilliseconds(item.p95DurationMilliseconds) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div *ngIf="dashboard().apiHealth.topErrorEndpoints.length === 0" class="empty-state">Sem erros por endpoint.</div>
+    </div>
+
+    <div class="table-block">
+      <div class="table-title">Mais lentos</div>
+      <div *ngIf="dashboard().apiHealth.slowestEndpoints.length > 0" class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Endpoint</th>
+              <th>Req.</th>
+              <th>Média</th>
+              <th>P95</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of dashboard().apiHealth.slowestEndpoints; trackBy: trackByEndpoint" [class.is-slow]="item.slowRequests > 0">
+              <td><span class="method-badge">{{ item.method }}</span> {{ displayPath(item.path) }}</td>
+              <td>{{ item.count }}</td>
+              <td>{{ formatMilliseconds(item.averageDurationMilliseconds) }}</td>
+              <td>{{ formatMilliseconds(item.p95DurationMilliseconds) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div *ngIf="dashboard().apiHealth.slowestEndpoints.length === 0" class="empty-state">Sem requests no período.</div>
+    </div>
+  </div>
+
+  <div class="api-footnote">
+    <span>Último 5xx</span>
+    <strong>{{ formatDate(dashboard().apiHealth.lastServerErrorAtUtc) }}</strong>
+  </div>
+</section>

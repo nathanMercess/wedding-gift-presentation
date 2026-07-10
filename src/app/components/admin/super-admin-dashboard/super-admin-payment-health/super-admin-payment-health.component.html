@@ -1,0 +1,62 @@
+<section class="ops-panel payment-health">
+  <div class="panel-header">
+    <div>
+      <span class="panel-kicker">Mercado Pago</span>
+      <h2>Saúde dos pagamentos</h2>
+    </div>
+    <span [class]="dashboard().paymentHealth.failedLast24Hours > 0 || dashboard().paymentHealth.approvedWithoutContribution > 0 ? 'health-badge is-critical' : dashboard().paymentHealth.pendingOlderThan30Minutes > 0 ? 'health-badge is-warning' : 'health-badge is-success'">
+      {{ dashboard().paymentHealth.failedLast24Hours > 0 || dashboard().paymentHealth.approvedWithoutContribution > 0 ? 'Crítico' : dashboard().paymentHealth.pendingOlderThan30Minutes > 0 ? 'Atenção' : 'Ok' }}
+    </span>
+  </div>
+
+  <div class="payment-metrics">
+    <div>
+      <span>Aprovação</span>
+      <strong>{{ formatPercent(dashboard().paymentHealth.approvalRate) }}</strong>
+    </div>
+    <div>
+      <span>Falha</span>
+      <strong>{{ formatPercent(dashboard().paymentHealth.failureRate) }}</strong>
+    </div>
+    <div>
+      <span>Pendentes</span>
+      <strong>{{ dashboard().paymentHealth.pendingCount }}</strong>
+      <small>{{ formatMoney(dashboard().paymentHealth.pendingAmount) }}</small>
+    </div>
+    <div>
+      <span>Sem contribuição</span>
+      <strong>{{ dashboard().paymentHealth.approvedWithoutContribution }}</strong>
+    </div>
+  </div>
+
+  <div class="funnel-list">
+    <div *ngFor="let item of dashboard().paymentsByStatus; trackBy: trackByPaymentStatus" class="funnel-row">
+      <div>
+        <span [class]="statusBadgeClass(item.status)">{{ displayValue(item.status) }}</span>
+        <strong>{{ item.count }}</strong>
+      </div>
+      <div class="bar-track"><span [style.width.%]="barWidth(item.count, maxPaymentStatusCount())"></span></div>
+      <small>{{ formatMoney(item.amount) }}</small>
+    </div>
+  </div>
+
+  <div class="warning-strip">
+    <div>
+      <span>Pendentes +30min</span>
+      <strong>{{ dashboard().paymentHealth.pendingOlderThan30Minutes }}</strong>
+    </div>
+    <div>
+      <span>Falhas 24h</span>
+      <strong>{{ dashboard().paymentHealth.failedLast24Hours }}</strong>
+      <small>{{ formatDate(dashboard().paymentHealth.lastFailureAtUtc) }}</small>
+    </div>
+  </div>
+
+  <div class="failure-table" *ngIf="dashboard().paymentHealth.topFailureReasons.length > 0">
+    <div class="table-title">Motivos de falha</div>
+    <div class="table-row" *ngFor="let item of dashboard().paymentHealth.topFailureReasons; trackBy: trackByFailureReason">
+      <span>{{ displayValue(item.statusDetail) }}</span>
+      <strong>{{ item.count }}</strong>
+    </div>
+  </div>
+</section>

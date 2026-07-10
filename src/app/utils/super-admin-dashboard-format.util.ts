@@ -45,6 +45,52 @@ export abstract class SuperAdminDashboardFormatUtil {
     return value;
   }
 
+  public static healthLabel(value: string): string {
+    const normalizedValue: string = value.toLowerCase();
+
+    if (normalizedValue === 'critical')
+      return 'Crítico';
+
+    if (normalizedValue === 'warning')
+      return 'Atenção';
+
+    return 'Saudável';
+  }
+
+  public static severityLabel(value: string): string {
+    const normalizedValue: string = value.toLowerCase();
+
+    if (normalizedValue === 'critical')
+      return 'Crítico';
+
+    if (normalizedValue === 'warning')
+      return 'Atenção';
+
+    if (normalizedValue === 'success' || normalizedValue === 'healthy')
+      return 'Ok';
+
+    return 'Info';
+  }
+
+  public static severityBadgeClass(value: string): string {
+    const normalizedValue: string = value.toLowerCase();
+
+    if (normalizedValue === 'critical')
+      return 'severity-badge is-critical';
+
+    if (normalizedValue === 'warning')
+      return 'severity-badge is-warning';
+
+    if (normalizedValue === 'success' || normalizedValue === 'healthy')
+      return 'severity-badge is-success';
+
+    return 'severity-badge';
+  }
+
+  public static healthBadgeClass(value: string): string {
+    return this.severityBadgeClass(value);
+  }
+
   public static displayPath(path: string): string {
     const value: string = this.displayValue(path);
 

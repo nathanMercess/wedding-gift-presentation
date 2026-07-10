@@ -2,40 +2,33 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { ButtonComponent } from '../../button/button.component';
-import { DashboardResponse } from '../../../models/dashboard-response.model';
-import { AuthService } from '../../../services/auth.service';
-import { SuperAdminDashboardService } from '../../../services/super-admin-dashboard.service';
 import { ButtonSize } from '../../../enums/button-size.enum';
 import { ButtonVariant } from '../../../enums/button-variant.enum';
-import { SuperAdminDashboardTab } from '../../../enums/super-admin-dashboard-tab.enum';
+import { DashboardActionItem, DashboardResponse } from '../../../models/dashboard-response.model';
+import { AuthService } from '../../../services/auth.service';
+import { SuperAdminDashboardService } from '../../../services/super-admin-dashboard.service';
 import { SuperAdminDashboardFormatUtil } from '../../../utils/super-admin-dashboard-format.util';
-import { SuperAdminChartsComponent } from './super-admin-charts/super-admin-charts.component';
-import { SuperAdminMonitoringComponent } from './super-admin-monitoring/super-admin-monitoring.component';
-import { SuperAdminSummaryComponent } from './super-admin-summary/super-admin-summary.component';
-import { SuperAdminTablesComponent } from './super-admin-tables/super-admin-tables.component';
+import { ButtonComponent } from '../../button/button.component';
+import { SuperAdminActionCenterComponent } from './super-admin-action-center/super-admin-action-center.component';
+import { SuperAdminActivityFeedComponent } from './super-admin-activity-feed/super-admin-activity-feed.component';
+import { SuperAdminApiHealthComponent } from './super-admin-api-health/super-admin-api-health.component';
+import { SuperAdminGiftInsightsComponent } from './super-admin-gift-insights/super-admin-gift-insights.component';
+import { SuperAdminPaymentHealthComponent } from './super-admin-payment-health/super-admin-payment-health.component';
+import { SuperAdminRevenuePanelComponent } from './super-admin-revenue-panel/super-admin-revenue-panel.component';
 
 @Component({
   standalone: true,
   selector: 'app-super-admin-dashboard',
   templateUrl: './super-admin-dashboard.component.html',
   styleUrl: './super-admin-dashboard.component.scss',
-  imports: [CommonModule, FormsModule, RouterLink, ButtonComponent, SuperAdminChartsComponent, SuperAdminMonitoringComponent, SuperAdminSummaryComponent, SuperAdminTablesComponent],
+  imports: [CommonModule, FormsModule, RouterLink, ButtonComponent, SuperAdminActionCenterComponent, SuperAdminActivityFeedComponent, SuperAdminApiHealthComponent, SuperAdminGiftInsightsComponent, SuperAdminPaymentHealthComponent, SuperAdminRevenuePanelComponent],
 })
 export class SuperAdminDashboardComponent implements OnInit {
   public readonly ButtonSize: typeof ButtonSize = ButtonSize;
   public readonly ButtonVariant: typeof ButtonVariant = ButtonVariant;
-  public readonly SuperAdminDashboardTab: typeof SuperAdminDashboardTab = SuperAdminDashboardTab;
   public readonly dayOptions: number[] = [7, 15, 30, 60, 90];
   public readonly recentItemsOptions: number[] = [5, 10, 20, 50];
-  public readonly tabs: SuperAdminDashboardTab[] = [
-    SuperAdminDashboardTab.Overview,
-    SuperAdminDashboardTab.Charts,
-    SuperAdminDashboardTab.Tables,
-    SuperAdminDashboardTab.Monitoring,
-  ];
 
-  public activeTab: SuperAdminDashboardTab = SuperAdminDashboardTab.Overview;
   public days: number = 30;
   public recentItems: number = 10;
 
@@ -61,33 +54,48 @@ export class SuperAdminDashboardComponent implements OnInit {
     this.loadDashboard();
   }
 
-  public setActiveTab(tab: SuperAdminDashboardTab): void {
-    this.activeTab = tab;
+  public formatMoney(value: number): string {
+    return SuperAdminDashboardFormatUtil.formatMoney(value);
   }
 
-  public getTabLabel(tab: SuperAdminDashboardTab): string {
-    if (tab === SuperAdminDashboardTab.Overview)
-      return 'Visão geral';
-
-    if (tab === SuperAdminDashboardTab.Charts)
-      return 'Gráficos';
-
-    if (tab === SuperAdminDashboardTab.Tables)
-      return 'Tabelas';
-
-    return 'Monitoramento';
+  public formatPercent(value: number): string {
+    return SuperAdminDashboardFormatUtil.formatPercent(value);
   }
 
   public formatDate(value: string | null | undefined): string {
     return SuperAdminDashboardFormatUtil.formatDate(value);
   }
 
-  public logout(): void {
-    this.auth.logout();
+  public healthLabel(value: string): string {
+    return SuperAdminDashboardFormatUtil.healthLabel(value);
   }
 
-  public trackByTab(_: number, tab: SuperAdminDashboardTab): SuperAdminDashboardTab {
-    return tab;
+  public severityBadgeClass(value: string): string {
+    return SuperAdminDashboardFormatUtil.severityBadgeClass(value);
+  }
+
+  public categoryStatus(category: string): string {
+    const items: DashboardActionItem[] = this.dashboard.actionCenter.items.filter((item: DashboardActionItem): boolean => item.category === category);
+
+    if (items.some((item: DashboardActionItem): boolean => item.severity === 'critical'))
+      return 'critical';
+
+    if (items.some((item: DashboardActionItem): boolean => item.severity === 'warning'))
+      return 'warning';
+
+    return 'healthy';
+  }
+
+  public categoryStatusLabel(category: string): string {
+    return SuperAdminDashboardFormatUtil.healthLabel(this.categoryStatus(category));
+  }
+
+  public categoryStatusBadgeClass(category: string): string {
+    return SuperAdminDashboardFormatUtil.severityBadgeClass(this.categoryStatus(category));
+  }
+
+  public logout(): void {
+    this.auth.logout();
   }
 
   public trackByIndex(index: number): number {

@@ -13,7 +13,7 @@ function makeGift(over: Partial<Gift> = {}): Gift {
 }
 
 function validValue(over: Record<string, unknown> = {}): Record<string, unknown> {
-  return { name: 'Air Fryer', total: 200, image: '', description: 'desc', allowPartialContribution: true, ...over };
+  return { name: 'Air Fryer', total: 200, image: '', description: 'desc', allowPartialContribution: true, available: true, ...over };
 }
 
 describe('AdminGiftFormComponent', () => {
@@ -39,6 +39,7 @@ describe('AdminGiftFormComponent', () => {
     });
     fixture = TestBed.createComponent(AdminGiftFormComponent);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('editingGift', makeGift({ id: '', name: '', total: 0 }));
   });
 
   it('inicia inválido — nome e total são obrigatórios', () => {
