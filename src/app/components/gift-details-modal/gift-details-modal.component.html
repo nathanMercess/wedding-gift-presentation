@@ -32,7 +32,7 @@
 
         <!-- Esquerda: foto sempre visível -->
         <div class="gift-info">
-          <app-gift-photo-card [gift]="gift()" [remaining]="remaining" [progress]="progress">
+          <app-gift-photo-card [gift]="gift()">
           </app-gift-photo-card>
         </div>
 
@@ -67,7 +67,7 @@
             }
 
             @case (ModalStep.Payment) {
-              <app-gift-payment-step *ngIf="!isUnavailable" [giftId]="gift().id" [giftName]="gift().name"
+              <app-gift-payment-step *ngIf="!isUnavailable" [giftId]="gift().id"
                 [amount]="contributionAmount" [orderId]="orderId" [contributorName]="contributorName"
                 [message]="contributorMessage" (paymentApproved)="onPaymentApproved()">
               </app-gift-payment-step>

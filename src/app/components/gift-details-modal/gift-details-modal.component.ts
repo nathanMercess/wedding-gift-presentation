@@ -60,10 +60,6 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy, AfterViewIn
     return Math.max(this.gift().total - this.gift().raised, 0);
   }
 
-  public get progress(): number {
-    return Math.min((this.gift().raised / this.gift().total) * 100, 100);
-  }
-
   public get isUnavailable(): boolean {
     return this.gift().available === false;
   }
@@ -73,6 +69,9 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy, AfterViewIn
   }
 
   public get contributionLimit(): number {
+    if (!this.gift().allowPartialContribution)
+      return this.gift().total;
+
     if (this.isFullyFunded)
       return this.gift().total;
 

@@ -16,7 +16,6 @@ import { CreditCardFeeUtil } from '../../checkout/utils/credit-card-fee.util';
 })
 export class GiftPaymentStepComponent {
   public readonly giftId: InputSignal<string> = input.required<string>();
-  public readonly giftName: InputSignal<string> = input.required<string>();
   public readonly amount: InputSignal<number> = input.required<number>();
   public readonly orderId: InputSignal<string> = input.required<string>();
   public readonly contributorName: InputSignal<string> = input.required<string>();
@@ -29,10 +28,6 @@ export class GiftPaymentStepComponent {
   public activeMethod: PaymentMethod = PaymentMethod.None;
 
   public constructor(public readonly paymentService: PaymentService) {}
-
-  public get creditCardAmount(): number {
-    return CreditCardFeeUtil.calculateGrossAmount(this.amount());
-  }
 
   public get maxInstallments(): number {
     return CreditCardFeeUtil.getMaxInstallments();

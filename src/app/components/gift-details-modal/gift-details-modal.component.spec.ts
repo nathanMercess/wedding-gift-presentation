@@ -56,6 +56,12 @@ describe('GiftDetailsModalComponent', () => {
     expect(component.availableQuickAmounts).toEqual([50, 100, 200]);
   });
 
+  it('contributionLimit usa o total quando o presente nao permite valor parcial', () => {
+    setup(makeGift({ allowPartialContribution: false, total: 50, raised: 1 }));
+    expect(component.remaining).toBe(49);
+    expect(component.contributionLimit).toBe(50);
+  });
+
   it('availableQuickAmounts usa o total como limite quando a meta já foi atingida', () => {
     setup(makeGift({ fullyFunded: true, total: 300, raised: 300 }));
     expect(component.availableQuickAmounts).toEqual([50, 100, 200, 300]);

@@ -11,6 +11,4 @@ import { Gift } from '../../models/gift.model';
 })
 export class GiftPhotoCardComponent {
   public readonly gift: InputSignal<Gift> = input.required<Gift>();
-  public readonly remaining: InputSignal<number> = input.required<number>();
-  public readonly progress: InputSignal<number> = input.required<number>();
 }
