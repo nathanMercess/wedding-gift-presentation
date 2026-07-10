@@ -4,6 +4,21 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        type: choice
+        default: production
+        options:
+          - production
+          - development
+
+env:
+  PROJECT_ID: weddinggift
+  REGION: us-central1
+  REPOSITORY: wedding-gift
 
 jobs:
   build-and-deploy:
@@ -12,7 +27,7 @@ jobs:
 
     permissions:
       contents: read
-      id-token: write  # required for Workload Identity Federation
+      id-token: write
 
     steps:
       - name: Checkout code
@@ -24,30 +39,60 @@ jobs:
           workload_identity_provider: "projects/528711077873/locations/global/workloadIdentityPools/github-pool/providers/github-provider"
           service_account: "github-actions@weddinggift.iam.gserviceaccount.com"
 
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Resolve target
+        id: target
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            TARGET="${{ inputs.environment }}"
+          else
+            TARGET="development"
+          fi
+
+          if [[ "$TARGET" == "production" ]]; then
+            echo "service=wedding-gift-front-prod" >> "$GITHUB_OUTPUT"
+            echo "image_name=frontend-prod" >> "$GITHUB_OUTPUT"
+            echo "build_configuration=production" >> "$GITHUB_OUTPUT"
+            echo "api_proxy_url=https://wedding-gift-api-prod-528711077873.us-central1.run.app" >> "$GITHUB_OUTPUT"
+          else
+            echo "service=wedding-gift-front-dev" >> "$GITHUB_OUTPUT"
+            echo "image_name=frontend-dev" >> "$GITHUB_OUTPUT"
+            echo "build_configuration=development" >> "$GITHUB_OUTPUT"
+            echo "api_proxy_url=https://wedding-gift-api-dev-528711077873.us-central1.run.app" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Configure Docker for Artifact Registry
-        run: gcloud auth configure-docker southamerica-east1-docker.pkg.dev --quiet
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
       - name: Build Frontend image
         run: |
+          IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ steps.target.outputs.image_name }}:${{ github.sha }}"
           docker build \
-            -t southamerica-east1-docker.pkg.dev/weddinggift/wedding-gift/frontend:latest \
-            -t southamerica-east1-docker.pkg.dev/weddinggift/wedding-gift/frontend:${{ github.sha }} \
+            --build-arg NG_BUILD_CONFIGURATION="${{ steps.target.outputs.build_configuration }}" \
+            -t "$IMAGE" \
             .
+          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
 
       - name: Push Frontend image
-        run: |
-          docker push southamerica-east1-docker.pkg.dev/weddinggift/wedding-gift/frontend:latest
-          docker push southamerica-east1-docker.pkg.dev/weddinggift/wedding-gift/frontend:${{ github.sha }}
+        run: docker push "$IMAGE"
 
-      - name: Deploy to VM via SSH
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
-          key: ${{ secrets.VM_SSH_KEY }}
-          script: |
-            gcloud auth configure-docker southamerica-east1-docker.pkg.dev --quiet
-            docker pull southamerica-east1-docker.pkg.dev/weddinggift/wedding-gift/frontend:latest
-            cd /home/nathan66merces/app
-            docker compose up -d frontend
-            docker image prune -f
+      - name: Deploy Frontend to Cloud Run
+        run: |
+          gcloud run deploy "${{ steps.target.outputs.service }}" \
+            --project "${{ env.PROJECT_ID }}" \
+            --region "${{ env.REGION }}" \
+            --platform managed \
+            --image "$IMAGE" \
+            --allow-unauthenticated \
+            --cpu 1 \
+            --memory 128Mi \
+            --concurrency 80 \
+            --timeout 60 \
+            --min-instances 0 \
+            --max-instances 2 \
+            --port 8080 \
+            --set-env-vars "API_PROXY_URL=${{ steps.target.outputs.api_proxy_url }}" \
+            --quiet
