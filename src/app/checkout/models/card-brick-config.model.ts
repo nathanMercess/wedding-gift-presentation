@@ -8,6 +8,5 @@ export interface CardBrickConfig {
   message: string;
   cardType: PaymentMethod.CreditCard | PaymentMethod.DebitCard;
   payerEmail: string;
-  netAmount: number;
   maxInstallments: number;
 }

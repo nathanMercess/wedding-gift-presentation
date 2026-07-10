@@ -15,22 +15,22 @@ export abstract class CreditCardFeeUtil {
     return fee.installmentFeePercent + fee.saleFeePercent;
   }
 
-  public static calculateGrossAmount(netAmount: number, installments: number = CREDIT_CARD_MAX_INSTALLMENTS): number {
+  public static calculateGrossAmount(amount: number, installments: number = CREDIT_CARD_MAX_INSTALLMENTS): number {
     const feePercent: number = this.getTotalFeePercent(installments);
 
-    if (netAmount <= 0)
+    if (amount <= 0)
       return 0;
 
     if (feePercent <= 0)
-      return netAmount;
+      return amount;
 
     if (feePercent >= 99)
-      return netAmount;
+      return amount;
 
-    return Math.round((netAmount / (1 - feePercent / 100)) * 100) / 100;
+    return Math.round((amount / (1 - feePercent / 100)) * 100) / 100;
   }
 
-  public static calculateInstallmentAmount(netAmount: number, installments: number = CREDIT_CARD_MAX_INSTALLMENTS): number {
-    return Math.round((this.calculateGrossAmount(netAmount, installments) / installments) * 100) / 100;
+  public static calculateInstallmentAmount(amount: number, installments: number = CREDIT_CARD_MAX_INSTALLMENTS): number {
+    return Math.round((this.calculateGrossAmount(amount, installments) / installments) * 100) / 100;
   }
 }

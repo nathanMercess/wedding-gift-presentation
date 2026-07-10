@@ -62,8 +62,7 @@ export class CheckoutComponent implements OnInit {
 
   private createCardConfig(method: PaymentMethod.CreditCard | PaymentMethod.DebitCard): CardBrickConfig {
     return {
-      amount: method === PaymentMethod.CreditCard ? CreditCardFeeUtil.calculateGrossAmount(this.totalAmount) : this.totalAmount,
-      netAmount: this.totalAmount,
+      amount: this.totalAmount,
       orderId: this.orderId,
       giftId: this.giftId,
       contributorName: this.contributorName,
