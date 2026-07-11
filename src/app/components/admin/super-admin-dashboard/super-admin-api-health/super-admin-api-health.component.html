@@ -43,10 +43,10 @@
           </thead>
           <tbody>
             <tr *ngFor="let item of dashboard().apiHealth.topErrorEndpoints; trackBy: trackByEndpoint" [class.is-danger]="item.serverErrors > 0">
-              <td><span class="method-badge">{{ item.method }}</span> {{ displayPath(item.path) }}</td>
-              <td>{{ item.serverErrors }}</td>
-              <td>{{ item.clientErrors }}</td>
-              <td>{{ formatMilliseconds(item.p95DurationMilliseconds) }}</td>
+              <td data-label="Endpoint"><span class="method-badge">{{ item.method }}</span> {{ displayPath(item.path) }}</td>
+              <td data-label="5xx">{{ item.serverErrors }}</td>
+              <td data-label="4xx">{{ item.clientErrors }}</td>
+              <td data-label="P95">{{ formatMilliseconds(item.p95DurationMilliseconds) }}</td>
             </tr>
           </tbody>
         </table>
@@ -68,10 +68,10 @@
           </thead>
           <tbody>
             <tr *ngFor="let item of dashboard().apiHealth.slowestEndpoints; trackBy: trackByEndpoint" [class.is-slow]="item.slowRequests > 0">
-              <td><span class="method-badge">{{ item.method }}</span> {{ displayPath(item.path) }}</td>
-              <td>{{ item.count }}</td>
-              <td>{{ formatMilliseconds(item.averageDurationMilliseconds) }}</td>
-              <td>{{ formatMilliseconds(item.p95DurationMilliseconds) }}</td>
+              <td data-label="Endpoint"><span class="method-badge">{{ item.method }}</span> {{ displayPath(item.path) }}</td>
+              <td data-label="Req.">{{ item.count }}</td>
+              <td data-label="Media">{{ formatMilliseconds(item.averageDurationMilliseconds) }}</td>
+              <td data-label="P95">{{ formatMilliseconds(item.p95DurationMilliseconds) }}</td>
             </tr>
           </tbody>
         </table>

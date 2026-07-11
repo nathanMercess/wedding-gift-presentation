@@ -1,4 +1,10 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
 .ops-panel {
+  min-width: 0;
   padding: 1rem;
   overflow: hidden;
   border: 1px solid var(--hairline);
@@ -13,6 +19,10 @@
   justify-content: space-between;
   gap: 0.75rem;
   margin-bottom: 0.9rem;
+
+  > div {
+    min-width: 0;
+  }
 
   h2 {
     margin: 0.15rem 0 0;
@@ -35,6 +45,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  max-width: 100%;
   min-height: 1.55rem;
   padding: 0 0.55rem;
   border-radius: var(--radius-pill);
@@ -42,6 +53,8 @@
   color: var(--neutral-700);
   font-size: 0.72rem;
   font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -119,6 +132,7 @@
     font-size: 0.9rem;
     font-weight: 800;
     line-height: 1.25;
+    overflow-wrap: anywhere;
   }
 
   p {
@@ -126,6 +140,7 @@
     color: var(--muted-foreground);
     font-size: 0.8rem;
     line-height: 1.4;
+    overflow-wrap: anywhere;
   }
 }
 
@@ -159,6 +174,7 @@
 
 .action-command {
   justify-self: flex-start;
+  max-width: 100%;
   min-height: 2rem;
   padding: 0 0.75rem;
   border: 1px solid var(--hairline-strong);
@@ -176,7 +192,11 @@
   opacity: 0.62;
 }
 
-@media (max-width: 420px) {
+@media (max-width: 560px) {
+  .ops-panel {
+    padding: 0.85rem;
+  }
+
   .panel-header,
   .action-topline,
   .action-meta {
@@ -192,6 +212,10 @@
   .action-meta span {
     text-align: left;
     white-space: normal;
+  }
+
+  .action-command {
+    width: 100%;
   }
 }
 

@@ -1,4 +1,10 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
 .ops-panel {
+  min-width: 0;
   padding: 1rem;
   overflow: hidden;
   border: 1px solid var(--hairline);
@@ -13,6 +19,10 @@
   justify-content: space-between;
   gap: 0.75rem;
   margin-bottom: 1rem;
+
+  > div {
+    min-width: 0;
+  }
 
   h2 {
     margin: 0.15rem 0 0;
@@ -35,6 +45,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  max-width: 100%;
   min-height: 1.55rem;
   padding: 0 0.55rem;
   border-radius: var(--radius-pill);
@@ -42,6 +53,8 @@
   color: var(--neutral-700);
   font-size: 0.72rem;
   font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -81,6 +94,7 @@
     font-size: 0.72rem;
     text-overflow: ellipsis;
     white-space: nowrap;
+    overflow-wrap: anywhere;
   }
 
   strong {
@@ -159,6 +173,7 @@
 
 .money-cell {
   min-width: 5.5rem;
+  max-width: 100%;
   text-align: right;
 }
 
@@ -194,15 +209,14 @@
   text-align: center;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 820px) {
   .gift-tables {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 640px) {
   .insight-strip,
-  .gift-tables,
   .table-row,
   .raised-row {
     grid-template-columns: 1fr;
@@ -213,12 +227,17 @@
   }
 }
 
-@media (max-width: 420px) {
+@media (max-width: 560px) {
+  .ops-panel {
+    padding: 0.85rem;
+  }
+
   .panel-header {
     align-items: stretch;
     flex-direction: column;
   }
 
+  .insight-strip span,
   .table-row strong,
   .table-row span,
   .raised-row strong,
