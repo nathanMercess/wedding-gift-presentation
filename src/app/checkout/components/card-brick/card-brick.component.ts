@@ -19,11 +19,10 @@ interface CardBrickController {
 }
 
 @Component({
-  standalone: true,
-  selector: 'app-card-brick',
-  templateUrl: './card-brick.component.html',
-  styleUrl: './card-brick.component.scss',
-  imports: [CommonModule],
+    selector: 'app-card-brick',
+    templateUrl: './card-brick.component.html',
+    styleUrl: './card-brick.component.scss',
+    imports: [CommonModule]
 })
 export class CardBrickComponent implements AfterViewInit, OnDestroy {
   public readonly config: InputSignal<CardBrickConfig> = input.required<CardBrickConfig>();

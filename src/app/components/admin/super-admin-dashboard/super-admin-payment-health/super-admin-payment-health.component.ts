@@ -4,12 +4,11 @@ import { DashboardPaymentByStatus, DashboardPaymentFailureReason, DashboardRespo
 import { SuperAdminDashboardFormatUtil } from '../../../../utils/super-admin-dashboard-format.util';
 
 @Component({
-  standalone: true,
-  selector: 'app-super-admin-payment-health',
-  templateUrl: './super-admin-payment-health.component.html',
-  styleUrl: './super-admin-payment-health.component.scss',
-  imports: [CommonModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-super-admin-payment-health',
+    templateUrl: './super-admin-payment-health.component.html',
+    styleUrl: './super-admin-payment-health.component.scss',
+    imports: [CommonModule],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SuperAdminPaymentHealthComponent {
   public readonly dashboard: InputSignal<DashboardResponse> = input.required<DashboardResponse>();

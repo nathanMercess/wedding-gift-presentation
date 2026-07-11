@@ -30,6 +30,14 @@
         <span>{{ item.category }}</span>
         <span *ngIf="item.createdAtUtc">{{ formatDate(item.createdAtUtc) }}</span>
       </div>
+      <button
+        *ngIf="canReconcileApprovedPayments(item)"
+        class="action-command"
+        type="button"
+        [disabled]="reconciling()"
+        (click)="reconcileApprovedPayments.emit()">
+        {{ reconciling() ? 'Reprocessando...' : item.actionLabel }}
+      </button>
     </article>
   </div>
 

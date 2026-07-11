@@ -4,12 +4,11 @@ import { DashboardApiEndpointHealth, DashboardResponse } from '../../../../model
 import { SuperAdminDashboardFormatUtil } from '../../../../utils/super-admin-dashboard-format.util';
 
 @Component({
-  standalone: true,
-  selector: 'app-super-admin-api-health',
-  templateUrl: './super-admin-api-health.component.html',
-  styleUrl: './super-admin-api-health.component.scss',
-  imports: [CommonModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-super-admin-api-health',
+    templateUrl: './super-admin-api-health.component.html',
+    styleUrl: './super-admin-api-health.component.scss',
+    imports: [CommonModule],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SuperAdminApiHealthComponent {
   public readonly dashboard: InputSignal<DashboardResponse> = input.required<DashboardResponse>();

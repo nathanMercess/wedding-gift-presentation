@@ -6,6 +6,7 @@ import { EndpointsUrls } from '../constants/api-endpoints';
 import { EMPTY_DASHBOARD_RESPONSE } from '../constants/empty-dashboard-response.constant';
 import { ApiResponse } from '../models/api-response.model';
 import { DashboardActionCenter, DashboardActivityFeedItem, DashboardApiHealth, DashboardCharts, DashboardGiftInsights, DashboardOverviewResponse, DashboardPaymentHealth, DashboardResponse, DashboardRevenue } from '../models/dashboard-response.model';
+import { PaymentReconciliationResponse } from '../models/payment-reconciliation-response.model';
 import { SuperAdminDashboardState } from '../models/super-admin-dashboard-state.model';
 import { ApiResponseUtil } from '../utils/api-response.util';
 import { HttpErrorUtil } from '../utils/http-error';
@@ -77,6 +78,11 @@ export class SuperAdminDashboardService {
     this.state.update((currentState: SuperAdminDashboardState): SuperAdminDashboardState => ({ ...currentState, ...partialState }));
   }
 
+  public reconcileApprovedPayments(): Observable<PaymentReconciliationResponse> {
+    return this.http.post<ApiResponse<PaymentReconciliationResponse>>(this.endpointsUrls.adminPaymentsReconcileApproved, {})
+      .pipe(ApiResponseUtil.data<PaymentReconciliationResponse>('Erro ao reconciliar pagamentos aprovados.'));
+  }
+
   private buildHttpParams(params: DashboardQueryParams): HttpParams {
     let httpParams: HttpParams = new HttpParams();
     httpParams = httpParams.set('days', String(params.days));
@@ -108,10 +114,6 @@ export class SuperAdminDashboardService {
       apiHealth: sections.apiHealth,
       contributionsByDay: sections.charts.contributionsByDay,
       paymentsByStatus: sections.charts.paymentsByStatus,
-      paymentsByMethod: sections.charts.paymentsByMethod,
-      giftsByCategory: sections.charts.giftsByCategory,
-      requestsByStatus: sections.charts.requestsByStatus,
-      requestsByPath: sections.charts.requestsByPath,
       topGiftsByRaised: sections.giftInsights.topRaisedGifts,
       activityFeed: sections.activityFeed,
     };

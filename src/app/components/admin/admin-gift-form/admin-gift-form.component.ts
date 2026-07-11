@@ -22,12 +22,11 @@ const MAX_IMAGE_SIZE_BYTES = 20 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 @Component({
-  standalone: true,
-  selector: 'app-admin-gift-form',
-  templateUrl: './admin-gift-form.component.html',
-  styleUrl: './admin-gift-form.component.scss',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-admin-gift-form',
+    templateUrl: './admin-gift-form.component.html',
+    styleUrl: './admin-gift-form.component.scss',
+    imports: [CommonModule, FormsModule, ReactiveFormsModule],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AdminGiftFormComponent {
   public readonly editingGift: InputSignal<Gift> = input.required<Gift>();

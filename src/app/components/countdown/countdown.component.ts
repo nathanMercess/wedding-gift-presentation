@@ -2,11 +2,10 @@ import { CommonModule } from '@angular/common';
 import { Component, InputSignal, OnDestroy, OnInit, input } from '@angular/core';
 
 @Component({
-  standalone: true,
-  selector: 'app-countdown',
-  templateUrl: './countdown.component.html',
-  styleUrl: './countdown.component.scss',
-  imports: [CommonModule],
+    selector: 'app-countdown',
+    templateUrl: './countdown.component.html',
+    styleUrl: './countdown.component.scss',
+    imports: [CommonModule]
 })
 export class CountdownComponent implements OnInit, OnDestroy {
   public readonly targetDate: InputSignal<Date | string> = input.required<Date | string>();

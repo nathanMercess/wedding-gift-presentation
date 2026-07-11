@@ -2,12 +2,11 @@ import { ChangeDetectionStrategy, Component, HostListener, InputSignal, OnDestro
 import { CommonModule } from '@angular/common';
 
 @Component({
-  standalone: true,
-  selector: 'app-slide-over',
-  templateUrl: './slide-over.component.html',
-  styleUrl: './slide-over.component.scss',
-  imports: [CommonModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-slide-over',
+    templateUrl: './slide-over.component.html',
+    styleUrl: './slide-over.component.scss',
+    imports: [CommonModule],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SlideOverComponent implements OnInit, OnDestroy {
   public readonly title: InputSignal<string> = input<string>('');

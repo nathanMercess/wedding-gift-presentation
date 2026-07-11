@@ -5,11 +5,10 @@ import { ButtonVariant } from '../../enums/button-variant.enum';
 import { ButtonType } from '../../enums/button-type.enum';
 
 @Component({
-  standalone: true,
-  selector: 'app-confirm-dialog',
-  templateUrl: './confirm-dialog.component.html',
-  styleUrl: './confirm-dialog.component.scss',
-  imports: [CommonModule, ButtonComponent],
+    selector: 'app-confirm-dialog',
+    templateUrl: './confirm-dialog.component.html',
+    styleUrl: './confirm-dialog.component.scss',
+    imports: [CommonModule, ButtonComponent]
 })
 export class ConfirmDialogComponent {
   public readonly title: InputSignal<string> = input<string>('Tem certeza?');

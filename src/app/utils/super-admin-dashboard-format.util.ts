@@ -1,7 +1,6 @@
 import { DateUtil } from './date.util';
 
 export abstract class SuperAdminDashboardFormatUtil {
-  public static readonly slowRequestThresholdMilliseconds: number = 1000;
   public static readonly sensitiveTerms: string[] = ['authorization', 'bearer', 'cookie', 'cookies', 'password', 'senha', 'token'];
   public static readonly moneyFormatter: Intl.NumberFormat = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
   public static readonly numberFormatter: Intl.NumberFormat = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 });
@@ -29,13 +28,6 @@ export abstract class SuperAdminDashboardFormatUtil {
 
   public static formatMilliseconds(value: number): string {
     return `${this.formatNumber(value)} ms`;
-  }
-
-  public static formatBoolean(value: boolean): string {
-    if (value)
-      return 'Sim';
-
-    return 'Não';
   }
 
   public static displayValue(value: string | null | undefined): string {
@@ -156,33 +148,4 @@ export abstract class SuperAdminDashboardFormatUtil {
     return 'status-badge';
   }
 
-  public static statusCodeBadgeClass(statusCode: number): string {
-    if (statusCode >= 500)
-      return 'status-badge is-danger';
-
-    if (statusCode >= 400)
-      return 'status-badge is-warning';
-
-    if (statusCode >= 200 && statusCode < 300)
-      return 'status-badge is-success';
-
-    return 'status-badge';
-  }
-
-  public static statusGroupBadgeClass(statusGroup: string): string {
-    if (statusGroup.startsWith('5'))
-      return 'status-badge is-danger';
-
-    if (statusGroup.startsWith('4'))
-      return 'status-badge is-warning';
-
-    if (statusGroup.startsWith('2'))
-      return 'status-badge is-success';
-
-    return 'status-badge';
-  }
-
-  public static isSlowRequest(durationMilliseconds: number): boolean {
-    return durationMilliseconds > this.slowRequestThresholdMilliseconds;
-  }
 }

@@ -5,11 +5,10 @@ import { ButtonVariant } from '../../enums/button-variant.enum';
 import { ButtonType } from '../../enums/button-type.enum';
 
 @Component({
-  standalone: true,
-  selector: 'app-gift-success-step',
-  templateUrl: './gift-success-step.component.html',
-  styleUrl: './gift-success-step.component.scss',
-  imports: [CommonModule, ButtonComponent],
+    selector: 'app-gift-success-step',
+    templateUrl: './gift-success-step.component.html',
+    styleUrl: './gift-success-step.component.scss',
+    imports: [CommonModule, ButtonComponent]
 })
 export class GiftSuccessStepComponent {
   public readonly giftName: InputSignal<string> = input.required<string>();

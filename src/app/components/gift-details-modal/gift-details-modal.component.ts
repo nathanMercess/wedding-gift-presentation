@@ -13,19 +13,18 @@ import { ButtonType } from '../../enums/button-type.enum';
 import { ContributionType } from '../../enums/contribution-type.enum';
 
 @Component({
-  standalone: true,
-  selector: 'app-gift-details-modal',
-  templateUrl: './gift-details-modal.component.html',
-  styleUrl: './gift-details-modal.component.scss',
-  imports: [
-    CommonModule,
-    ButtonComponent,
-    ConfirmDialogComponent,
-    GiftPhotoCardComponent,
-    GiftContributionFormComponent,
-    GiftPaymentStepComponent,
-    GiftSuccessStepComponent,
-  ],
+    selector: 'app-gift-details-modal',
+    templateUrl: './gift-details-modal.component.html',
+    styleUrl: './gift-details-modal.component.scss',
+    imports: [
+        CommonModule,
+        ButtonComponent,
+        ConfirmDialogComponent,
+        GiftPhotoCardComponent,
+        GiftContributionFormComponent,
+        GiftPaymentStepComponent,
+        GiftSuccessStepComponent,
+    ]
 })
 export class GiftDetailsModalComponent implements OnInit, OnDestroy, AfterViewInit {
   public readonly gift: InputSignal<Gift> = input.required<Gift>();

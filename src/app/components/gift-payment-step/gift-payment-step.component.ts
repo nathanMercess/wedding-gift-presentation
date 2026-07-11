@@ -8,11 +8,10 @@ import { PaymentService } from '../../checkout/services/payment.service';
 import { CreditCardFeeUtil } from '../../checkout/utils/credit-card-fee.util';
 
 @Component({
-  standalone: true,
-  selector: 'app-gift-payment-step',
-  templateUrl: './gift-payment-step.component.html',
-  styleUrl: './gift-payment-step.component.scss',
-  imports: [CommonModule, PaymentMethodSelectorComponent, CardBrickComponent, PixDisplayComponent],
+    selector: 'app-gift-payment-step',
+    templateUrl: './gift-payment-step.component.html',
+    styleUrl: './gift-payment-step.component.scss',
+    imports: [CommonModule, PaymentMethodSelectorComponent, CardBrickComponent, PixDisplayComponent]
 })
 export class GiftPaymentStepComponent {
   public readonly giftId: InputSignal<string> = input.required<string>();

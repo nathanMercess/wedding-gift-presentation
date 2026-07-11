@@ -1,12 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { finalize } from 'rxjs';
 import { ButtonSize } from '../../../enums/button-size.enum';
 import { ButtonVariant } from '../../../enums/button-variant.enum';
 import { DashboardActionItem, DashboardResponse } from '../../../models/dashboard-response.model';
+import { PaymentReconciliationResponse } from '../../../models/payment-reconciliation-response.model';
 import { AuthService } from '../../../services/auth.service';
 import { SuperAdminDashboardService } from '../../../services/super-admin-dashboard.service';
+import { HttpErrorUtil } from '../../../utils/http-error';
 import { SuperAdminDashboardFormatUtil } from '../../../utils/super-admin-dashboard-format.util';
 import { ButtonComponent } from '../../button/button.component';
 import { SuperAdminActionCenterComponent } from './super-admin-action-center/super-admin-action-center.component';
@@ -17,11 +21,10 @@ import { SuperAdminPaymentHealthComponent } from './super-admin-payment-health/s
 import { SuperAdminRevenuePanelComponent } from './super-admin-revenue-panel/super-admin-revenue-panel.component';
 
 @Component({
-  standalone: true,
-  selector: 'app-super-admin-dashboard',
-  templateUrl: './super-admin-dashboard.component.html',
-  styleUrl: './super-admin-dashboard.component.scss',
-  imports: [CommonModule, FormsModule, RouterLink, ButtonComponent, SuperAdminActionCenterComponent, SuperAdminActivityFeedComponent, SuperAdminApiHealthComponent, SuperAdminGiftInsightsComponent, SuperAdminPaymentHealthComponent, SuperAdminRevenuePanelComponent],
+    selector: 'app-super-admin-dashboard',
+    templateUrl: './super-admin-dashboard.component.html',
+    styleUrl: './super-admin-dashboard.component.scss',
+    imports: [CommonModule, FormsModule, RouterLink, ButtonComponent, SuperAdminActionCenterComponent, SuperAdminActivityFeedComponent, SuperAdminApiHealthComponent, SuperAdminGiftInsightsComponent, SuperAdminPaymentHealthComponent, SuperAdminRevenuePanelComponent]
 })
 export class SuperAdminDashboardComponent implements OnInit {
   public readonly ButtonSize: typeof ButtonSize = ButtonSize;
@@ -31,6 +34,8 @@ export class SuperAdminDashboardComponent implements OnInit {
 
   public days: number = 30;
   public recentItems: number = 10;
+  public reconcilingPayments: boolean = false;
+  public reconciliationMessage: string = '';
 
   public constructor(public readonly dashboardService: SuperAdminDashboardService, public readonly auth: AuthService) {}
 
@@ -52,6 +57,28 @@ export class SuperAdminDashboardComponent implements OnInit {
 
   public onFiltersChange(): void {
     this.loadDashboard();
+  }
+
+  public reconcileApprovedPayments(): void {
+    if (this.reconcilingPayments)
+      return;
+
+    this.reconcilingPayments = true;
+    this.reconciliationMessage = '';
+
+    this.dashboardService.reconcileApprovedPayments()
+      .pipe(finalize((): void => {
+        this.reconcilingPayments = false;
+      }))
+      .subscribe({
+        next: (response: PaymentReconciliationResponse): void => {
+          this.reconciliationMessage = `Reconciliação concluída: ${response.createdCount} criadas, ${response.skippedCount} ignoradas, ${response.failedCount} falhas.`;
+          this.loadDashboard();
+        },
+        error: (err: HttpErrorResponse): void => {
+          this.reconciliationMessage = HttpErrorUtil.extract(err, 'Erro ao reconciliar pagamentos aprovados.');
+        },
+      });
   }
 
   public formatMoney(value: number): string {

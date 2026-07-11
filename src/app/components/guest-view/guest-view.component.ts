@@ -14,11 +14,10 @@ import { GiftCardComponent } from '../gift-card/gift-card.component';
 import { GiftDetailsModalComponent } from '../gift-details-modal/gift-details-modal.component';
 
 @Component({
-  standalone: true,
-  selector: 'app-guest-view',
-  templateUrl: './guest-view.component.html',
-  styleUrl: './guest-view.component.scss',
-  imports: [CommonModule, FormsModule, GiftCardComponent, GiftDetailsModalComponent, CountdownComponent],
+    selector: 'app-guest-view',
+    templateUrl: './guest-view.component.html',
+    styleUrl: './guest-view.component.scss',
+    imports: [CommonModule, FormsModule, GiftCardComponent, GiftDetailsModalComponent, CountdownComponent]
 })
 export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   public searchTerm: string = '';

@@ -157,6 +157,25 @@
   white-space: nowrap;
 }
 
+.action-command {
+  justify-self: flex-start;
+  min-height: 2rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-sm);
+  background: var(--foreground);
+  color: var(--background);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.action-command:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
 @media (max-width: 420px) {
   .panel-header,
   .action-topline,

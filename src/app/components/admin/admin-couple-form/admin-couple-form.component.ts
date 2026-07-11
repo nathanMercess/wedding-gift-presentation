@@ -7,11 +7,10 @@ import { ThemeService } from '../../../services/theme.service';
 import { ColorUtil } from '../../../utils/color.util';
 
 @Component({
-  standalone: true,
-  selector: 'app-admin-couple-form',
-  templateUrl: './admin-couple-form.component.html',
-  styleUrl: './admin-couple-form.component.scss',
-  imports: [CommonModule, FormsModule],
+    selector: 'app-admin-couple-form',
+    templateUrl: './admin-couple-form.component.html',
+    styleUrl: './admin-couple-form.component.scss',
+    imports: [CommonModule, FormsModule]
 })
 export class AdminCoupleFormComponent {
   public couple: Couple = { names: '', weddingDate: '', photoUrl: '', message: '', primaryColor: '#000000', secondaryColor: '#d9d9d9', carouselPhotos: [] };

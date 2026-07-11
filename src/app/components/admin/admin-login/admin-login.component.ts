@@ -5,11 +5,10 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 
 @Component({
-  standalone: true,
-  selector: 'app-admin-login',
-  templateUrl: './admin-login.component.html',
-  styleUrl: './admin-login.component.scss',
-  imports: [CommonModule, FormsModule],
+    selector: 'app-admin-login',
+    templateUrl: './admin-login.component.html',
+    styleUrl: './admin-login.component.scss',
+    imports: [CommonModule, FormsModule]
 })
 export class AdminLoginComponent {
   public email: string = '';

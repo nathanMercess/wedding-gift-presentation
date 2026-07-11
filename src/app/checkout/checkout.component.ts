@@ -9,11 +9,10 @@ import { CardBrickConfig } from './models/card-brick-config.model';
 import { CreditCardFeeUtil } from './utils/credit-card-fee.util';
 
 @Component({
-  standalone: true,
-  selector: 'app-checkout',
-  templateUrl: './checkout.component.html',
-  styleUrl: './checkout.component.scss',
-  imports: [CommonModule, PaymentMethodSelectorComponent, CardBrickComponent, PixDisplayComponent],
+    selector: 'app-checkout',
+    templateUrl: './checkout.component.html',
+    styleUrl: './checkout.component.scss',
+    imports: [CommonModule, PaymentMethodSelectorComponent, CardBrickComponent, PixDisplayComponent]
 })
 export class CheckoutComponent implements OnInit {
   public readonly PaymentMethod: typeof PaymentMethod = PaymentMethod;

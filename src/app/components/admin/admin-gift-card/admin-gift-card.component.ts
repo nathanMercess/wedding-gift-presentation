@@ -3,12 +3,11 @@ import { CommonModule } from '@angular/common';
 import { Gift } from '../../../models/gift.model';
 
 @Component({
-  standalone: true,
-  selector: 'app-admin-gift-card',
-  templateUrl: './admin-gift-card.component.html',
-  styleUrl: './admin-gift-card.component.scss',
-  imports: [CommonModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-admin-gift-card',
+    templateUrl: './admin-gift-card.component.html',
+    styleUrl: './admin-gift-card.component.scss',
+    imports: [CommonModule],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AdminGiftCardComponent {
   public readonly gift: InputSignal<Gift> = input.required<Gift>();

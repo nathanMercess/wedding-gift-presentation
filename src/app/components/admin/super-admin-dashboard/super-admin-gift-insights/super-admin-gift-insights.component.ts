@@ -4,12 +4,11 @@ import { DashboardResponse, DashboardTopGiftByRaised } from '../../../../models/
 import { SuperAdminDashboardFormatUtil } from '../../../../utils/super-admin-dashboard-format.util';
 
 @Component({
-  standalone: true,
-  selector: 'app-super-admin-gift-insights',
-  templateUrl: './super-admin-gift-insights.component.html',
-  styleUrl: './super-admin-gift-insights.component.scss',
-  imports: [CommonModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-super-admin-gift-insights',
+    templateUrl: './super-admin-gift-insights.component.html',
+    styleUrl: './super-admin-gift-insights.component.scss',
+    imports: [CommonModule],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SuperAdminGiftInsightsComponent {
   public readonly dashboard: InputSignal<DashboardResponse> = input.required<DashboardResponse>();

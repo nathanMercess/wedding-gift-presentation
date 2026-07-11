@@ -232,6 +232,16 @@
   top: 76px;
 }
 
+.dashboard-notice {
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-sm);
+  background: var(--success-bg);
+  color: var(--success);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
 .dashboard-state,
 .dashboard-error {
   display: flex;

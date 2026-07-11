@@ -61,6 +61,10 @@ export class EndpointsUrls {
         return `${this.adminDashboard}/activity-feed`;
     }
 
+    public get adminPaymentsReconcileApproved(): string {
+        return `${this.apiUrl}/admin/payments/reconcile-approved`;
+    }
+
     public get coupleGet(): string {
         return `${this.apiUrl}/couple`;
     }

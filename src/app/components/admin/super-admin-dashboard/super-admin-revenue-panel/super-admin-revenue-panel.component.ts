@@ -4,12 +4,11 @@ import { DashboardContributionByDay, DashboardResponse } from '../../../../model
 import { SuperAdminDashboardFormatUtil } from '../../../../utils/super-admin-dashboard-format.util';
 
 @Component({
-  standalone: true,
-  selector: 'app-super-admin-revenue-panel',
-  templateUrl: './super-admin-revenue-panel.component.html',
-  styleUrl: './super-admin-revenue-panel.component.scss',
-  imports: [CommonModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-super-admin-revenue-panel',
+    templateUrl: './super-admin-revenue-panel.component.html',
+    styleUrl: './super-admin-revenue-panel.component.scss',
+    imports: [CommonModule],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SuperAdminRevenuePanelComponent {
   public readonly dashboard: InputSignal<DashboardResponse> = input.required<DashboardResponse>();

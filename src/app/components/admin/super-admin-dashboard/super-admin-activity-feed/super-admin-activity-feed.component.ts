@@ -4,12 +4,11 @@ import { DashboardActivityFeedItem, DashboardResponse } from '../../../../models
 import { SuperAdminDashboardFormatUtil } from '../../../../utils/super-admin-dashboard-format.util';
 
 @Component({
-  standalone: true,
-  selector: 'app-super-admin-activity-feed',
-  templateUrl: './super-admin-activity-feed.component.html',
-  styleUrl: './super-admin-activity-feed.component.scss',
-  imports: [CommonModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-super-admin-activity-feed',
+    templateUrl: './super-admin-activity-feed.component.html',
+    styleUrl: './super-admin-activity-feed.component.scss',
+    imports: [CommonModule],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SuperAdminActivityFeedComponent {
   public readonly dashboard: InputSignal<DashboardResponse> = input.required<DashboardResponse>();

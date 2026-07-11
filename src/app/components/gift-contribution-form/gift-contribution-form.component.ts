@@ -30,11 +30,10 @@ export const EMPTY_CONTRIBUTION_FORM_DATA: ContributionFormData = {
 };
 
 @Component({
-  standalone: true,
-  selector: 'app-gift-contribution-form',
-  templateUrl: './gift-contribution-form.component.html',
-  styleUrl: './gift-contribution-form.component.scss',
-  imports: [CommonModule, ReactiveFormsModule, ButtonComponent],
+    selector: 'app-gift-contribution-form',
+    templateUrl: './gift-contribution-form.component.html',
+    styleUrl: './gift-contribution-form.component.scss',
+    imports: [CommonModule, ReactiveFormsModule, ButtonComponent]
 })
 export class GiftContributionFormComponent implements OnInit {
   public readonly gift: InputSignal<Gift> = input.required<Gift>();

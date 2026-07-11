@@ -5,11 +5,10 @@ import { ButtonSize } from '../../enums/button-size.enum';
 import { ButtonType } from '../../enums/button-type.enum';
 
 @Component({
-  standalone: true,
-  selector: 'app-button',
-  templateUrl: './button.component.html',
-  styleUrl: './button.component.scss',
-  imports: [CommonModule]
+    selector: 'app-button',
+    templateUrl: './button.component.html',
+    styleUrl: './button.component.scss',
+    imports: [CommonModule]
 })
 export class ButtonComponent {
   public readonly variant: InputSignal<ButtonVariant> = input<ButtonVariant>(ButtonVariant.Primary);

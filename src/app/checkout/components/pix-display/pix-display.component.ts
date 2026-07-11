@@ -15,11 +15,10 @@ import { FormFieldErrorComponent } from '../../../components/form-field-error/fo
 const PIX_EXPIRATION_SECONDS = 10 * 60;
 
 @Component({
-  standalone: true,
-  selector: 'app-pix-display',
-  templateUrl: './pix-display.component.html',
-  styleUrl: './pix-display.component.scss',
-  imports: [CommonModule, ReactiveFormsModule, FormFieldErrorComponent],
+    selector: 'app-pix-display',
+    templateUrl: './pix-display.component.html',
+    styleUrl: './pix-display.component.scss',
+    imports: [CommonModule, ReactiveFormsModule, FormFieldErrorComponent]
 })
 export class PixDisplayComponent implements OnDestroy {
   public readonly orderId: InputSignal<string> = input<string>('');

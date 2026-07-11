@@ -195,34 +195,6 @@ export interface DashboardPaymentByStatus {
   amount: number;
 }
 
-export interface DashboardPaymentByMethod {
-  method: string;
-  count: number;
-  amount: number;
-}
-
-export interface DashboardGiftByCategory {
-  category: string;
-  count: number;
-  goalAmount: number;
-  raisedAmount: number;
-}
-
-export interface DashboardRequestByStatus {
-  statusGroup: string;
-  count: number;
-  averageDurationMilliseconds: number;
-}
-
-export interface DashboardRequestByPath {
-  method: string;
-  path: string;
-  count: number;
-  serverErrors: number;
-  averageDurationMilliseconds: number;
-  maxDurationMilliseconds: number;
-}
-
 export interface DashboardTopGiftByRaised {
   giftId: string;
   giftName: string;
@@ -234,63 +206,6 @@ export interface DashboardTopGiftByRaised {
   paidContributions: number;
   available: boolean;
   fullyFunded: boolean;
-}
-
-export interface DashboardRecentMessage {
-  source: string;
-  sourceId: string;
-  giftId: string;
-  giftName: string;
-  contributorName: string;
-  message: string;
-  amount: number;
-  status: string;
-  createdAtUtc: string;
-}
-
-export interface DashboardRecentRequest {
-  id: string;
-  method: string;
-  path: string;
-  statusCode: number;
-  isSuccess: boolean;
-  isAuthenticated: boolean;
-  userRole: string;
-  durationMilliseconds: number;
-  correlationId: string;
-  exceptionType: string;
-  exceptionMessage: string;
-  startedAtUtc: string;
-}
-
-export interface DashboardRecentPayment {
-  id: string;
-  giftId: string;
-  giftName: string;
-  contributorName: string;
-  method: string;
-  amount: number;
-  installments: number;
-  status: string;
-  statusDetail: string;
-  orderId: string;
-  mpOrderId: string;
-  mpPaymentId: string;
-  contributionCreated: boolean;
-  createdAtUtc: string;
-  updatedAtUtc: string;
-}
-
-export interface DashboardRecentContribution {
-  id: string;
-  giftId: string;
-  giftName: string;
-  contributorName: string;
-  message: string;
-  amount: number;
-  paymentMethod: string;
-  status: string;
-  paidAtUtc: string;
 }
 
 export interface DashboardActivityFeedItem {
@@ -319,10 +234,6 @@ export interface DashboardOverviewResponse {
 export interface DashboardCharts {
   contributionsByDay: DashboardContributionByDay[];
   paymentsByStatus: DashboardPaymentByStatus[];
-  paymentsByMethod: DashboardPaymentByMethod[];
-  giftsByCategory: DashboardGiftByCategory[];
-  requestsByStatus: DashboardRequestByStatus[];
-  requestsByPath: DashboardRequestByPath[];
 }
 
 export interface DashboardResponse {
@@ -342,15 +253,6 @@ export interface DashboardResponse {
   apiHealth: DashboardApiHealth;
   contributionsByDay: DashboardContributionByDay[];
   paymentsByStatus: DashboardPaymentByStatus[];
-  paymentsByMethod: DashboardPaymentByMethod[];
-  giftsByCategory: DashboardGiftByCategory[];
-  requestsByStatus: DashboardRequestByStatus[];
-  requestsByPath: DashboardRequestByPath[];
   topGiftsByRaised: DashboardTopGiftByRaised[];
-  recentMessages: DashboardRecentMessage[];
-  recentRequests: DashboardRecentRequest[];
-  recentPayments: DashboardRecentPayment[];
-  recentFailedPayments: DashboardRecentPayment[];
-  recentContributions: DashboardRecentContribution[];
   activityFeed: DashboardActivityFeedItem[];
 }

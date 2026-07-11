@@ -42,6 +42,10 @@
       </div>
     </section>
 
+    <section *ngIf="reconciliationMessage" class="dashboard-notice">
+      {{ reconciliationMessage }}
+    </section>
+
     <section *ngIf="dashboardService.state().loading" class="dashboard-state">
       <div class="spinner"></div>
       <p>Carregando dashboard...</p>
@@ -97,7 +101,11 @@
           </div>
 
           <aside class="side-column">
-            <app-super-admin-action-center [dashboard]="dashboard"></app-super-admin-action-center>
+            <app-super-admin-action-center
+              [dashboard]="dashboard"
+              [reconciling]="reconcilingPayments"
+              (reconcileApprovedPayments)="reconcileApprovedPayments()">
+            </app-super-admin-action-center>
             <app-super-admin-activity-feed [dashboard]="dashboard"></app-super-admin-activity-feed>
           </aside>
         </section>
