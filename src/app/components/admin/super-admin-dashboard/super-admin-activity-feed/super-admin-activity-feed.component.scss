@@ -146,6 +146,20 @@
   }
 }
 
+@media (max-width: 420px) {
+  .panel-header,
+  .feed-topline {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .feed-topline time,
+  .feed-meta span,
+  .feed-item small {
+    white-space: normal;
+  }
+}
+
 .empty-state {
   display: flex;
   align-items: center;

@@ -71,12 +71,12 @@
 }
 
 .payment-metrics {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(7.75rem, 100%), 1fr));
   margin-bottom: 0.95rem;
 }
 
 .warning-strip {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(9rem, 100%), 1fr));
   margin-top: 0.95rem;
 }
 
@@ -194,12 +194,18 @@
 }
 
 @media (max-width: 760px) {
-  .payment-metrics,
-  .warning-strip {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .funnel-row {
     grid-template-columns: 1fr;
+  }
+
+  .funnel-row small {
+    text-align: left;
+  }
+}
+
+@media (max-width: 420px) {
+  .panel-header {
+    align-items: stretch;
+    flex-direction: column;
   }
 }

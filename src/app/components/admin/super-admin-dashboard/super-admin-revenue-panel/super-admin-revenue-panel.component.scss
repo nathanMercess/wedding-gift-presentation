@@ -113,7 +113,7 @@
 
 .metric-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(8rem, 100%), 1fr));
   gap: 0.7rem;
   margin-bottom: 1rem;
 
@@ -217,15 +217,8 @@
   text-align: center;
 }
 
-@media (max-width: 980px) {
-  .metric-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 640px) {
-  .revenue-headline,
-  .metric-grid {
+@media (max-width: 760px) {
+  .revenue-headline {
     grid-template-columns: 1fr;
   }
 
@@ -235,5 +228,11 @@
 
   .chart-block svg {
     height: 10rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .metric-grid {
+    grid-template-columns: 1fr;
   }
 }

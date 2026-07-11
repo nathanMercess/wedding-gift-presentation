@@ -62,7 +62,7 @@
 
 .insight-strip {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(8rem, 100%), 1fr));
   gap: 0.65rem;
   margin-bottom: 1rem;
 
@@ -195,7 +195,6 @@
 }
 
 @media (max-width: 900px) {
-  .insight-strip,
   .gift-tables {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -211,5 +210,19 @@
 
   .money-cell {
     text-align: left;
+  }
+}
+
+@media (max-width: 420px) {
+  .panel-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .table-row strong,
+  .table-row span,
+  .raised-row strong,
+  .raised-row span {
+    white-space: normal;
   }
 }

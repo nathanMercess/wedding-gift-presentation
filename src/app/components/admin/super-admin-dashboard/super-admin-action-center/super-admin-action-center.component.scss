@@ -157,6 +157,25 @@
   white-space: nowrap;
 }
 
+@media (max-width: 420px) {
+  .panel-header,
+  .action-topline,
+  .action-meta {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .alert-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .action-topline strong,
+  .action-meta span {
+    text-align: left;
+    white-space: normal;
+  }
+}
+
 .empty-state {
   display: flex;
   align-items: center;

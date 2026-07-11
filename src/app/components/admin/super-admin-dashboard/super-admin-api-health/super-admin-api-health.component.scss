@@ -70,7 +70,7 @@
 
 .api-metrics {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(7.5rem, 100%), 1fr));
   gap: 0.65rem;
   margin-bottom: 1rem;
 
@@ -197,11 +197,18 @@ tr.is-slow td {
 }
 
 @media (max-width: 640px) {
-  .api-metrics {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .api-footnote {
     justify-content: flex-start;
+  }
+}
+
+@media (max-width: 420px) {
+  .panel-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  table {
+    min-width: 28rem;
   }
 }

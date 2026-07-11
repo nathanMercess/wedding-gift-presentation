@@ -148,7 +148,7 @@
 
 .status-strip {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(10.5rem, 100%), 1fr));
   gap: 0.75rem;
   margin-bottom: 1rem;
 }
@@ -215,7 +215,7 @@
 
 .dashboard-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(20rem, 24rem);
+  grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem);
   align-items: start;
   gap: 1rem;
 }
@@ -273,11 +273,7 @@
   }
 }
 
-@media (max-width: 1240px) {
-  .status-strip {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
+@media (max-width: 1180px) {
   .dashboard-layout {
     grid-template-columns: 1fr;
   }
@@ -306,12 +302,12 @@
 }
 
 @media (max-width: 720px) {
-  .status-strip,
   .side-column {
     grid-template-columns: 1fr;
   }
 
-  .status-tile strong:not(.severity-badge) {
+  .status-tile strong:not(.severity-badge),
+  .status-tile small {
     white-space: normal;
   }
 }
@@ -339,5 +335,23 @@
 
   .super-main {
     padding: 1rem 0.85rem 2.5rem;
+  }
+
+  .toolbar-copy h1 {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .filters {
+    gap: 0.5rem;
+  }
+
+  .status-strip {
+    gap: 0.55rem;
+  }
+
+  .status-tile {
+    padding: 0.7rem;
   }
 }
