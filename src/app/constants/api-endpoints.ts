@@ -29,38 +29,6 @@ export class EndpointsUrls {
         return `${this.apiUrl}/admin/dashboard`;
     }
 
-    public get adminDashboardOverview(): string {
-        return `${this.adminDashboard}/overview`;
-    }
-
-    public get adminDashboardCharts(): string {
-        return `${this.adminDashboard}/charts`;
-    }
-
-    public get adminDashboardActionCenter(): string {
-        return `${this.adminDashboard}/action-center`;
-    }
-
-    public get adminDashboardRevenue(): string {
-        return `${this.adminDashboard}/revenue`;
-    }
-
-    public get adminDashboardPaymentHealth(): string {
-        return `${this.adminDashboard}/payment-health`;
-    }
-
-    public get adminDashboardGiftInsights(): string {
-        return `${this.adminDashboard}/gift-insights`;
-    }
-
-    public get adminDashboardApiHealth(): string {
-        return `${this.adminDashboard}/api-health`;
-    }
-
-    public get adminDashboardActivityFeed(): string {
-        return `${this.adminDashboard}/activity-feed`;
-    }
-
     public get adminPaymentsReconcileApproved(): string {
         return `${this.apiUrl}/admin/payments/reconcile-approved`;
     }
