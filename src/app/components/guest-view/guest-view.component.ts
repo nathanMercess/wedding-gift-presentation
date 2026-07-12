@@ -3,13 +3,14 @@ import { AfterViewChecked, Component, ElementRef, HostListener, OnDestroy, OnIni
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { EMPTY_GIFT } from '../../constants/empty-gift.constant';
+import { DEFAULT_SITE_SETTINGS } from '../../constants/default-site-settings.constant';
 import { SORT_OPTIONS, SortOption } from '../../constants/sort-options.constant';
 import { PendingPayment } from '../../checkout/models/pending-payment.model';
 import { PaymentResumeService } from '../../checkout/services/payment-resume.service';
 import { PaymentStatusUtil } from '../../checkout/utils/payment-status.util';
 import { GiftCategory } from '../../enums/gift-category.enum';
 import { GiftDisplayMode } from '../../enums/gift-display-mode.enum';
-import { CarouselPhoto, Couple } from '../../models/couple.model';
+import { CarouselPhoto, Couple, CoupleSiteSettings } from '../../models/couple.model';
 import { Gift } from '../../models/gift.model';
 import { CoupleService } from '../../services/couple.service';
 import { GiftService } from '../../services/gift.service';
@@ -206,7 +207,31 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   public get showGuestStats(): boolean {
-    return this.giftDisplayMode !== GiftDisplayMode.PrivateUnlimited;
+    return this.giftDisplayMode !== GiftDisplayMode.PrivateUnlimited && this.siteSettings.showGuestStats;
+  }
+
+  public get siteSettings(): CoupleSiteSettings {
+    return this.coupleService.state().couple.siteSettings ?? DEFAULT_SITE_SETTINGS;
+  }
+
+  public get visibleCategoryOptions(): GiftCategory[] {
+    if (!this.siteSettings.showGiftCategories)
+      return [];
+
+    return this.categoryOptions.filter((category: GiftCategory): boolean => this.siteSettings.enabledCategories.includes(category));
+  }
+
+  public get showCategoryControls(): boolean {
+    return this.siteSettings.showGiftCategories && this.siteSettings.showCategoryFilter && this.visibleCategoryOptions.length > 0;
+  }
+
+  public get visibleGuestGifts(): Gift[] {
+    const gifts: Gift[] = this.giftService.guestState().gifts;
+
+    if (!this.siteSettings.showGiftCategories)
+      return gifts;
+
+    return gifts.filter((gift: Gift): boolean => !gift.category || this.siteSettings.enabledCategories.includes(gift.category));
   }
 
   public get pendingPayment(): PendingPayment | null {
@@ -295,12 +320,12 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   public loadGifts(page: number = 1): void {
     this.giftService.loadGuestGifts({
       search: this.searchTerm || undefined,
-      category: this.selectedCategory || undefined,
-      minTotal: this.parsedMoney(this.minTotal),
-      maxTotal: this.parsedMoney(this.maxTotal),
+      category: this.showCategoryControls ? this.selectedCategory || undefined : undefined,
+      minTotal: this.siteSettings.showPriceFilter ? this.parsedMoney(this.minTotal) : undefined,
+      maxTotal: this.siteSettings.showPriceFilter ? this.parsedMoney(this.maxTotal) : undefined,
       orderBy: this.selectedSort.orderBy,
       orderDir: this.selectedSort.orderDir,
-      onlyAvailable: this.onlyAvailable || undefined,
+      onlyAvailable: this.siteSettings.showAvailabilityFilter ? this.onlyAvailable || undefined : undefined,
       page,
       pageSize: 20,
     });
@@ -333,12 +358,12 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   public onGiftPaymentCompleted(): void {
     this.giftService.refreshGuestGiftsSilently({
       search: this.searchTerm || undefined,
-      category: this.selectedCategory || undefined,
-      minTotal: this.parsedMoney(this.minTotal),
-      maxTotal: this.parsedMoney(this.maxTotal),
+      category: this.showCategoryControls ? this.selectedCategory || undefined : undefined,
+      minTotal: this.siteSettings.showPriceFilter ? this.parsedMoney(this.minTotal) : undefined,
+      maxTotal: this.siteSettings.showPriceFilter ? this.parsedMoney(this.maxTotal) : undefined,
       orderBy: this.selectedSort.orderBy,
       orderDir: this.selectedSort.orderDir,
-      onlyAvailable: this.onlyAvailable || undefined,
+      onlyAvailable: this.siteSettings.showAvailabilityFilter ? this.onlyAvailable || undefined : undefined,
       page: this.currentPage,
       pageSize: 20,
     });
@@ -458,6 +483,9 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   public selectCategory(category: GiftCategory | null): void {
+    if (category && !this.visibleCategoryOptions.includes(category))
+      return;
+
     this.selectedCategory = category;
     this.onFilterChange();
   }

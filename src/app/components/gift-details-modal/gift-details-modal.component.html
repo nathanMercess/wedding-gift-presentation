@@ -32,7 +32,9 @@
 
         <!-- Esquerda: foto sempre visível -->
         <div class="gift-info">
-          <app-gift-photo-card [gift]="currentGift" [giftDisplayMode]="giftDisplayMode()">
+          <app-gift-photo-card [gift]="currentGift" [giftDisplayMode]="giftDisplayMode()"
+            [showCategory]="showGiftCategory()" [showProgress]="showGiftProgress()"
+            [showContributionType]="showContributionType()">
           </app-gift-photo-card>
         </div>
 

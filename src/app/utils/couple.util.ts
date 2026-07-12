@@ -1,4 +1,6 @@
 import { CarouselPhoto, Couple } from '../models/couple.model';
+import { DEFAULT_SITE_SETTINGS } from '../constants/default-site-settings.constant';
+import { GiftCategory } from '../enums/gift-category.enum';
 import { GiftDisplayMode } from '../enums/gift-display-mode.enum';
 
 export abstract class CoupleUtil {
@@ -15,6 +17,7 @@ export abstract class CoupleUtil {
       secondaryColor: CoupleUtil.text(data['secondaryColor']) || '#d9d9d9',
       giftDisplayMode: CoupleUtil.giftDisplayMode(data['giftDisplayMode'] ?? data['GiftDisplayMode']),
       carouselPhotos: CoupleUtil.normalizeCarouselPhotos(data['carouselPhotos'] ?? data['CarouselPhotos']),
+      siteSettings: CoupleUtil.normalizeSiteSettings(data['siteSettings'] ?? data['SiteSettings']),
     };
   }
 
@@ -57,5 +60,44 @@ export abstract class CoupleUtil {
       return GiftDisplayMode.PrivateUnlimited;
 
     return GiftDisplayMode.Traditional;
+  }
+
+  public static normalizeSiteSettings(raw: unknown): typeof DEFAULT_SITE_SETTINGS {
+    const data: Record<string, unknown> = CoupleUtil.record(raw);
+
+    return {
+      ...DEFAULT_SITE_SETTINGS,
+      showCountdown: CoupleUtil.boolean(data['showCountdown'] ?? data['ShowCountdown'], DEFAULT_SITE_SETTINGS.showCountdown),
+      showEventLocation: CoupleUtil.boolean(data['showEventLocation'] ?? data['ShowEventLocation'], DEFAULT_SITE_SETTINGS.showEventLocation),
+      showCoupleMessage: CoupleUtil.boolean(data['showCoupleMessage'] ?? data['ShowCoupleMessage'], DEFAULT_SITE_SETTINGS.showCoupleMessage),
+      showGuestStats: CoupleUtil.boolean(data['showGuestStats'] ?? data['ShowGuestStats'], DEFAULT_SITE_SETTINGS.showGuestStats),
+      showGiftCategories: CoupleUtil.boolean(data['showGiftCategories'] ?? data['ShowGiftCategories'], DEFAULT_SITE_SETTINGS.showGiftCategories),
+      showGiftProgress: CoupleUtil.boolean(data['showGiftProgress'] ?? data['ShowGiftProgress'], DEFAULT_SITE_SETTINGS.showGiftProgress),
+      showContributionType: CoupleUtil.boolean(data['showContributionType'] ?? data['ShowContributionType'], DEFAULT_SITE_SETTINGS.showContributionType),
+      showCategoryFilter: CoupleUtil.boolean(data['showCategoryFilter'] ?? data['ShowCategoryFilter'], DEFAULT_SITE_SETTINGS.showCategoryFilter),
+      showPriceFilter: CoupleUtil.boolean(data['showPriceFilter'] ?? data['ShowPriceFilter'], DEFAULT_SITE_SETTINGS.showPriceFilter),
+      showAvailabilityFilter: CoupleUtil.boolean(data['showAvailabilityFilter'] ?? data['ShowAvailabilityFilter'], DEFAULT_SITE_SETTINGS.showAvailabilityFilter),
+      enabledCategories: CoupleUtil.giftCategories(data['enabledCategories'] ?? data['EnabledCategories']),
+      giftSectionTitle: CoupleUtil.text(data['giftSectionTitle'] ?? data['GiftSectionTitle']) || DEFAULT_SITE_SETTINGS.giftSectionTitle,
+      giftSectionSubtitle: CoupleUtil.text(data['giftSectionSubtitle'] ?? data['GiftSectionSubtitle']),
+      searchPlaceholder: CoupleUtil.text(data['searchPlaceholder'] ?? data['SearchPlaceholder']) || DEFAULT_SITE_SETTINGS.searchPlaceholder,
+      presentButtonLabel: CoupleUtil.text(data['presentButtonLabel'] ?? data['PresentButtonLabel']) || DEFAULT_SITE_SETTINGS.presentButtonLabel,
+      emptyStateTitle: CoupleUtil.text(data['emptyStateTitle'] ?? data['EmptyStateTitle']) || DEFAULT_SITE_SETTINGS.emptyStateTitle,
+      emptyStateMessage: CoupleUtil.text(data['emptyStateMessage'] ?? data['EmptyStateMessage']) || DEFAULT_SITE_SETTINGS.emptyStateMessage,
+    };
+  }
+
+  public static boolean(value: unknown, fallback: boolean): boolean {
+    if (typeof value === 'boolean')
+      return value;
+
+    return fallback;
+  }
+
+  public static giftCategories(value: unknown): GiftCategory[] {
+    if (!Array.isArray(value))
+      return [...DEFAULT_SITE_SETTINGS.enabledCategories];
+
+    return value.filter((category: unknown): category is GiftCategory => Object.values(GiftCategory).includes(category as GiftCategory));
   }
 }

@@ -13,6 +13,9 @@ import { Gift } from '../../models/gift.model';
 export class GiftPhotoCardComponent {
   public readonly gift: InputSignal<Gift> = input.required<Gift>();
   public readonly giftDisplayMode: InputSignal<GiftDisplayMode> = input<GiftDisplayMode>(GiftDisplayMode.Traditional);
+  public readonly showCategory: InputSignal<boolean> = input<boolean>(true);
+  public readonly showProgress: InputSignal<boolean> = input<boolean>(true);
+  public readonly showContributionType: InputSignal<boolean> = input<boolean>(true);
 
   public get isPrivateUnlimited(): boolean {
     return this.giftDisplayMode() === GiftDisplayMode.PrivateUnlimited;

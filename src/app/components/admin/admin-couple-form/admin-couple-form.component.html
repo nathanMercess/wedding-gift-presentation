@@ -114,6 +114,140 @@
     </div>
   </section>
 
+  <section class="cf-card">
+    <div class="cf-section-head cf-section-head-row">
+      <div>
+        <h3>Personalizacao do site</h3>
+        <p>Controle o que convidados enxergam na vitrine publica.</p>
+      </div>
+      <button type="button" class="cf-link" (click)="resetSiteSettings()">restaurar padrao</button>
+    </div>
+
+    <div class="cf-settings-grid">
+      <label class="cf-check-option">
+        <input type="checkbox" [(ngModel)]="couple.siteSettings.showCountdown" name="showCountdown" />
+        <span>
+          <strong>Contagem regressiva</strong>
+          <small>Mostra o contador ate a data do casamento.</small>
+        </span>
+      </label>
+
+      <label class="cf-check-option">
+        <input type="checkbox" [(ngModel)]="couple.siteSettings.showEventLocation" name="showEventLocation" />
+        <span>
+          <strong>Local do evento</strong>
+          <small>Mostra a localizacao no topo da pagina.</small>
+        </span>
+      </label>
+
+      <label class="cf-check-option">
+        <input type="checkbox" [(ngModel)]="couple.siteSettings.showCoupleMessage" name="showCoupleMessage" />
+        <span>
+          <strong>Mensagem do casal</strong>
+          <small>Exibe o texto de boas-vindas para convidados.</small>
+        </span>
+      </label>
+
+      <label class="cf-check-option">
+        <input type="checkbox" [(ngModel)]="couple.siteSettings.showGuestStats" name="showGuestStats" />
+        <span>
+          <strong>Estatisticas publicas</strong>
+          <small>Mostra quantidade de presentes garantidos.</small>
+        </span>
+      </label>
+
+      <label class="cf-check-option">
+        <input type="checkbox" [(ngModel)]="couple.siteSettings.showGiftProgress" name="showGiftProgress" />
+        <span>
+          <strong>Progresso dos presentes</strong>
+          <small>Mostra barra, porcentagem e valor restante.</small>
+        </span>
+      </label>
+
+      <label class="cf-check-option">
+        <input type="checkbox" [(ngModel)]="couple.siteSettings.showContributionType" name="showContributionType" />
+        <span>
+          <strong>Tipo de contribuicao</strong>
+          <small>Mostra se o presente aceita valor parcial ou integral.</small>
+        </span>
+      </label>
+    </div>
+
+    <div class="cf-subsection">
+      <h4>Categorias e filtros</h4>
+      <div class="cf-settings-grid">
+        <label class="cf-check-option">
+          <input type="checkbox" [(ngModel)]="couple.siteSettings.showGiftCategories" name="showGiftCategories" />
+          <span>
+            <strong>Mostrar categorias</strong>
+            <small>Exibe categorias nos cards e detalhes.</small>
+          </span>
+        </label>
+
+        <label class="cf-check-option">
+          <input type="checkbox" [(ngModel)]="couple.siteSettings.showCategoryFilter" name="showCategoryFilter" />
+          <span>
+            <strong>Filtro por categoria</strong>
+            <small>Permite filtrar presentes por categoria.</small>
+          </span>
+        </label>
+
+        <label class="cf-check-option">
+          <input type="checkbox" [(ngModel)]="couple.siteSettings.showPriceFilter" name="showPriceFilter" />
+          <span>
+            <strong>Filtro por valor</strong>
+            <small>Mostra campos de valor minimo e maximo.</small>
+          </span>
+        </label>
+
+        <label class="cf-check-option">
+          <input type="checkbox" [(ngModel)]="couple.siteSettings.showAvailabilityFilter" name="showAvailabilityFilter" />
+          <span>
+            <strong>Filtro de disponiveis</strong>
+            <small>Permite ver apenas presentes disponiveis.</small>
+          </span>
+        </label>
+      </div>
+
+      <div class="cf-category-picker" *ngIf="couple.siteSettings.showGiftCategories">
+        <button *ngFor="let category of categoryOptions; trackBy: trackByCategory" type="button" class="cf-category-chip"
+          [class.active]="couple.siteSettings.enabledCategories.includes(category)" (click)="toggleCategory(category)">
+          {{ category }}
+        </button>
+      </div>
+    </div>
+
+    <div class="cf-subsection">
+      <h4>Textos da vitrine</h4>
+      <div class="cf-text-grid">
+        <div class="cf-group">
+          <label>Titulo da lista</label>
+          <input type="text" [(ngModel)]="couple.siteSettings.giftSectionTitle" name="giftSectionTitle" class="cf-input" />
+        </div>
+        <div class="cf-group">
+          <label>Subtitulo da lista</label>
+          <input type="text" [(ngModel)]="couple.siteSettings.giftSectionSubtitle" name="giftSectionSubtitle" class="cf-input" />
+        </div>
+        <div class="cf-group">
+          <label>Placeholder da busca</label>
+          <input type="text" [(ngModel)]="couple.siteSettings.searchPlaceholder" name="searchPlaceholder" class="cf-input" />
+        </div>
+        <div class="cf-group">
+          <label>Texto do botao de presente</label>
+          <input type="text" [(ngModel)]="couple.siteSettings.presentButtonLabel" name="presentButtonLabel" class="cf-input" />
+        </div>
+        <div class="cf-group">
+          <label>Titulo quando vazio</label>
+          <input type="text" [(ngModel)]="couple.siteSettings.emptyStateTitle" name="emptyStateTitle" class="cf-input" />
+        </div>
+        <div class="cf-group">
+          <label>Mensagem quando vazio</label>
+          <input type="text" [(ngModel)]="couple.siteSettings.emptyStateMessage" name="emptyStateMessage" class="cf-input" />
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Carousel de fotos -->
   <section class="cf-card">
     <div class="cf-section-head">

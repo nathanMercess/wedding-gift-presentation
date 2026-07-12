@@ -14,6 +14,10 @@ import { Gift } from '../../models/gift.model';
 export class GiftCardComponent {
   public readonly gift: InputSignal<Gift> = input.required<Gift>();
   public readonly giftDisplayMode: InputSignal<GiftDisplayMode> = input<GiftDisplayMode>(GiftDisplayMode.Traditional);
+  public readonly showCategory: InputSignal<boolean> = input<boolean>(true);
+  public readonly showProgress: InputSignal<boolean> = input<boolean>(true);
+  public readonly showContributionType: InputSignal<boolean> = input<boolean>(true);
+  public readonly presentButtonLabel: InputSignal<string> = input<string>('Presentear');
   public readonly presentClick: OutputEmitterRef<void> = output<void>();
 
   public get progressPercent(): number {

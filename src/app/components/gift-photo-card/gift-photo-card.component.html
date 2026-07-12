@@ -6,22 +6,22 @@
   </div>
   <div class="gift-photo-stats">
     <p class="description" *ngIf="gift().description">{{ gift().description }}</p>
-    <div class="gift-tags">
-      <span *ngIf="gift().category">{{ gift().category }}</span>
-      <span>{{ contributionModeLabel }}</span>
+    <div class="gift-tags" *ngIf="showCategory() || showContributionType()">
+      <span *ngIf="showCategory() && gift().category">{{ gift().category }}</span>
+      <span *ngIf="showContributionType()">{{ contributionModeLabel }}</span>
     </div>
     <div class="mini-stats">
       <div class="mini-stat">
         <span class="mini-stat-label">Valor total</span>
         <span class="mini-stat-value">{{ gift().total | currency:'BRL':'symbol':'1.2-2' }}</span>
       </div>
-      <div class="mini-stat" *ngIf="!isPrivateUnlimited">
+      <div class="mini-stat" *ngIf="!isPrivateUnlimited && showProgress()">
         <span class="mini-stat-label">Restante</span>
         <span class="mini-stat-value">{{ remaining | currency:'BRL':'symbol':'1.2-2' }}</span>
       </div>
     </div>
 
-    <div class="detail-progress" *ngIf="!isPrivateUnlimited">
+    <div class="detail-progress" *ngIf="!isPrivateUnlimited && showProgress()">
       <div class="detail-progress-top">
         <span>{{ gift().raised | currency:'BRL':'symbol':'1.2-2' }} presenteados</span>
         <span>{{ progressPercent | number:'1.0-0' }}%</span>

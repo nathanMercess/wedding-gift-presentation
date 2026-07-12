@@ -1,6 +1,8 @@
 import { Component, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DEFAULT_SITE_SETTINGS } from '../../../constants/default-site-settings.constant';
+import { GiftCategory } from '../../../enums/gift-category.enum';
 import { GiftDisplayMode } from '../../../enums/gift-display-mode.enum';
 import { CarouselPhoto, Couple } from '../../../models/couple.model';
 import { CoupleService } from '../../../services/couple.service';
@@ -16,8 +18,10 @@ import { ColorUtil } from '../../../utils/color.util';
 })
 export class AdminCoupleFormComponent {
   public readonly GiftDisplayMode: typeof GiftDisplayMode = GiftDisplayMode;
+  public readonly GiftCategory: typeof GiftCategory = GiftCategory;
 
-  public couple: Couple = { names: '', weddingDate: '', photoUrl: '', message: '', eventLocation: '', primaryColor: '#000000', secondaryColor: '#d9d9d9', giftDisplayMode: GiftDisplayMode.Traditional, carouselPhotos: [] };
+  public couple: Couple = { names: '', weddingDate: '', photoUrl: '', message: '', eventLocation: '', primaryColor: '#000000', secondaryColor: '#d9d9d9', giftDisplayMode: GiftDisplayMode.Traditional, carouselPhotos: [], siteSettings: { ...DEFAULT_SITE_SETTINGS, enabledCategories: [...DEFAULT_SITE_SETTINGS.enabledCategories] } };
+  public readonly categoryOptions: GiftCategory[] = [...DEFAULT_SITE_SETTINGS.enabledCategories];
   public carouselUploading: boolean = false;
   public carouselUploadError: string = '';
   public isDraggingFiles: boolean = false;
@@ -27,7 +31,7 @@ export class AdminCoupleFormComponent {
   public constructor(public readonly coupleService: CoupleService, public readonly theme: ThemeService) {
     effect((): void => {
       const loaded: Couple = this.coupleService.state().couple;
-      const signature: string = `${loaded.names}|${loaded.weddingDate}|${loaded.photoUrl}|${loaded.message}|${loaded.eventLocation}|${loaded.primaryColor}|${loaded.secondaryColor}|${loaded.giftDisplayMode}`;
+      const signature: string = `${loaded.names}|${loaded.weddingDate}|${loaded.photoUrl}|${loaded.message}|${loaded.eventLocation}|${loaded.primaryColor}|${loaded.secondaryColor}|${loaded.giftDisplayMode}|${JSON.stringify(loaded.siteSettings)}`;
 
       if (this.coupleSignature === signature)
         return;
@@ -51,6 +55,7 @@ export class AdminCoupleFormComponent {
         secondaryColor: loaded.secondaryColor || ColorUtil.lighten(primaryColor, 0.85),
         giftDisplayMode: loaded.giftDisplayMode || GiftDisplayMode.Traditional,
         carouselPhotos: loaded.carouselPhotos ?? [],
+        siteSettings: loaded.siteSettings ?? { ...DEFAULT_SITE_SETTINGS, enabledCategories: [...DEFAULT_SITE_SETTINGS.enabledCategories] },
       };
     }, { allowSignalWrites: true });
   }
@@ -152,6 +157,28 @@ export class AdminCoupleFormComponent {
 
   public save(): void {
     this.coupleService.saveCouple(this.couple);
+  }
+
+  public toggleCategory(category: GiftCategory): void {
+    const enabledCategories: GiftCategory[] = this.couple.siteSettings.enabledCategories.includes(category)
+      ? this.couple.siteSettings.enabledCategories.filter((item: GiftCategory): boolean => item !== category)
+      : [...this.couple.siteSettings.enabledCategories, category];
+
+    this.couple = {
+      ...this.couple,
+      siteSettings: {
+        ...this.couple.siteSettings,
+        enabledCategories,
+      },
+    };
+  }
+
+  public resetSiteSettings(): void {
+    this.couple = { ...this.couple, siteSettings: { ...DEFAULT_SITE_SETTINGS, enabledCategories: [...DEFAULT_SITE_SETTINGS.enabledCategories] } };
+  }
+
+  public trackByCategory(_: number, category: GiftCategory): GiftCategory {
+    return category;
   }
 
   private padDatePart(value: number): string {

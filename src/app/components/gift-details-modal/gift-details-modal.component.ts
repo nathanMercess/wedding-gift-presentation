@@ -38,6 +38,9 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy, AfterViewIn
   public readonly gift: InputSignal<Gift> = input.required<Gift>();
   public readonly coupleName: InputSignal<string> = input<string>('');
   public readonly giftDisplayMode: InputSignal<GiftDisplayMode> = input<GiftDisplayMode>(GiftDisplayMode.Traditional);
+  public readonly showGiftCategory: InputSignal<boolean> = input<boolean>(true);
+  public readonly showGiftProgress: InputSignal<boolean> = input<boolean>(true);
+  public readonly showContributionType: InputSignal<boolean> = input<boolean>(true);
   public readonly resumePayment: InputSignal<PendingPayment | null> = input<PendingPayment | null>(null);
   public readonly close: OutputEmitterRef<void> = output<void>();
   public readonly paymentCompleted: OutputEmitterRef<void> = output<void>();

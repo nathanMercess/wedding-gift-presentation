@@ -26,7 +26,7 @@
       <div class="hero-header container">
         <p class="hero-date">{{ formattedWeddingDate || coupleService.state().couple.weddingDate }}</p>
         <h1 class="hero-names">{{ coupleService.state().couple.names }}</h1>
-        <p *ngIf="coupleService.state().couple.eventLocation" class="hero-location">
+        <p *ngIf="siteSettings.showEventLocation && coupleService.state().couple.eventLocation" class="hero-location">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2">
             <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z" />
@@ -36,13 +36,13 @@
         </p>
       </div>
 
-      <div class="couple-quote-wrap" *ngIf="coupleService.state().couple.message">
+      <div class="couple-quote-wrap" *ngIf="siteSettings.showCoupleMessage && coupleService.state().couple.message">
         <blockquote class="couple-quote">
           "{{ coupleService.state().couple.message }}"
         </blockquote>
       </div>
 
-      <app-countdown [targetDate]="coupleService.state().couple.weddingDate"></app-countdown>
+      <app-countdown *ngIf="siteSettings.showCountdown" [targetDate]="coupleService.state().couple.weddingDate"></app-countdown>
 
 
       <div class="carousel-section" (mouseenter)="stopCarousel()" (mouseleave)="startCarousel()"
@@ -121,7 +121,7 @@
             <circle cx="11" cy="11" r="8" />
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
-          <input type="text" placeholder="Buscar presente..." [(ngModel)]="searchTerm" name="search"
+          <input type="text" [placeholder]="siteSettings.searchPlaceholder" [(ngModel)]="searchTerm" name="search"
             class="search-input" (input)="onSearchChange()" />
         </div>
 
@@ -131,20 +131,20 @@
               [class.active]="selectedSortId === s.id" (click)="selectedSortId = s.id; onFilterChange()">
               {{ s.label }}
             </button>
-            <button type="button" class="chip" [class.active]="selectedCategory === null" (click)="selectCategory(null)">
+            <button *ngIf="showCategoryControls" type="button" class="chip" [class.active]="selectedCategory === null" (click)="selectCategory(null)">
               Todas categorias
             </button>
-            <button *ngFor="let category of categoryOptions; trackBy: trackByCategory" type="button" class="chip"
+            <button *ngFor="let category of visibleCategoryOptions; trackBy: trackByCategory" type="button" class="chip"
               [class.active]="selectedCategory === category" (click)="selectCategory(category)">
               {{ category }}
             </button>
-            <button type="button" class="avail-toggle" [class.active]="onlyAvailable"
+            <button *ngIf="siteSettings.showAvailabilityFilter" type="button" class="avail-toggle" [class.active]="onlyAvailable"
               (click)="onlyAvailable = !onlyAvailable; onFilterChange()">
               Disponiveis
             </button>
-            <input type="number" min="0" inputmode="decimal" class="price-filter" placeholder="Min R$"
+            <input *ngIf="siteSettings.showPriceFilter" type="number" min="0" inputmode="decimal" class="price-filter" placeholder="Min R$"
               [(ngModel)]="minTotal" name="minTotal" (change)="onFilterChange()" />
-            <input type="number" min="0" inputmode="decimal" class="price-filter" placeholder="Max R$"
+            <input *ngIf="siteSettings.showPriceFilter" type="number" min="0" inputmode="decimal" class="price-filter" placeholder="Max R$"
               [(ngModel)]="maxTotal" name="maxTotal" (change)="onFilterChange()" />
           </div>
         </div>
@@ -174,25 +174,25 @@
         </div>
       </div>
 
-      <div class="filter-sheet-section">
+      <div class="filter-sheet-section" *ngIf="showCategoryControls">
         <p class="filter-sheet-label">Categoria</p>
         <div class="filter-sheet-chips">
           <button type="button" class="chip" [class.active]="selectedCategory === null"
             (click)="selectedCategory = null">Todas</button>
-          <button *ngFor="let category of categoryOptions; trackBy: trackByCategory" type="button" class="chip"
+          <button *ngFor="let category of visibleCategoryOptions; trackBy: trackByCategory" type="button" class="chip"
             [class.active]="selectedCategory === category" (click)="selectedCategory = category">{{ category }}</button>
         </div>
       </div>
 
-      <div class="filter-sheet-section">
+      <div class="filter-sheet-section" *ngIf="siteSettings.showPriceFilter || siteSettings.showAvailabilityFilter">
         <p class="filter-sheet-label">Faixa de valor</p>
-        <div class="price-filter-grid">
+        <div class="price-filter-grid" *ngIf="siteSettings.showPriceFilter">
           <input type="number" min="0" inputmode="decimal" class="price-filter" placeholder="Min R$"
             [(ngModel)]="minTotal" name="mobileMinTotal" />
           <input type="number" min="0" inputmode="decimal" class="price-filter" placeholder="Max R$"
             [(ngModel)]="maxTotal" name="mobileMaxTotal" />
         </div>
-        <label class="filter-checkbox">
+        <label class="filter-checkbox" *ngIf="siteSettings.showAvailabilityFilter">
           <input type="checkbox" [(ngModel)]="onlyAvailable" name="mobileOnlyAvailable" />
           <span>Mostrar apenas disponiveis</span>
         </label>
@@ -212,24 +212,31 @@
           <button class="chip active" (click)="loadGifts()">Tentar novamente</button>
         </div>
 
-        <div *ngIf="!giftService.guestState().error && giftService.guestState().gifts.length === 0" class="empty-state">
+        <div *ngIf="!giftService.guestState().error && visibleGuestGifts.length === 0" class="empty-state">
           <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="1.2">
             <circle cx="11" cy="11" r="8" />
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
-          <h3>Nenhum presente encontrado</h3>
-          <p>Tente ajustar os filtros ou buscar por outro termo</p>
+          <h3>{{ siteSettings.emptyStateTitle }}</h3>
+          <p>{{ siteSettings.emptyStateMessage }}</p>
         </div>
 
-        <div *ngIf="!giftService.guestState().error && giftService.guestState().gifts.length > 0">
+        <div *ngIf="!giftService.guestState().error && visibleGuestGifts.length > 0">
+          <div class="gift-section-heading" *ngIf="siteSettings.giftSectionTitle || siteSettings.giftSectionSubtitle">
+            <h2 *ngIf="siteSettings.giftSectionTitle">{{ siteSettings.giftSectionTitle }}</h2>
+            <p *ngIf="siteSettings.giftSectionSubtitle">{{ siteSettings.giftSectionSubtitle }}</p>
+          </div>
           <p class="results-count">{{ giftService.guestState().totalCount }}
             presente{{ giftService.guestState().totalCount !== 1 ? 's' : '' }}</p>
           <div class="gifts-grid">
-            <div *ngFor="let gift of giftService.guestState().gifts; trackBy: trackByGiftId" class="gift-grid-item"
+            <div *ngFor="let gift of visibleGuestGifts; trackBy: trackByGiftId" class="gift-grid-item"
               role="button" tabindex="0" [attr.aria-label]="'Presentear com ' + gift.name"
               (click)="openGiftDetails(gift)" (keydown)="openGiftDetailsFromKeyboard($event, gift)">
               <app-gift-card [gift]="gift" [giftDisplayMode]="giftDisplayMode"
+                [showCategory]="siteSettings.showGiftCategories" [showProgress]="siteSettings.showGiftProgress"
+                [showContributionType]="siteSettings.showContributionType"
+                [presentButtonLabel]="siteSettings.presentButtonLabel"
                 (presentClick)="openGiftDetails(gift)"></app-gift-card>
             </div>
           </div>
@@ -266,7 +273,9 @@
   </ng-container>
 
   <app-gift-details-modal *ngIf="showGiftDetailsModal" [gift]="selectedGift" [resumePayment]="selectedResumePayment"
-    [coupleName]="coupleService.state().couple.names" [giftDisplayMode]="giftDisplayMode" (close)="closeGiftDetails()"
+    [coupleName]="coupleService.state().couple.names" [giftDisplayMode]="giftDisplayMode"
+    [showGiftCategory]="siteSettings.showGiftCategories" [showGiftProgress]="siteSettings.showGiftProgress"
+    [showContributionType]="siteSettings.showContributionType" (close)="closeGiftDetails()"
     (paymentCompleted)="onGiftPaymentCompleted()">
   </app-gift-details-modal>
 
