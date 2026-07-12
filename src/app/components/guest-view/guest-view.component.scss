@@ -603,7 +603,8 @@
   }
 
   .filter-row .chips-scroll {
-    overflow: visible;
+    min-width: 0;
+    overflow-x: auto;
   }
 }
 
@@ -938,32 +939,34 @@
   padding: 2.5rem 0 4.5rem;
 }
 
+.gift-section-heading {
+  max-width: 42rem;
+  margin: 0 0 1.5rem;
+
+  h2 {
+    font-family: var(--font-sans);
+    font-size: clamp(1.35rem, 3vw, 2rem);
+    font-weight: 650;
+    letter-spacing: 0;
+    color: var(--foreground);
+    margin: 0 0 0.45rem;
+  }
+
+  p {
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--muted-foreground);
+    margin: 0;
+  }
+}
+
 .results-count {
   font-family: var(--font-sans);
   font-size: 0.82rem;
   color: var(--muted-foreground);
   letter-spacing: 0.02em;
   margin-bottom: 1.5rem;
-}
-
-.gift-section-heading {
-  margin-bottom: 1.1rem;
-
-  h2 {
-    margin: 0 0 0.25rem;
-    font-family: var(--font-sans);
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--foreground);
-  }
-
-  p {
-    margin: 0;
-    font-family: var(--font-sans);
-    font-size: 0.9rem;
-    line-height: 1.45;
-    color: var(--muted-foreground);
-  }
 }
 
 .gifts-grid {
@@ -1108,6 +1111,10 @@
 
   .gifts-grid {
     gap: 0.875rem;
+  }
+
+  .gift-section-heading {
+    margin-bottom: 1.1rem;
   }
 
   .filters-bar {
