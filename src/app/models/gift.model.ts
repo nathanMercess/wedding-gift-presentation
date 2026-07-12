@@ -9,7 +9,7 @@ export interface Gift {
   total: number;
   remaining?: number;
   fullyFunded: boolean;
-  category?: GiftCategory;
+  category?: GiftCategory | null;
   description?: string;
   available: boolean;
   allowPartialContribution: boolean;

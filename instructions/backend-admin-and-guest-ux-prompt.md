@@ -16,10 +16,11 @@ Os valores validos, case-sensitive, sao:
 
 Requisitos:
 
-1. Aceitar `category` em `POST /api/admin/gifts` e `PUT /api/admin/gifts/{id}`.
-2. Validar o valor contra a lista acima e retornar erro de validacao campo a campo para `category`.
+1. Aceitar `category` opcional e nullable em `POST /api/admin/gifts` e `PUT /api/admin/gifts/{id}`.
+2. Quando preenchida, validar o valor contra a lista acima e retornar erro de validacao campo a campo para `category`.
 3. Retornar `category` em `GET /api/gifts`, `GET /api/gifts/{id}` e endpoints administrativos.
-4. Para registros antigos sem categoria, manter `null` sem quebrar a leitura. Nao inventar categoria durante a migracao.
+4. `null` deve representar "Sem categoria" e deve permitir remover a categoria de um presente existente.
+5. A coluna no banco deve ser nullable. Para registros antigos sem categoria, manter `null` sem quebrar a leitura e sem inventar categoria durante a migracao.
 
 ## 2. Central de contribuicoes do casal
 

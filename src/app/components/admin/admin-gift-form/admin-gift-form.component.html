@@ -20,7 +20,8 @@
     <div class="form-group full-width">
       <label for="giftCategory">Categoria</label>
       <select id="giftCategory" formControlName="category" class="text-input">
-        <option *ngFor="let category of categoryOptions" [value]="category">{{ category }}</option>
+        <option [ngValue]="null">Sem categoria</option>
+        <option *ngFor="let category of categoryOptions" [ngValue]="category">{{ category }}</option>
       </select>
     </div>
 

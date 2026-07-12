@@ -73,6 +73,16 @@ describe('AdminGiftFormComponent', () => {
     );
   });
 
+  it('permite salvar e remover a categoria do presente', () => {
+    fixture.componentRef.setInput('editingGift', makeGift({ category: GiftCategory.Kitchen }));
+    fixture.detectChanges();
+    component.form.patchValue({ category: null });
+
+    component.save();
+
+    expect(giftServiceMock.saveAdminGift).toHaveBeenCalledWith('g1', expect.objectContaining({ category: null }));
+  });
+
   it('applySuggestedTotal() aplica a sugestao sem recalcular taxa sobre ela', () => {
     fixture.detectChanges();
     component.form.patchValue({ total: 100 });
