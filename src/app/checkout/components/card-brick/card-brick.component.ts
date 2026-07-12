@@ -173,6 +173,8 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
         amount: cfg.amount,
         cardToken: formData.token,
         paymentMethodId: formData.payment_method_id,
+        issuerId: formData.issuer_id,
+        deviceId: (window as any).MP_DEVICE_SESSION_ID,
         installments: formData.installments ?? 1,
         method: cfg.cardType,
         payerEmail: payer.email ?? cfg.payerEmail,

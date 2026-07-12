@@ -8,6 +8,8 @@ export interface CardPaymentDto {
   amount: number;
   cardToken: string;
   paymentMethodId: string;
+  issuerId?: string;
+  deviceId?: string;
   installments: number;
   method: PaymentMethod.CreditCard | PaymentMethod.DebitCard;
   payerEmail: string;
