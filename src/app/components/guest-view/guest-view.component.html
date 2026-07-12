@@ -131,13 +131,15 @@
               [class.active]="selectedSortId === s.id" (click)="selectedSortId = s.id; onFilterChange()">
               {{ s.label }}
             </button>
-            <button *ngIf="showCategoryControls" type="button" class="chip" [class.active]="selectedCategory === null" (click)="selectCategory(null)">
-              Todas categorias
-            </button>
-            <button *ngFor="let category of visibleCategoryOptions; trackBy: trackByCategory" type="button" class="chip"
-              [class.active]="selectedCategory === category" (click)="selectCategory(category)">
-              {{ category }}
-            </button>
+            <ng-container *ngIf="showCategoryControls">
+              <button type="button" class="chip" [class.active]="selectedCategory === null" (click)="selectCategory(null)">
+                Todas categorias
+              </button>
+              <button *ngFor="let category of visibleCategoryOptions; trackBy: trackByCategory" type="button" class="chip"
+                [class.active]="selectedCategory === category" (click)="selectCategory(category)">
+                {{ category }}
+              </button>
+            </ng-container>
             <button *ngIf="siteSettings.showAvailabilityFilter" type="button" class="avail-toggle" [class.active]="onlyAvailable"
               (click)="onlyAvailable = !onlyAvailable; onFilterChange()">
               Disponiveis
@@ -184,15 +186,19 @@
         </div>
       </div>
 
-      <div class="filter-sheet-section" *ngIf="siteSettings.showPriceFilter || siteSettings.showAvailabilityFilter">
+      <div class="filter-sheet-section" *ngIf="siteSettings.showPriceFilter">
         <p class="filter-sheet-label">Faixa de valor</p>
-        <div class="price-filter-grid" *ngIf="siteSettings.showPriceFilter">
+        <div class="price-filter-grid">
           <input type="number" min="0" inputmode="decimal" class="price-filter" placeholder="Min R$"
             [(ngModel)]="minTotal" name="mobileMinTotal" />
           <input type="number" min="0" inputmode="decimal" class="price-filter" placeholder="Max R$"
             [(ngModel)]="maxTotal" name="mobileMaxTotal" />
         </div>
-        <label class="filter-checkbox" *ngIf="siteSettings.showAvailabilityFilter">
+      </div>
+
+      <div class="filter-sheet-section" *ngIf="siteSettings.showAvailabilityFilter">
+        <p class="filter-sheet-label">Disponibilidade</p>
+        <label class="filter-checkbox">
           <input type="checkbox" [(ngModel)]="onlyAvailable" name="mobileOnlyAvailable" />
           <span>Mostrar apenas disponiveis</span>
         </label>
