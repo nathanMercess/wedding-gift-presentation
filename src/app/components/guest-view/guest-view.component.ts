@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewChecked, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, WritableSignal, effect, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { EMPTY_GIFT } from '../../constants/empty-gift.constant';
 import { DEFAULT_SITE_SETTINGS } from '../../constants/default-site-settings.constant';
@@ -14,6 +15,7 @@ import { CarouselPhoto, Couple, CoupleSiteSettings } from '../../models/couple.m
 import { Gift } from '../../models/gift.model';
 import { CoupleService } from '../../services/couple.service';
 import { GiftService } from '../../services/gift.service';
+import { ToastService } from '../../services/toast.service';
 import { DateUtil } from '../../utils/date.util';
 import { CountdownComponent } from '../countdown/countdown.component';
 import { GiftCardComponent } from '../gift-card/gift-card.component';
@@ -158,8 +160,10 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   private readonly destroy$ = new Subject<void>();
   private readonly searchSubject = new Subject<string>();
+  private initialPage: number = 1;
+  private sharedGiftId: string = '';
 
-  public constructor(public readonly giftService: GiftService, public readonly coupleService: CoupleService, public readonly paymentResumeService: PaymentResumeService) {
+  public constructor(public readonly giftService: GiftService, public readonly coupleService: CoupleService, public readonly paymentResumeService: PaymentResumeService, public readonly route: ActivatedRoute, public readonly router: Router, public readonly toast: ToastService) {
     effect((): void => {
       const stateCouple: Couple = this.coupleService.state().couple;
       const nextSignature: string = `${stateCouple.names}|${stateCouple.weddingDate}|${stateCouple.photoUrl}|${stateCouple.message}|${stateCouple.eventLocation}|${stateCouple.primaryColor}|${stateCouple.secondaryColor}|${stateCouple.giftDisplayMode}`;
@@ -259,10 +263,16 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
     return this.giftService.guestState().totalPages;
   }
 
+  public get hasActiveFilters(): boolean {
+    return this.searchTerm.trim().length > 0 || this.selectedSortId !== 'name-asc' || this.selectedCategory !== null || this.minTotal.trim().length > 0 || this.maxTotal.trim().length > 0 || this.onlyAvailable;
+  }
+
   public ngOnInit(): void {
+    this.restoreFiltersFromUrl();
     this.loadCouple();
-    this.loadGifts();
+    this.loadGifts(this.initialPage);
     this.giftService.loadGuestStats();
+    this.openSharedGift();
   }
 
   public ngOnDestroy(): void {
@@ -318,6 +328,7 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   public loadGifts(page: number = 1): void {
+    this.syncUrl(page);
     this.giftService.loadGuestGifts({
       search: this.searchTerm || undefined,
       category: this.showCategoryControls ? this.selectedCategory || undefined : undefined,
@@ -377,7 +388,9 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   public openGiftDetails(gift: Gift): void {
     this.selectedResumePayment = null;
     this.selectedGift = gift;
+    this.sharedGiftId = gift.id;
     this.showGiftDetailsModal = true;
+    this.syncUrl(this.currentPage);
   }
 
   public openGiftDetailsFromKeyboard(event: KeyboardEvent, gift: Gift): void {
@@ -395,8 +408,10 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
       return;
 
     this.selectedGift = pendingPayment.gift;
+    this.sharedGiftId = pendingPayment.gift.id;
     this.selectedResumePayment = pendingPayment;
     this.showGiftDetailsModal = true;
+    this.syncUrl(this.currentPage);
   }
 
   public dismissPendingPayment(): void {
@@ -412,6 +427,31 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.showGiftDetailsModal = false;
     this.selectedGift = EMPTY_GIFT;
     this.selectedResumePayment = null;
+    this.sharedGiftId = '';
+    this.syncUrl(this.currentPage);
+  }
+
+  public async shareGift(gift: Gift): Promise<void> {
+    const url: string = this.giftUrl(gift.id);
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: gift.name, text: `Veja este presente para ${this.coupleService.state().couple.names}.`, url });
+      } catch (err: unknown) {
+        if (err instanceof DOMException && err.name === 'AbortError')
+          return;
+
+        this.toast.error('Não foi possível compartilhar este presente.');
+      }
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(url);
+      this.toast.success('Link do presente copiado.');
+    } catch {
+      this.toast.error('Não foi possível copiar o link do presente.');
+    }
   }
 
   public get selectedSort(): SortOption {
@@ -502,5 +542,59 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
       return undefined;
 
     return parsedValue;
+  }
+
+  private restoreFiltersFromUrl(): void {
+    const params = this.route.snapshot.queryParamMap;
+    const sortId: string = params.get('sort') ?? '';
+    const category: string = params.get('category') ?? '';
+    const page: number = Number(params.get('page') ?? '1');
+
+    this.searchTerm = params.get('search') ?? '';
+    this.selectedSortId = this.sortOptions.some((option: SortOption): boolean => option.id === sortId) ? sortId : 'name-asc';
+    this.selectedCategory = Object.values(GiftCategory).includes(category as GiftCategory) ? category as GiftCategory : null;
+    this.minTotal = params.get('min') ?? '';
+    this.maxTotal = params.get('max') ?? '';
+    this.onlyAvailable = params.get('available') === 'true';
+    this.initialPage = Number.isInteger(page) && page > 0 ? page : 1;
+    this.sharedGiftId = params.get('gift') ?? '';
+  }
+
+  private openSharedGift(): void {
+    if (!this.sharedGiftId)
+      return;
+
+    this.giftService.loadGuestGiftById(
+      this.sharedGiftId,
+      (gift: Gift): void => this.openGiftDetails(gift),
+      (message: string): void => {
+        this.sharedGiftId = '';
+        this.syncUrl(this.initialPage);
+        this.toast.error(message);
+      },
+    );
+  }
+
+  private syncUrl(page: number): void {
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        search: this.searchTerm.trim() || undefined,
+        sort: this.selectedSortId !== 'name-asc' ? this.selectedSortId : undefined,
+        category: this.selectedCategory ?? undefined,
+        min: this.minTotal.trim() || undefined,
+        max: this.maxTotal.trim() || undefined,
+        available: this.onlyAvailable || undefined,
+        page: page > 1 ? page : undefined,
+        gift: this.sharedGiftId || undefined,
+      },
+      replaceUrl: true,
+    });
+  }
+
+  private giftUrl(giftId: string): string {
+    const url = new URL('/gifts', window.location.origin);
+    url.searchParams.set('gift', giftId);
+    return url.toString();
   }
 }

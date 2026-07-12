@@ -27,11 +27,12 @@ export class AdminCoupleFormComponent {
   public isDraggingFiles: boolean = false;
 
   private coupleSignature: string = '';
+  private savedFormSignature: string = '';
 
   public constructor(public readonly coupleService: CoupleService, public readonly theme: ThemeService) {
     effect((): void => {
       const loaded: Couple = this.coupleService.state().couple;
-      const signature: string = `${loaded.names}|${loaded.weddingDate}|${loaded.photoUrl}|${loaded.message}|${loaded.eventLocation}|${loaded.primaryColor}|${loaded.secondaryColor}|${loaded.giftDisplayMode}|${JSON.stringify(loaded.siteSettings)}`;
+      const signature: string = `${loaded.names}|${loaded.weddingDate}|${loaded.photoUrl}|${loaded.message}|${loaded.eventLocation}|${loaded.primaryColor}|${loaded.secondaryColor}|${loaded.giftDisplayMode}|${JSON.stringify(loaded.carouselPhotos)}|${JSON.stringify(loaded.siteSettings)}`;
 
       if (this.coupleSignature === signature)
         return;
@@ -54,10 +55,18 @@ export class AdminCoupleFormComponent {
         primaryColor,
         secondaryColor: loaded.secondaryColor || ColorUtil.lighten(primaryColor, 0.85),
         giftDisplayMode: loaded.giftDisplayMode || GiftDisplayMode.Traditional,
-        carouselPhotos: loaded.carouselPhotos ?? [],
-        siteSettings: loaded.siteSettings ?? { ...DEFAULT_SITE_SETTINGS, enabledCategories: [...DEFAULT_SITE_SETTINGS.enabledCategories] },
+        carouselPhotos: (loaded.carouselPhotos ?? []).map((photo: CarouselPhoto): CarouselPhoto => ({ ...photo })),
+        siteSettings: {
+          ...(loaded.siteSettings ?? DEFAULT_SITE_SETTINGS),
+          enabledCategories: [...(loaded.siteSettings?.enabledCategories ?? DEFAULT_SITE_SETTINGS.enabledCategories)],
+        },
       };
+      this.savedFormSignature = JSON.stringify(this.couple);
     }, { allowSignalWrites: true });
+  }
+
+  public get isDirty(): boolean {
+    return this.savedFormSignature.length > 0 && JSON.stringify(this.couple) !== this.savedFormSignature;
   }
 
   public suggestSecondaryFromPrimary(): void {
@@ -157,6 +166,11 @@ export class AdminCoupleFormComponent {
 
   public save(): void {
     this.coupleService.saveCouple(this.couple);
+  }
+
+  public discardChanges(): void {
+    const savedCouple: Couple = this.coupleService.state().couple;
+    this.theme.apply(savedCouple.primaryColor, savedCouple.secondaryColor);
   }
 
   public toggleCategory(category: GiftCategory): void {

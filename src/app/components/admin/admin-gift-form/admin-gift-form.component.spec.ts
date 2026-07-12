@@ -4,6 +4,7 @@ import { signal, WritableSignal } from '@angular/core';
 import { AdminGiftFormComponent } from './admin-gift-form.component';
 import { GiftService } from '../../../services/gift.service';
 import { Gift } from '../../../models/gift.model';
+import { GiftCategory } from '../../../enums/gift-category.enum';
 
 function makeGift(over: Partial<Gift> = {}): Gift {
   return {
@@ -13,7 +14,7 @@ function makeGift(over: Partial<Gift> = {}): Gift {
 }
 
 function validValue(over: Record<string, unknown> = {}): Record<string, unknown> {
-  return { name: 'Air Fryer', total: 200, image: '', description: 'desc', allowPartialContribution: true, available: true, ...over };
+  return { name: 'Air Fryer', total: 200, image: '', category: GiftCategory.Appliances, description: 'desc', allowPartialContribution: true, available: true, ...over };
 }
 
 describe('AdminGiftFormComponent', () => {
@@ -68,7 +69,7 @@ describe('AdminGiftFormComponent', () => {
     component.save();
     expect(giftServiceMock.saveAdminGift).toHaveBeenCalledWith(
       '',
-      expect.objectContaining({ name: 'Air Fryer', total: 200, raised: 0, allowPartialContribution: true }),
+      expect.objectContaining({ name: 'Air Fryer', total: 200, raised: 0, category: GiftCategory.Appliances, allowPartialContribution: true }),
     );
   });
 

@@ -19,6 +19,7 @@ export class GiftCardComponent {
   public readonly showContributionType: InputSignal<boolean> = input<boolean>(true);
   public readonly presentButtonLabel: InputSignal<string> = input<string>('Presentear');
   public readonly presentClick: OutputEmitterRef<void> = output<void>();
+  public readonly shareClick: OutputEmitterRef<void> = output<void>();
 
   public get progressPercent(): number {
     if (this.gift().total <= 0)
@@ -63,6 +64,11 @@ export class GiftCardComponent {
       return;
 
     this.presentClick.emit();
+  }
+
+  public onShare(event: MouseEvent): void {
+    event.stopPropagation();
+    this.shareClick.emit();
   }
 
   public onImgError(event: Event): void {

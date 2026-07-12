@@ -5,6 +5,7 @@ import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
 import { EndpointsUrls } from '../../../constants/api-endpoints';
 import { EMPTY_GIFT } from '../../../constants/empty-gift.constant';
 import { CreditCardFeeUtil } from '../../../checkout/utils/credit-card-fee.util';
+import { GiftCategory } from '../../../enums/gift-category.enum';
 import { ApiResponse } from '../../../models/api-response.model';
 import { Gift } from '../../../models/gift.model';
 import { GiftService } from '../../../services/gift.service';
@@ -22,15 +23,18 @@ const MAX_IMAGE_SIZE_BYTES = 20 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 @Component({
-    selector: 'app-admin-gift-form',
-    templateUrl: './admin-gift-form.component.html',
-    styleUrl: './admin-gift-form.component.scss',
-    imports: [CommonModule, FormsModule, ReactiveFormsModule],
-    changeDetection: ChangeDetectionStrategy.OnPush
+  standalone: true,
+  selector: 'app-admin-gift-form',
+  templateUrl: './admin-gift-form.component.html',
+  styleUrl: './admin-gift-form.component.scss',
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdminGiftFormComponent {
   public readonly editingGift: InputSignal<Gift> = input.required<Gift>();
   public readonly cancel: OutputEmitterRef<void> = output<void>();
+  public readonly GiftCategory: typeof GiftCategory = GiftCategory;
+  public readonly categoryOptions: GiftCategory[] = Object.values(GiftCategory);
 
   public readonly form: FormGroup;
   public appliedSuggestionBaseAmount: number = 0;
@@ -46,6 +50,7 @@ export class AdminGiftFormComponent {
       name: ['', [Validators.required, Validators.maxLength(120)]],
       total: [null, [Validators.required, Validators.min(0.01)]],
       image: [''],
+      category: [GiftCategory.Home, [Validators.required]],
       description: ['', [Validators.maxLength(1000)]],
       allowPartialContribution: [true],
       available: [true],
@@ -59,6 +64,7 @@ export class AdminGiftFormComponent {
         name: gift.name,
         total: this.isEditing ? gift.total : null,
         image: gift.image,
+        category: gift.category ?? GiftCategory.Home,
         description: gift.description ?? '',
         allowPartialContribution: gift.allowPartialContribution,
         available: gift.available,
@@ -76,6 +82,10 @@ export class AdminGiftFormComponent {
 
   public get isEditing(): boolean {
     return this.editingGift().id.trim().length > 0;
+  }
+
+  public get isDirty(): boolean {
+    return this.form.dirty;
   }
 
   public get totalAmount(): number {
@@ -138,6 +148,7 @@ export class AdminGiftFormComponent {
       name: `${value.name ?? ''}`.trim(),
       total: Number(value.total),
       image: value.image ?? '',
+      category: value.category as GiftCategory,
       description: `${value.description ?? ''}`.trim(),
       allowPartialContribution: !!value.allowPartialContribution,
       available: !!value.available,

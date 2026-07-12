@@ -45,7 +45,7 @@
       <app-countdown *ngIf="siteSettings.showCountdown" [targetDate]="coupleService.state().couple.weddingDate"></app-countdown>
 
 
-      <div class="carousel-section" (mouseenter)="stopCarousel()" (mouseleave)="startCarousel()"
+      <div class="carousel-section" role="region" aria-label="Fotos do casal" (mouseenter)="stopCarousel()" (mouseleave)="startCarousel()"
         (touchstart)="onTouchStart($event)" (touchend)="onTouchEnd($event)">
         <div #carouselTrack class="carousel-track" [class.is-ready]="carouselReady()"
           (scroll)="onCarouselScroll($event)">
@@ -104,7 +104,7 @@
       <div class="resume-payment-content">
         <div>
           <span class="resume-payment-eyebrow">{{ pendingStatusLabel }}</span>
-          <p>Voce tem um pagamento em andamento para {{ pending.gift.name }}.</p>
+          <p>Você tem um pagamento em andamento para {{ pending.gift.name }}.</p>
         </div>
         <div class="resume-payment-actions">
           <button type="button" class="resume-payment-secondary" (click)="dismissPendingPayment()">Descartar</button>
@@ -121,37 +121,43 @@
             <circle cx="11" cy="11" r="8" />
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
-          <input type="text" [placeholder]="siteSettings.searchPlaceholder" [(ngModel)]="searchTerm" name="search"
+          <input type="search" [placeholder]="siteSettings.searchPlaceholder" aria-label="Buscar presente"
+            [(ngModel)]="searchTerm" name="search"
             class="search-input" (input)="onSearchChange()" />
         </div>
 
         <div class="filter-row desktop-only">
           <div class="chips-scroll">
-            <button *ngFor="let s of sortOptions; trackBy: trackByOptionId" class="chip"
-              [class.active]="selectedSortId === s.id" (click)="selectedSortId = s.id; onFilterChange()">
+            <button *ngFor="let s of sortOptions; trackBy: trackByOptionId" type="button" class="chip"
+              [class.active]="selectedSortId === s.id" [attr.aria-pressed]="selectedSortId === s.id"
+              (click)="selectedSortId = s.id; onFilterChange()">
               {{ s.label }}
             </button>
             <ng-container *ngIf="showCategoryControls">
-              <button type="button" class="chip" [class.active]="selectedCategory === null" (click)="selectCategory(null)">
+              <button type="button" class="chip" [class.active]="selectedCategory === null"
+                [attr.aria-pressed]="selectedCategory === null" (click)="selectCategory(null)">
                 Todas categorias
               </button>
               <button *ngFor="let category of visibleCategoryOptions; trackBy: trackByCategory" type="button" class="chip"
-                [class.active]="selectedCategory === category" (click)="selectCategory(category)">
+                [class.active]="selectedCategory === category" [attr.aria-pressed]="selectedCategory === category"
+                (click)="selectCategory(category)">
                 {{ category }}
               </button>
             </ng-container>
             <button *ngIf="siteSettings.showAvailabilityFilter" type="button" class="avail-toggle" [class.active]="onlyAvailable"
+              [attr.aria-pressed]="onlyAvailable"
               (click)="onlyAvailable = !onlyAvailable; onFilterChange()">
-              Disponiveis
+              Disponíveis
             </button>
             <input *ngIf="siteSettings.showPriceFilter" type="number" min="0" inputmode="decimal" class="price-filter" placeholder="Min R$"
-              [(ngModel)]="minTotal" name="minTotal" (change)="onFilterChange()" />
+              aria-label="Valor mínimo" [(ngModel)]="minTotal" name="minTotal" (change)="onFilterChange()" />
             <input *ngIf="siteSettings.showPriceFilter" type="number" min="0" inputmode="decimal" class="price-filter" placeholder="Max R$"
-              [(ngModel)]="maxTotal" name="maxTotal" (change)="onFilterChange()" />
+              aria-label="Valor máximo" [(ngModel)]="maxTotal" name="maxTotal" (change)="onFilterChange()" />
           </div>
         </div>
 
-        <button class="filter-sheet-btn mobile-only" (click)="openFilterSheet()">
+        <button type="button" class="filter-sheet-btn mobile-only" aria-haspopup="dialog"
+          [attr.aria-expanded]="filterSheetOpen" (click)="openFilterSheet()">
           <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2">
             <line x1="4" y1="6" x2="20" y2="6" />
@@ -171,7 +177,8 @@
       <div class="filter-sheet-section">
         <p class="filter-sheet-label">Ordenar por</p>
         <div class="filter-sheet-chips">
-          <button *ngFor="let s of sortOptions; trackBy: trackByOptionId" class="chip" [class.active]="selectedSortId === s.id"
+          <button *ngFor="let s of sortOptions; trackBy: trackByOptionId" type="button" class="chip"
+            [class.active]="selectedSortId === s.id" [attr.aria-pressed]="selectedSortId === s.id"
             (click)="selectedSortId = s.id">{{ s.label }}</button>
         </div>
       </div>
@@ -180,9 +187,10 @@
         <p class="filter-sheet-label">Categoria</p>
         <div class="filter-sheet-chips">
           <button type="button" class="chip" [class.active]="selectedCategory === null"
-            (click)="selectedCategory = null">Todas</button>
+            [attr.aria-pressed]="selectedCategory === null" (click)="selectedCategory = null">Todas</button>
           <button *ngFor="let category of visibleCategoryOptions; trackBy: trackByCategory" type="button" class="chip"
-            [class.active]="selectedCategory === category" (click)="selectedCategory = category">{{ category }}</button>
+            [class.active]="selectedCategory === category" [attr.aria-pressed]="selectedCategory === category"
+            (click)="selectedCategory = category">{{ category }}</button>
         </div>
       </div>
 
@@ -190,9 +198,9 @@
         <p class="filter-sheet-label">Faixa de valor</p>
         <div class="price-filter-grid">
           <input type="number" min="0" inputmode="decimal" class="price-filter" placeholder="Min R$"
-            [(ngModel)]="minTotal" name="mobileMinTotal" />
+            aria-label="Valor mínimo" [(ngModel)]="minTotal" name="mobileMinTotal" />
           <input type="number" min="0" inputmode="decimal" class="price-filter" placeholder="Max R$"
-            [(ngModel)]="maxTotal" name="mobileMaxTotal" />
+            aria-label="Valor máximo" [(ngModel)]="maxTotal" name="mobileMaxTotal" />
         </div>
       </div>
 
@@ -200,13 +208,13 @@
         <p class="filter-sheet-label">Disponibilidade</p>
         <label class="filter-checkbox">
           <input type="checkbox" [(ngModel)]="onlyAvailable" name="mobileOnlyAvailable" />
-          <span>Mostrar apenas disponiveis</span>
+          <span>Mostrar apenas disponíveis</span>
         </label>
       </div>
 
       <div class="filter-sheet-actions">
-        <button class="filter-sheet-reset" (click)="resetFilters()">Limpar</button>
-        <button class="filter-sheet-apply" (click)="applyFilterSheet()">Aplicar</button>
+        <button type="button" class="filter-sheet-reset" (click)="resetFilters()">Limpar</button>
+        <button type="button" class="filter-sheet-apply" (click)="applyFilterSheet()">Aplicar</button>
       </div>
     </div>
 
@@ -226,6 +234,7 @@
           </svg>
           <h3>{{ siteSettings.emptyStateTitle }}</h3>
           <p>{{ siteSettings.emptyStateMessage }}</p>
+          <button *ngIf="hasActiveFilters" type="button" class="empty-reset-btn" (click)="resetFilters()">Limpar filtros</button>
         </div>
 
         <div *ngIf="!giftService.guestState().error && visibleGuestGifts.length > 0">
@@ -233,29 +242,30 @@
             <h2 *ngIf="siteSettings.giftSectionTitle">{{ siteSettings.giftSectionTitle }}</h2>
             <p *ngIf="siteSettings.giftSectionSubtitle">{{ siteSettings.giftSectionSubtitle }}</p>
           </div>
-          <p class="results-count">{{ giftService.guestState().totalCount }}
+          <p class="results-count" aria-live="polite">{{ giftService.guestState().totalCount }}
             presente{{ giftService.guestState().totalCount !== 1 ? 's' : '' }}</p>
           <div class="gifts-grid">
-            <div *ngFor="let gift of visibleGuestGifts; trackBy: trackByGiftId" class="gift-grid-item"
-              role="button" tabindex="0" [attr.aria-label]="'Presentear com ' + gift.name"
-              (click)="openGiftDetails(gift)" (keydown)="openGiftDetailsFromKeyboard($event, gift)">
+            <article *ngFor="let gift of visibleGuestGifts; trackBy: trackByGiftId" class="gift-grid-item"
+              (click)="openGiftDetails(gift)">
               <app-gift-card [gift]="gift" [giftDisplayMode]="giftDisplayMode"
                 [showCategory]="siteSettings.showGiftCategories" [showProgress]="siteSettings.showGiftProgress"
                 [showContributionType]="siteSettings.showContributionType"
                 [presentButtonLabel]="siteSettings.presentButtonLabel"
-                (presentClick)="openGiftDetails(gift)"></app-gift-card>
-            </div>
+                (presentClick)="openGiftDetails(gift)" (shareClick)="shareGift(gift)"></app-gift-card>
+            </article>
           </div>
 
           <div *ngIf="totalPages > 1" class="pagination">
-            <button class="page-btn" [disabled]="currentPage <= 1" (click)="onPageChange(currentPage - 1)">
+            <button type="button" class="page-btn" aria-label="Página anterior" [disabled]="currentPage <= 1"
+              (click)="onPageChange(currentPage - 1)">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2">
                 <polyline points="15 18 9 12 15 6" />
               </svg>
             </button>
             <span class="page-info">{{ currentPage }} / {{ totalPages }}</span>
-            <button class="page-btn" [disabled]="currentPage >= totalPages" (click)="onPageChange(currentPage + 1)">
+            <button type="button" class="page-btn" aria-label="Próxima página" [disabled]="currentPage >= totalPages"
+              (click)="onPageChange(currentPage + 1)">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2">
                 <polyline points="9 18 15 12 9 6" />

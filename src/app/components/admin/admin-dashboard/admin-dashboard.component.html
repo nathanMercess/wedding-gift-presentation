@@ -8,8 +8,11 @@
       <span>Admin</span>
     </div>
     <nav class="dash-nav">
-      <button [class.active]="activeTab === AdminTab.Gifts" (click)="activeTab = AdminTab.Gifts">Presentes</button>
-      <button [class.active]="activeTab === AdminTab.Couple" (click)="activeTab = AdminTab.Couple">Casal</button>
+      <button type="button" [class.active]="activeTab === AdminTab.Gifts" [attr.aria-pressed]="activeTab === AdminTab.Gifts"
+        (click)="requestTabChange(AdminTab.Gifts)">Presentes</button>
+      <button type="button" [class.active]="activeTab === AdminTab.Couple" [attr.aria-pressed]="activeTab === AdminTab.Couple"
+        (click)="requestTabChange(AdminTab.Couple)">Casal</button>
+      <a routerLink="/gifts" target="_blank" rel="noopener">Ver vitrine</a>
       <a *ngIf="isSuperAdmin" routerLink="/super-admin/dashboard">Dashboard</a>
     </nav>
     <button class="logout-btn" (click)="logout()">Sair</button>
@@ -79,12 +82,18 @@
   </main>
 
   <app-slide-over *ngIf="showGiftForm" [title]="isEditingGift ? 'Editar presente' : 'Novo presente'"
-    (closed)="closeGiftForm()">
-    <app-admin-gift-form [editingGift]="editingGift" (cancel)="closeGiftForm()"></app-admin-gift-form>
+    (closed)="requestCloseGiftForm()">
+    <app-admin-gift-form [editingGift]="editingGift" (cancel)="requestCloseGiftForm()"></app-admin-gift-form>
   </app-slide-over>
 
   <app-confirm-dialog *ngIf="showDeleteConfirm" title="Remover presente?"
     [message]="'Tem certeza que deseja remover \'' + giftPendingDeletion.name + '\'? Essa ação não pode ser desfeita.'"
     confirmLabel="Remover" cancelLabel="Cancelar" (confirmed)="confirmDeleteGift()" (cancelled)="cancelDeleteGift()">
+  </app-confirm-dialog>
+
+  <app-confirm-dialog *ngIf="showDiscardConfirm" title="Descartar alterações?"
+    message="Existem alterações que ainda não foram salvas. Deseja descartá-las?"
+    confirmLabel="Descartar" cancelLabel="Continuar editando" (confirmed)="confirmDiscardChanges()"
+    (cancelled)="cancelDiscardChanges()">
   </app-confirm-dialog>
 </div>

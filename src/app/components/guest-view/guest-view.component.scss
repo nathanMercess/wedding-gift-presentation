@@ -1140,3 +1140,17 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+
+.empty-reset-btn {
+  min-height: 2.65rem;
+  padding: 0 1rem;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  font-weight: 650;
+  cursor: pointer;
+  box-shadow: var(--shadow-primary);
+}

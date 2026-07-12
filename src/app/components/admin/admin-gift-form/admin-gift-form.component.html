@@ -17,6 +17,13 @@
         maior que zero.</p>
     </div>
 
+    <div class="form-group full-width">
+      <label for="giftCategory">Categoria</label>
+      <select id="giftCategory" formControlName="category" class="text-input">
+        <option *ngFor="let category of categoryOptions" [value]="category">{{ category }}</option>
+      </select>
+    </div>
+
     <div class="card-preview" *ngIf="form.get('total')!.value > 0">
       <div class="card-preview-info">
         <span>Valor cadastrado:

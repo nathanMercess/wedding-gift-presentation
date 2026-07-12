@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, effect } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit, ViewChild, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -17,10 +17,11 @@ import { AdminTab } from '../../../enums/admin-tab.enum';
 import { UserRole } from '../../../enums/user-role.enum';
 
 @Component({
-    selector: 'app-admin-dashboard',
-    templateUrl: './admin-dashboard.component.html',
-    styleUrl: './admin-dashboard.component.scss',
-    imports: [CommonModule, FormsModule, RouterLink, ConfirmDialogComponent, AdminGiftCardComponent, AdminGiftFormComponent, AdminCoupleFormComponent, SlideOverComponent]
+  standalone: true,
+  selector: 'app-admin-dashboard',
+  templateUrl: './admin-dashboard.component.html',
+  styleUrl: './admin-dashboard.component.scss',
+  imports: [CommonModule, FormsModule, RouterLink, ConfirmDialogComponent, AdminGiftCardComponent, AdminGiftFormComponent, AdminCoupleFormComponent, SlideOverComponent],
 })
 export class AdminDashboardComponent implements OnInit, OnDestroy {
   public readonly AdminTab: typeof AdminTab = AdminTab;
@@ -30,7 +31,12 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   public editingGift: Gift = EMPTY_GIFT;
   public giftPendingDeletion: Gift = EMPTY_GIFT;
   public showDeleteConfirm: boolean = false;
+  public showDiscardConfirm: boolean = false;
+  public pendingTab: AdminTab | null = null;
   public searchTerm: string = '';
+
+  @ViewChild(AdminGiftFormComponent) public giftForm?: AdminGiftFormComponent;
+  @ViewChild(AdminCoupleFormComponent) public coupleForm?: AdminCoupleFormComponent;
 
   private readonly destroy$ = new Subject<void>();
   private readonly searchSubject = new Subject<string>();
@@ -42,11 +48,12 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     public readonly auth: AuthService,
   ) {
     effect((): void => {
-      if (this.giftService.adminState().giftSaved) {
-        this.showGiftForm = false;
-        this.editingGift = EMPTY_GIFT;
-        this.giftService.resetAdminGiftSaved();
-      }
+      if (!this.giftService.adminState().giftSaved)
+        return;
+
+      this.showGiftForm = false;
+      this.editingGift = EMPTY_GIFT;
+      this.giftService.resetAdminGiftSaved();
     }, { allowSignalWrites: true });
 
     this.searchSubject.pipe(
@@ -76,6 +83,10 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   public get isEditingGift(): boolean {
     return this.editingGift.id.trim().length > 0;
+  }
+
+  public get hasUnsavedChanges(): boolean {
+    return !!this.giftForm?.isDirty || !!this.coupleForm?.isDirty;
   }
 
   public ngOnInit(): void {
@@ -118,10 +129,68 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     this.showGiftForm = true;
   }
 
+  public requestTabChange(tab: AdminTab): void {
+    if (tab === this.activeTab)
+      return;
+
+    if (this.hasUnsavedChanges) {
+      this.pendingTab = tab;
+      this.showDiscardConfirm = true;
+      return;
+    }
+
+    this.activeTab = tab;
+  }
+
+  public requestCloseGiftForm(): void {
+    if (this.showDiscardConfirm)
+      return;
+
+    if (this.giftForm?.isDirty) {
+      this.pendingTab = null;
+      this.showDiscardConfirm = true;
+      return;
+    }
+
+    this.closeGiftForm();
+  }
+
   public closeGiftForm(): void {
     this.showGiftForm = false;
     this.editingGift = EMPTY_GIFT;
     this.giftService.clearAdminGiftError();
+  }
+
+  public confirmDiscardChanges(): void {
+    const nextTab: AdminTab | null = this.pendingTab;
+
+    this.showDiscardConfirm = false;
+    this.pendingTab = null;
+    this.coupleForm?.discardChanges();
+
+    if (nextTab === null) {
+      this.closeGiftForm();
+      return;
+    }
+
+    this.showGiftForm = false;
+    this.editingGift = EMPTY_GIFT;
+    this.giftService.clearAdminGiftError();
+    this.activeTab = nextTab;
+  }
+
+  public cancelDiscardChanges(): void {
+    this.showDiscardConfirm = false;
+    this.pendingTab = null;
+  }
+
+  @HostListener('window:beforeunload', ['$event'])
+  public onBeforeUnload(event: BeforeUnloadEvent): void {
+    if (!this.hasUnsavedChanges)
+      return;
+
+    event.preventDefault();
+    event.returnValue = '';
   }
 
   private pollGifts(): void {

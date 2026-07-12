@@ -1,9 +1,21 @@
 <div class="gift-card">
   <div class="card-image">
     <img [src]="gift().image" [alt]="gift().name" loading="lazy" decoding="async" (error)="onImgError($event)" />
+    <button type="button" class="card-share-btn" [attr.aria-label]="'Compartilhar ' + gift().name" (click)="onShare($event)">
+      <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2">
+        <circle cx="18" cy="5" r="3" />
+        <circle cx="6" cy="12" r="3" />
+        <circle cx="18" cy="19" r="3" />
+        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+      </svg>
+    </button>
     <div class="card-badge unavailable" *ngIf="isUnavailable">Indisponível</div>
     <div class="card-badge funded" *ngIf="!isUnavailable && isFullyFunded">Meta atingida</div>
-    <button type="button" class="card-hover-btn" [disabled]="isUnavailable" (click)="onPresent($event)">
+    <button type="button" class="card-hover-btn" [disabled]="isUnavailable"
+      [attr.aria-label]="(isUnavailable ? 'Indisponível: ' : presentButtonLabel() + ': ') + gift().name"
+      (click)="onPresent($event)">
       {{ isUnavailable ? 'Indisponível' : presentButtonLabel() }}
     </button>
   </div>

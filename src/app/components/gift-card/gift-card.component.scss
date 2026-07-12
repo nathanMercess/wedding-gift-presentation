@@ -107,6 +107,35 @@
   flex: 1;
 }
 
+.card-share-btn {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  background: rgba(20, 20, 20, 0.5);
+  color: var(--on-media);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out), transform var(--duration-base) var(--ease-spring);
+
+  &:hover {
+    background: var(--primary);
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--primary) 35%, white);
+    outline-offset: 2px;
+  }
+}
+
 .card-meta {
   display: flex;
   flex-wrap: wrap;

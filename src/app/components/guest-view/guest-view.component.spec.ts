@@ -1,11 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { signal, WritableSignal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { GuestViewComponent } from './guest-view.component';
 import { DEFAULT_SITE_SETTINGS } from '../../constants/default-site-settings.constant';
 import { GiftDisplayMode } from '../../enums/gift-display-mode.enum';
 import { PaymentResumeService } from '../../checkout/services/payment-resume.service';
 import { GiftService } from '../../services/gift.service';
 import { CoupleService } from '../../services/couple.service';
+import { ToastService } from '../../services/toast.service';
 
 const emptyCouple = {
   names: '', weddingDate: '', photoUrl: '', message: '', eventLocation: '', primaryColor: '', secondaryColor: '', giftDisplayMode: GiftDisplayMode.Traditional, carouselPhotos: [], siteSettings: { ...DEFAULT_SITE_SETTINGS, enabledCategories: [...DEFAULT_SITE_SETTINGS.enabledCategories] },
@@ -25,6 +27,9 @@ describe('GuestViewComponent — controle de skeleton (anti-flicker)', () => {
         { provide: GiftService, useValue: { guestState, loadGuestGifts: jest.fn(), loadGuestStats: jest.fn() } },
         { provide: CoupleService, useValue: { state: coupleState, loadCouple: jest.fn() } },
         { provide: PaymentResumeService, useValue: { state: signal({ pending: null }), clear: jest.fn() } },
+        { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: { get: jest.fn((): null => null) } } } },
+        { provide: Router, useValue: { navigate: jest.fn() } },
+        { provide: ToastService, useValue: { success: jest.fn(), error: jest.fn() } },
       ],
     });
     TestBed.overrideComponent(GuestViewComponent, { set: { template: '<div></div>', imports: [] } });
