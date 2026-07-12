@@ -17,7 +17,21 @@ export class GiftCardComponent {
   public readonly presentClick: OutputEmitterRef<void> = output<void>();
 
   public get progressPercent(): number {
+    if (this.gift().total <= 0)
+      return 0;
+
     return Math.min((this.gift().raised / this.gift().total) * 100, 100);
+  }
+
+  public get remaining(): number {
+    return Math.max(this.gift().total - this.gift().raised, 0);
+  }
+
+  public get contributionModeLabel(): string {
+    if (this.gift().allowPartialContribution)
+      return 'Parcial';
+
+    return 'Integral';
   }
 
   public get isUnavailable(): boolean {
@@ -38,7 +52,9 @@ export class GiftCardComponent {
     return this.giftDisplayMode() === GiftDisplayMode.PrivateUnlimited;
   }
 
-  public onPresent(): void {
+  public onPresent(event?: MouseEvent): void {
+    event?.stopPropagation();
+
     if (this.isUnavailable)
       return;
 

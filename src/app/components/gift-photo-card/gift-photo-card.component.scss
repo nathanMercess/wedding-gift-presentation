@@ -118,6 +118,25 @@
   margin: 0 0 0.25rem;
 }
 
+.gift-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.6rem;
+    padding: 0 0.55rem;
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--primary) 9%, transparent);
+    color: var(--primary);
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+    font-weight: 650;
+  }
+}
+
 .mini-stats {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -175,6 +194,37 @@
   font-size: 0.75rem;
   color: var(--muted-foreground);
   margin: 0;
+}
+
+.detail-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.detail-progress-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  font-family: var(--font-sans);
+  font-size: 0.76rem;
+  color: var(--muted-foreground);
+}
+
+.detail-progress-track {
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--track);
+  overflow: hidden;
+}
+
+.detail-progress-fill {
+  display: block;
+  height: 100%;
+  max-width: 100%;
+  border-radius: inherit;
+  background: linear-gradient(to right, color-mix(in srgb, var(--primary) 82%, white), var(--primary));
 }
 
 /* ───────── Mobile (≤767): banner hero, título embaixo ───────── */

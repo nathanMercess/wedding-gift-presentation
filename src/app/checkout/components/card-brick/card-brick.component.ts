@@ -8,6 +8,8 @@ import { PaymentMethod } from '../../enums/payment-method.enum';
 import { PaymentStatus } from '../../enums/payment-status.enum';
 import { CardBrickConfig } from '../../models/card-brick-config.model';
 import { CardPaymentDto } from '../../models/card-payment-dto.model';
+import { PaymentResult } from '../../models/payment-result.model';
+import { PaymentResponse } from '../../models/payment-response.model';
 import { PaymentState } from '../../models/payment-state.model';
 import { PaymentService } from '../../services/payment.service';
 import { ApiErrorCode } from '../../../enums/api-error-code.enum';
@@ -19,14 +21,16 @@ interface CardBrickController {
 }
 
 @Component({
-    selector: 'app-card-brick',
-    templateUrl: './card-brick.component.html',
-    styleUrl: './card-brick.component.scss',
-    imports: [CommonModule]
+  standalone: true,
+  selector: 'app-card-brick',
+  templateUrl: './card-brick.component.html',
+  styleUrl: './card-brick.component.scss',
+  imports: [CommonModule],
 })
 export class CardBrickComponent implements AfterViewInit, OnDestroy {
   public readonly config: InputSignal<CardBrickConfig> = input.required<CardBrickConfig>();
   public readonly paymentApproved: OutputEmitterRef<void> = output<void>();
+  public readonly paymentResolved: OutputEmitterRef<PaymentResult> = output<PaymentResult>();
 
   public readonly ApiErrorCode: typeof ApiErrorCode = ApiErrorCode;
   public brickReady: boolean = false;
@@ -213,6 +217,7 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
 
       if (response.status === PaymentStatus.Approved || response.status === PaymentStatus.Processed) {
         this.pendingResolve();
+        this.paymentResolved.emit(this.toPaymentResult(response));
         this.paymentApproved.emit();
         this.clearPending();
         return;
@@ -221,7 +226,7 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
       if (response.status === PaymentStatus.InProcess || response.status === PaymentStatus.Pending) {
         this.pendingResolve();
         this.toastService.info('Pagamento em análise pelo emissor. Sua contribuição será confirmada em instantes.', 'Pagamento recebido');
-        this.paymentApproved.emit();
+        this.paymentResolved.emit(this.toPaymentResult(response));
         this.clearPending();
         return;
       }
@@ -230,5 +235,24 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
       this.showError(response.errorCode ?? ApiErrorCode.PaymentDeclined, MP_DECLINE_MESSAGES[response.statusDetail ?? ''] ?? MP_DECLINE_FALLBACK);
       this.clearPending();
     });
+  }
+
+  private toPaymentResult(response: PaymentResponse): PaymentResult {
+    const cfg: CardBrickConfig = this.config();
+
+    return {
+      orderId: response.orderId ?? cfg.orderId,
+      amount: response.amount ?? cfg.amount,
+      giftId: response.giftId ?? cfg.giftId,
+      giftName: response.giftName ?? cfg.giftName,
+      contributorName: response.contributorName ?? cfg.contributorName,
+      message: response.message ?? cfg.message,
+      method: cfg.cardType,
+      status: response.status,
+      statusDetail: response.statusDetail,
+      mpOrderId: response.mpOrderId,
+      paidAt: response.paidAt ?? response.updatedAt ?? new Date().toISOString(),
+      contributionCreated: response.contributionCreated ?? false,
+    };
   }
 }

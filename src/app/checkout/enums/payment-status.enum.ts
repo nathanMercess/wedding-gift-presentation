@@ -5,4 +5,6 @@ export enum PaymentStatus {
   InProcess = 'in_process',
   Error = 'error',
   Processed = 'processed',
+  Expired = 'expired',
+  Cancelled = 'cancelled',
 }

@@ -27,13 +27,21 @@
 
 .completed-notice {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.75rem;
   background: color-mix(in srgb, var(--primary) 8%, transparent);
   border: 1px solid color-mix(in srgb, var(--primary) 18%, transparent);
   border-radius: 12px;
   padding: 1rem;
   color: var(--primary);
+
+  strong {
+    display: block;
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    color: var(--foreground);
+    margin-bottom: 0.2rem;
+  }
 
   p {
     font-family: var(--font-sans);
@@ -76,6 +84,25 @@
   font-size: 0.9rem;
   font-weight: 500;
   color: var(--foreground);
+  text-align: right;
+}
+
+.code-value {
+  max-width: 12rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.65rem;
+  padding: 0 0.65rem;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  color: var(--primary);
 }
 
 .total-amount {
@@ -98,5 +125,41 @@
     height: 3rem;
     font-size: 0.95rem;
     border-radius: 10px;
+  }
+}
+
+.receipt-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.receipt-btn {
+  min-height: 2.75rem;
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-md);
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), transform var(--duration-base) var(--ease-spring);
+
+  &:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+@media (max-width: 420px) {
+  .receipt-actions,
+  .actions {
+    grid-template-columns: 1fr;
+    flex-direction: column;
   }
 }

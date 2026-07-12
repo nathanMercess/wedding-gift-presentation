@@ -9,6 +9,7 @@
         </svg>
       </div>
       <p class="pix-intro-text">Informe seus dados para gerar o QR Code</p>
+      <p class="pix-safe-note">PIX processado em ambiente seguro. A confirmacao aparece automaticamente nesta tela.</p>
     </div>
 
     <form [formGroup]="payerForm" (ngSubmit)="generatePix()" novalidate class="pix-form">
@@ -59,7 +60,7 @@
       <span class="qr-timer">Expira em {{ formattedCountdown() }}</span>
     </div>
 
-    <div class="qr-image-wrap">
+    <div class="qr-image-wrap" *ngIf="qrCodeBase64()">
       <img
         [src]="'data:image/png;base64,' + qrCodeBase64()"
         alt="QR Code PIX"
@@ -81,6 +82,7 @@
     </div>
 
     <p class="qr-reassure">Assim que o pagamento for identificado, esta tela avança sozinha — você não precisa fazer mais nada.</p>
+    <button type="button" class="btn-secondary" (click)="verifyNow()">Ja paguei, verificar agora</button>
     <button type="button" class="pix-link-btn" (click)="cancel()">Trocar forma de pagamento</button>
   </ng-container>
 

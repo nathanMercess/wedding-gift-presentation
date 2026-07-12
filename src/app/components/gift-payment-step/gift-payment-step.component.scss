@@ -101,6 +101,42 @@
   &::-webkit-scrollbar { display: none; }
 }
 
+.payment-summary {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.45rem 1rem;
+  align-items: baseline;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  background: var(--secondary);
+
+  span {
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    color: var(--muted-foreground);
+  }
+
+  strong {
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    color: var(--foreground);
+    text-align: right;
+  }
+}
+
+.trust-note {
+  margin: -0.25rem 0 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--primary) 18%, transparent);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--primary) 7%, transparent);
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--muted-foreground);
+}
+
 .payment-hint {
   font-family: var(--font-sans);
   font-size: 0.875rem;

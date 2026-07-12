@@ -81,8 +81,8 @@
       <app-button [variant]="ButtonVariant.Outline" [type]="ButtonType.Button"
         (click)="cancelled.emit()">Cancelar</app-button>
       <app-button [variant]="ButtonVariant.Primary" [type]="ButtonType.Submit"
-        [disabled]="form.invalid">
-        Confirmar
+        [disabled]="form.invalid || submitting()">
+        {{ submitting() ? 'Conferindo...' : 'Confirmar' }}
       </app-button>
     </div>
   </div>

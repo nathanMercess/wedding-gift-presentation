@@ -32,7 +32,7 @@
 
         <!-- Esquerda: foto sempre visível -->
         <div class="gift-info">
-          <app-gift-photo-card [gift]="gift()">
+          <app-gift-photo-card [gift]="currentGift" [giftDisplayMode]="giftDisplayMode()">
           </app-gift-photo-card>
         </div>
 
@@ -59,23 +59,25 @@
 
           @switch (step) {
             @case (ModalStep.Contribution) {
-              <app-gift-contribution-form *ngIf="!isUnavailable" [gift]="gift()" [coupleName]="coupleName()"
+              <div *ngIf="validationError" class="validation-alert" role="alert">{{ validationError }}</div>
+              <app-gift-contribution-form *ngIf="!isUnavailable" [gift]="currentGift" [coupleName]="coupleName()"
                 [giftDisplayMode]="giftDisplayMode()" [minAmount]="minAmount" [remaining]="contributionLimit"
                 [availableQuickAmounts]="availableQuickAmounts" [initialData]="contributionFormData"
-                [hasInitialData]="hasStoredContribution" (submitted)="onContributionSubmit($event)" (cancelled)="requestClose()">
+                [hasInitialData]="hasStoredContribution" [submitting]="validatingContribution"
+                (submitted)="onContributionSubmit($event)" (cancelled)="requestClose()">
               </app-gift-contribution-form>
             }
 
             @case (ModalStep.Payment) {
-              <app-gift-payment-step *ngIf="!isUnavailable" [giftId]="gift().id"
+              <app-gift-payment-step *ngIf="!isUnavailable" [gift]="currentGift" [giftId]="currentGift.id"
                 [amount]="contributionAmount" [orderId]="orderId" [contributorName]="contributorName"
-                [message]="contributorMessage" (paymentApproved)="onPaymentApproved()">
+                [message]="contributorMessage" [resumePayment]="resumePayment()" (paymentResolved)="onPaymentResolved($event)">
               </app-gift-payment-step>
             }
 
             @case (ModalStep.Success) {
-              <app-gift-success-step [giftName]="gift().name" [amount]="contributionAmount" [coupleName]="coupleName()"
-                (close)="close.emit()">
+              <app-gift-success-step *ngIf="paymentResult as result" [result]="result" [coupleName]="coupleName()"
+                (close)="closeAndRefresh()" (presentAnother)="closeAndRefresh()">
               </app-gift-success-step>
             }
           }

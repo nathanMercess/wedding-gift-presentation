@@ -4,22 +4,46 @@
       stroke="currentColor" stroke-width="2">
       <path d="M20 6L9 17l-5-5" />
     </svg>
-    <p>Pagamento aprovado com sucesso. Obrigado por presentear {{ coupleName() }}.</p>
+    <div>
+      <strong>{{ statusLabel }}</strong>
+      <p>{{ statusMessage }}</p>
+    </div>
   </div>
 
   <div class="summary-box">
     <div class="summary-row">
+      <span class="label">Pedido</span>
+      <span class="value code-value">{{ result().orderId }}</span>
+    </div>
+    <div class="summary-row">
       <span class="label">Presente</span>
-      <span class="value">{{ giftName() }}</span>
+      <span class="value">{{ result().giftName }}</span>
+    </div>
+    <div class="summary-row">
+      <span class="label">Status</span>
+      <span class="value status-pill">{{ statusLabel }}</span>
+    </div>
+    <div class="summary-row">
+      <span class="label">Data</span>
+      <span class="value">{{ result().paidAt | date:'short' }}</span>
     </div>
     <div class="summary-row total-row">
       <span class="value">Valor pago</span>
-      <span class="total-amount">{{ amount() | currency:'BRL' }}</span>
+      <span class="total-amount">{{ result().amount | currency:'BRL' }}</span>
     </div>
   </div>
 
+  <div class="receipt-actions">
+    <button type="button" class="receipt-btn" (click)="copyReceipt()">
+      {{ receiptCopied ? 'Comprovante copiado' : 'Copiar comprovante' }}
+    </button>
+    <button type="button" class="receipt-btn" (click)="downloadReceipt()">Baixar comprovante</button>
+  </div>
+
   <div class="actions">
+    <app-button [variant]="ButtonVariant.Outline" [type]="ButtonType.Button"
+      (click)="presentAnother.emit()">Presentear outro item</app-button>
     <app-button [variant]="ButtonVariant.Primary" [type]="ButtonType.Button"
-      (click)="close.emit()">Fechar</app-button>
+      (click)="close.emit()">Voltar para lista</app-button>
   </div>
 </div>

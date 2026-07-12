@@ -4,6 +4,7 @@ export interface CardBrickConfig {
   amount: number;
   orderId: string;
   giftId: string;
+  giftName: string;
   contributorName: string;
   message: string;
   cardType: PaymentMethod.CreditCard | PaymentMethod.DebitCard;

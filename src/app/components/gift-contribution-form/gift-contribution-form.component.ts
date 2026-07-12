@@ -46,6 +46,7 @@ export class GiftContributionFormComponent implements OnInit {
   public readonly availableQuickAmounts: InputSignal<number[]> = input<number[]>([]);
   public readonly initialData: InputSignal<ContributionFormData> = input<ContributionFormData>(EMPTY_CONTRIBUTION_FORM_DATA);
   public readonly hasInitialData: InputSignal<boolean> = input<boolean>(false);
+  public readonly submitting: InputSignal<boolean> = input<boolean>(false);
 
   public readonly submitted: OutputEmitterRef<ContributionSubmitData> = output<ContributionSubmitData>();
   public readonly cancelled: OutputEmitterRef<void> = output<void>();
@@ -124,6 +125,9 @@ export class GiftContributionFormComponent implements OnInit {
   }
 
   public onSubmit(): void {
+    if (this.submitting())
+      return;
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;

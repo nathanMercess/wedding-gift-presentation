@@ -235,6 +235,67 @@
   background: var(--hairline-strong);
 }
 
+.resume-payment-bar {
+  margin-top: -0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.resume-payment-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.15rem;
+  border: 1px solid color-mix(in srgb, var(--primary) 18%, transparent);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--primary) 7%, transparent);
+
+  p {
+    margin: 0.2rem 0 0;
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    color: var(--foreground);
+  }
+}
+
+.resume-payment-eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.resume-payment-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+
+.resume-payment-primary,
+.resume-payment-secondary {
+  min-height: 2.5rem;
+  padding: 0 0.9rem;
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-size: 0.84rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.resume-payment-primary {
+  border: 1px solid var(--primary);
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.resume-payment-secondary {
+  border: 1px solid var(--hairline-strong);
+  background: var(--background);
+  color: var(--foreground);
+}
+
 /* ── Multi-card carousel (Apple style) ── */
 .carousel-section {
   position: relative;
@@ -652,6 +713,24 @@
   }
 }
 
+.price-filter {
+  width: 6.75rem;
+  height: 2.35rem;
+  padding: 0 0.7rem;
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-md);
+  background: var(--secondary);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  outline: none;
+
+  &:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 14%, transparent);
+  }
+}
+
 /* ── Botão filtrar mobile ── */
 .filter-sheet-btn {
   display: flex;
@@ -757,6 +836,34 @@
   margin: -0.25rem;
 }
 
+.price-filter-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+
+  .price-filter {
+    width: 100%;
+    height: 2.8rem;
+    box-sizing: border-box;
+  }
+}
+
+.filter-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.9rem;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  color: var(--foreground);
+
+  input {
+    width: 1.05rem;
+    height: 1.05rem;
+    accent-color: var(--primary);
+  }
+}
+
 .filter-sheet-actions {
   display: flex;
   gap: 0.75rem;
@@ -848,6 +955,12 @@
 .gift-grid-item {
   display: flex;
   cursor: pointer;
+  border-radius: var(--radius-lg);
+  outline: none;
+
+  &:focus-visible {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 20%, transparent);
+  }
 }
 
 .gift-grid-item app-gift-card {
@@ -988,5 +1101,15 @@
   .hero-stats-wrap.container {
     padding-top: 0.25rem;
     padding-bottom: 0.25rem;
+  }
+
+  .resume-payment-content {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .resume-payment-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
   }
 }

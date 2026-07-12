@@ -1,23 +1,35 @@
 <div class="payment-step">
-  <app-payment-method-selector (methodSelected)="activeMethod = $event">
+  <div class="payment-summary">
+    <span>Presente</span>
+    <strong>{{ gift().name }}</strong>
+    <span>Total desta contribuicao</span>
+    <strong>{{ amount() | currency:'BRL':'symbol':'1.2-2' }}</strong>
+  </div>
+
+  <p class="trust-note">Pagamento seguro via Mercado Pago. Voce pode voltar para conferir os dados antes de pagar.</p>
+
+  <app-payment-method-selector (methodSelected)="onMethodSelected($event)">
   </app-payment-method-selector>
 
   <ng-container *ngIf="activeMethod !== PaymentMethod.None">
     <app-card-brick
       *ngIf="activeMethod === PaymentMethod.CreditCard || activeMethod === PaymentMethod.DebitCard"
-      [config]="{ cardType: activeMethod, orderId: orderId(), giftId: giftId(), contributorName: contributorName(), message: message(), amount: this.amount(), payerEmail: '', maxInstallments: maxInstallments }"
-      (paymentApproved)="paymentApproved.emit()">
+      [config]="{ cardType: activeMethod, orderId: orderId(), giftId: giftId(), giftName: gift().name, contributorName: contributorName(), message: message(), amount: this.amount(), payerEmail: '', maxInstallments: maxInstallments }"
+      (paymentResolved)="onPaymentResolved($event)">
     </app-card-brick>
 
     <app-pix-display
       *ngIf="activeMethod === PaymentMethod.Pix"
       [orderId]="orderId()"
       [giftId]="giftId()"
+      [giftName]="gift().name"
       [contributorName]="contributorName()"
       [message]="message()"
       [amount]="amount()"
-      (paymentApproved)="paymentApproved.emit()"
-      (cancelled)="activeMethod = PaymentMethod.None">
+      [resumePayment]="resumePayment()"
+      (pixReady)="onPixReady($event)"
+      (paymentResolved)="onPaymentResolved($event)"
+      (cancelled)="onPixCancelled()">
     </app-pix-display>
   </ng-container>
 

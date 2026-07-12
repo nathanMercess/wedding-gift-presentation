@@ -28,6 +28,15 @@
 .pix-intro-text {
   font-size: 0.875rem;
   color: var(--muted-foreground);
+  margin: 0;
+}
+
+.pix-safe-note {
+  max-width: 28rem;
+  margin: -0.25rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--muted-foreground);
 }
 
 /* ── Payer form ── */
@@ -186,6 +195,32 @@
   &:hover {
     background: var(--primary);
     color: var(--primary-foreground);
+  }
+}
+
+.btn-secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 2.75rem;
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius);
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, transform 0.2s;
+
+  &:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  &:active {
+    transform: scale(0.98);
   }
 }
 

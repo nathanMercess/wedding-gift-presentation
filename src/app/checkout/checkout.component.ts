@@ -9,10 +9,11 @@ import { CardBrickConfig } from './models/card-brick-config.model';
 import { CreditCardFeeUtil } from './utils/credit-card-fee.util';
 
 @Component({
-    selector: 'app-checkout',
-    templateUrl: './checkout.component.html',
-    styleUrl: './checkout.component.scss',
-    imports: [CommonModule, PaymentMethodSelectorComponent, CardBrickComponent, PixDisplayComponent]
+  standalone: true,
+  selector: 'app-checkout',
+  templateUrl: './checkout.component.html',
+  styleUrl: './checkout.component.scss',
+  imports: [CommonModule, PaymentMethodSelectorComponent, CardBrickComponent, PixDisplayComponent],
 })
 export class CheckoutComponent implements OnInit {
   public readonly PaymentMethod: typeof PaymentMethod = PaymentMethod;
@@ -23,6 +24,7 @@ export class CheckoutComponent implements OnInit {
   public cardConfig: CardBrickConfig = this.createCardConfig(PaymentMethod.CreditCard);
 
   public giftId: string = '';
+  public giftName: string = 'Presente';
   public contributorName: string = '';
   public message: string = '';
   private payerEmail: string = '';
@@ -34,6 +36,7 @@ export class CheckoutComponent implements OnInit {
       this.orderId = (params['orderId'] as string) ?? '';
       this.totalAmount = Number(params['amount'] ?? 0);
       this.giftId = (params['giftId'] as string) ?? '';
+      this.giftName = (params['giftName'] as string) ?? 'Presente';
       this.contributorName = (params['contributorName'] as string) ?? '';
       this.message = (params['message'] as string) ?? '';
       this.payerEmail = (params['payerEmail'] as string) ?? '';
@@ -64,6 +67,7 @@ export class CheckoutComponent implements OnInit {
       amount: this.totalAmount,
       orderId: this.orderId,
       giftId: this.giftId,
+      giftName: this.giftName,
       contributorName: this.contributorName,
       message: this.message,
       cardType: method,

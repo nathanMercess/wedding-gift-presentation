@@ -70,6 +70,8 @@ export class PaymentService {
   }
 
   public checkStatus(mpOrderId: string): void {
+    this.patchStatusState({ hasResponse: false, response: EMPTY_PAYMENT_RESPONSE, error: '' });
+
     this.http.get<ApiResponse<PaymentResponse>>(this.endpointsUrls.paymentStatus(mpOrderId))
       .pipe(ApiResponseUtil.data<PaymentResponse>('Erro ao consultar status do pagamento.'))
       .subscribe({
@@ -78,6 +80,21 @@ export class PaymentService {
         },
         error: (err: HttpErrorResponse): void => {
           this.patchStatusState({ error: HttpErrorUtil.extract(err, 'Erro ao consultar status do pagamento.') });
+        },
+      });
+  }
+
+  public loadOrder(orderId: string): void {
+    this.patchStatusState({ hasResponse: false, response: EMPTY_PAYMENT_RESPONSE, error: '' });
+
+    this.http.get<ApiResponse<PaymentResponse>>(this.endpointsUrls.paymentOrder(orderId))
+      .pipe(ApiResponseUtil.data<PaymentResponse>('Erro ao consultar pedido.'))
+      .subscribe({
+        next: (response: PaymentResponse): void => {
+          this.patchStatusState({ hasResponse: true, response, error: '' });
+        },
+        error: (err: HttpErrorResponse): void => {
+          this.patchStatusState({ error: HttpErrorUtil.extract(err, 'Erro ao consultar pedido.') });
         },
       });
   }

@@ -105,6 +105,26 @@
   flex: 1;
 }
 
+.card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  min-height: 1.35rem;
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.35rem;
+    padding: 0 0.45rem;
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--primary) 8%, transparent);
+    color: var(--primary);
+    font-family: var(--font-sans);
+    font-size: 0.68rem;
+    font-weight: 650;
+  }
+}
+
 .card-name {
   font-family: var(--font-sans);
   font-size: 0.92rem;
@@ -126,6 +146,13 @@
   letter-spacing: -0.01em;
   color: var(--foreground);
   margin-top: 0.1rem;
+}
+
+.card-remaining {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 0.76rem;
+  color: var(--muted-foreground);
 }
 
 .card-progress {

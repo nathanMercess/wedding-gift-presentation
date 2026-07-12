@@ -100,6 +100,19 @@
       </div>
     </section>
 
+    <section class="resume-payment-bar container" *ngIf="pendingPayment as pending">
+      <div class="resume-payment-content">
+        <div>
+          <span class="resume-payment-eyebrow">{{ pendingStatusLabel }}</span>
+          <p>Voce tem um pagamento em andamento para {{ pending.gift.name }}.</p>
+        </div>
+        <div class="resume-payment-actions">
+          <button type="button" class="resume-payment-secondary" (click)="dismissPendingPayment()">Descartar</button>
+          <button type="button" class="resume-payment-primary" (click)="resumePendingPayment()">Continuar</button>
+        </div>
+      </div>
+    </section>
+
     <div class="filters-bar">
       <div class="container filters-inner">
         <div class="search-wrap">
@@ -118,6 +131,21 @@
               [class.active]="selectedSortId === s.id" (click)="selectedSortId = s.id; onFilterChange()">
               {{ s.label }}
             </button>
+            <button type="button" class="chip" [class.active]="selectedCategory === null" (click)="selectCategory(null)">
+              Todas categorias
+            </button>
+            <button *ngFor="let category of categoryOptions; trackBy: trackByCategory" type="button" class="chip"
+              [class.active]="selectedCategory === category" (click)="selectCategory(category)">
+              {{ category }}
+            </button>
+            <button type="button" class="avail-toggle" [class.active]="onlyAvailable"
+              (click)="onlyAvailable = !onlyAvailable; onFilterChange()">
+              Disponiveis
+            </button>
+            <input type="number" min="0" inputmode="decimal" class="price-filter" placeholder="Min R$"
+              [(ngModel)]="minTotal" name="minTotal" (change)="onFilterChange()" />
+            <input type="number" min="0" inputmode="decimal" class="price-filter" placeholder="Max R$"
+              [(ngModel)]="maxTotal" name="maxTotal" (change)="onFilterChange()" />
           </div>
         </div>
 
@@ -144,6 +172,30 @@
           <button *ngFor="let s of sortOptions; trackBy: trackByOptionId" class="chip" [class.active]="selectedSortId === s.id"
             (click)="selectedSortId = s.id">{{ s.label }}</button>
         </div>
+      </div>
+
+      <div class="filter-sheet-section">
+        <p class="filter-sheet-label">Categoria</p>
+        <div class="filter-sheet-chips">
+          <button type="button" class="chip" [class.active]="selectedCategory === null"
+            (click)="selectedCategory = null">Todas</button>
+          <button *ngFor="let category of categoryOptions; trackBy: trackByCategory" type="button" class="chip"
+            [class.active]="selectedCategory === category" (click)="selectedCategory = category">{{ category }}</button>
+        </div>
+      </div>
+
+      <div class="filter-sheet-section">
+        <p class="filter-sheet-label">Faixa de valor</p>
+        <div class="price-filter-grid">
+          <input type="number" min="0" inputmode="decimal" class="price-filter" placeholder="Min R$"
+            [(ngModel)]="minTotal" name="mobileMinTotal" />
+          <input type="number" min="0" inputmode="decimal" class="price-filter" placeholder="Max R$"
+            [(ngModel)]="maxTotal" name="mobileMaxTotal" />
+        </div>
+        <label class="filter-checkbox">
+          <input type="checkbox" [(ngModel)]="onlyAvailable" name="mobileOnlyAvailable" />
+          <span>Mostrar apenas disponiveis</span>
+        </label>
       </div>
 
       <div class="filter-sheet-actions">
@@ -175,7 +227,8 @@
             presente{{ giftService.guestState().totalCount !== 1 ? 's' : '' }}</p>
           <div class="gifts-grid">
             <div *ngFor="let gift of giftService.guestState().gifts; trackBy: trackByGiftId" class="gift-grid-item"
-              (click)="openGiftDetails(gift)">
+              role="button" tabindex="0" [attr.aria-label]="'Presentear com ' + gift.name"
+              (click)="openGiftDetails(gift)" (keydown)="openGiftDetailsFromKeyboard($event, gift)">
               <app-gift-card [gift]="gift" [giftDisplayMode]="giftDisplayMode"
                 (presentClick)="openGiftDetails(gift)"></app-gift-card>
             </div>
@@ -212,7 +265,7 @@
 
   </ng-container>
 
-  <app-gift-details-modal *ngIf="showGiftDetailsModal" [gift]="selectedGift"
+  <app-gift-details-modal *ngIf="showGiftDetailsModal" [gift]="selectedGift" [resumePayment]="selectedResumePayment"
     [coupleName]="coupleService.state().couple.names" [giftDisplayMode]="giftDisplayMode" (close)="closeGiftDetails()"
     (paymentCompleted)="onGiftPaymentCompleted()">
   </app-gift-details-modal>

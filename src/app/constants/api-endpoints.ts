@@ -72,4 +72,8 @@ export class EndpointsUrls {
     public paymentStatus(nsu: string): string {
         return `${this.apiUrl}/payment/status/${nsu}`;
     }
+
+    public paymentOrder(orderId: string): string {
+        return `${this.apiUrl}/payment/order/${orderId}`;
+    }
 }

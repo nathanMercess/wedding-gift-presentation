@@ -254,6 +254,18 @@
   }
 }
 
+.validation-alert {
+  margin: 1rem 1.5rem 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(192, 57, 43, 0.25);
+  border-radius: var(--radius-md);
+  background: #fef2f2;
+  color: #a93226;
+  font-family: var(--font-sans);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
 /* ── Faixa de progresso (apenas mobile, abaixo da foto hero) ── */
 .gift-progress-strip { display: none; }
 

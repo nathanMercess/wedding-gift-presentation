@@ -5,6 +5,7 @@ import { ModalStep } from '../../enums/modal-step.enum';
 import { ContributionType } from '../../enums/contribution-type.enum';
 import { GiftDisplayMode } from '../../enums/gift-display-mode.enum';
 import { Gift } from '../../models/gift.model';
+import { GiftService } from '../../services/gift.service';
 
 function makeGift(over: Partial<Gift> = {}): Gift {
   return {
@@ -18,7 +19,14 @@ describe('GiftDetailsModalComponent', () => {
   let component: GiftDetailsModalComponent;
 
   function setup(gift: Gift = makeGift(), giftDisplayMode: GiftDisplayMode = GiftDisplayMode.Traditional): void {
-    TestBed.configureTestingModule({ imports: [GiftDetailsModalComponent] });
+    const giftServiceMock: Pick<GiftService, 'loadGuestGiftById'> = {
+      loadGuestGiftById: (_giftId: string, onSuccess: (gift: Gift) => void): void => onSuccess(gift),
+    };
+
+    TestBed.configureTestingModule({
+      imports: [GiftDetailsModalComponent],
+      providers: [{ provide: GiftService, useValue: giftServiceMock }],
+    });
     TestBed.overrideComponent(GiftDetailsModalComponent, { set: { template: '<div></div>', imports: [] } });
     fixture = TestBed.createComponent(GiftDetailsModalComponent);
     component = fixture.componentInstance;

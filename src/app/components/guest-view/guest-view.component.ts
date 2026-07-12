@@ -4,6 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { EMPTY_GIFT } from '../../constants/empty-gift.constant';
 import { SORT_OPTIONS, SortOption } from '../../constants/sort-options.constant';
+import { PendingPayment } from '../../checkout/models/pending-payment.model';
+import { PaymentResumeService } from '../../checkout/services/payment-resume.service';
+import { PaymentStatusUtil } from '../../checkout/utils/payment-status.util';
+import { GiftCategory } from '../../enums/gift-category.enum';
 import { GiftDisplayMode } from '../../enums/gift-display-mode.enum';
 import { CarouselPhoto, Couple } from '../../models/couple.model';
 import { Gift } from '../../models/gift.model';
@@ -31,8 +35,12 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   public hasTriedApiCouplePhoto: boolean = false;
   public coupleSignature: string = '';
   public selectedSortId: string = 'name-asc';
+  public selectedCategory: GiftCategory | null = null;
+  public minTotal: string = '';
+  public maxTotal: string = '';
   public onlyAvailable: boolean = false;
   public selectedGift: Gift = EMPTY_GIFT;
+  public selectedResumePayment: PendingPayment | null = null;
   public showGiftDetailsModal: boolean = false;
   public filterSheetOpen: boolean = false;
 
@@ -139,11 +147,18 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   public readonly skeletonItems: number[] = [1, 2, 3, 4, 5, 6];
   public readonly sortOptions: typeof SORT_OPTIONS = SORT_OPTIONS;
+  public readonly categoryOptions: GiftCategory[] = [
+    GiftCategory.Kitchen,
+    GiftCategory.Appliances,
+    GiftCategory.Bedroom,
+    GiftCategory.Table,
+    GiftCategory.Home,
+  ];
 
   private readonly destroy$ = new Subject<void>();
   private readonly searchSubject = new Subject<string>();
 
-  public constructor(public readonly giftService: GiftService, public readonly coupleService: CoupleService) {
+  public constructor(public readonly giftService: GiftService, public readonly coupleService: CoupleService, public readonly paymentResumeService: PaymentResumeService) {
     effect((): void => {
       const stateCouple: Couple = this.coupleService.state().couple;
       const nextSignature: string = `${stateCouple.names}|${stateCouple.weddingDate}|${stateCouple.photoUrl}|${stateCouple.message}|${stateCouple.eventLocation}|${stateCouple.primaryColor}|${stateCouple.secondaryColor}|${stateCouple.giftDisplayMode}`;
@@ -192,6 +207,19 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   public get showGuestStats(): boolean {
     return this.giftDisplayMode !== GiftDisplayMode.PrivateUnlimited;
+  }
+
+  public get pendingPayment(): PendingPayment | null {
+    return this.paymentResumeService.state().pending;
+  }
+
+  public get pendingStatusLabel(): string {
+    const pendingPayment: PendingPayment | null = this.pendingPayment;
+
+    if (!pendingPayment)
+      return '';
+
+    return PaymentStatusUtil.label(pendingPayment.status);
   }
 
   public get isInitialLoading(): boolean {
@@ -265,9 +293,11 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   public loadGifts(page: number = 1): void {
-    // Uso del nuevo método tipado
     this.giftService.loadGuestGifts({
       search: this.searchTerm || undefined,
+      category: this.selectedCategory || undefined,
+      minTotal: this.parsedMoney(this.minTotal),
+      maxTotal: this.parsedMoney(this.maxTotal),
       orderBy: this.selectedSort.orderBy,
       orderDir: this.selectedSort.orderDir,
       onlyAvailable: this.onlyAvailable || undefined,
@@ -301,9 +331,11 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   public onGiftPaymentCompleted(): void {
-    // Uso del nuevo método tipado
     this.giftService.refreshGuestGiftsSilently({
       search: this.searchTerm || undefined,
+      category: this.selectedCategory || undefined,
+      minTotal: this.parsedMoney(this.minTotal),
+      maxTotal: this.parsedMoney(this.maxTotal),
       orderBy: this.selectedSort.orderBy,
       orderDir: this.selectedSort.orderDir,
       onlyAvailable: this.onlyAvailable || undefined,
@@ -318,13 +350,43 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   public openGiftDetails(gift: Gift): void {
+    this.selectedResumePayment = null;
     this.selectedGift = gift;
     this.showGiftDetailsModal = true;
+  }
+
+  public openGiftDetailsFromKeyboard(event: KeyboardEvent, gift: Gift): void {
+    if (event.key !== 'Enter' && event.key !== ' ')
+      return;
+
+    event.preventDefault();
+    this.openGiftDetails(gift);
+  }
+
+  public resumePendingPayment(): void {
+    const pendingPayment: PendingPayment | null = this.pendingPayment;
+
+    if (!pendingPayment)
+      return;
+
+    this.selectedGift = pendingPayment.gift;
+    this.selectedResumePayment = pendingPayment;
+    this.showGiftDetailsModal = true;
+  }
+
+  public dismissPendingPayment(): void {
+    const pendingPayment: PendingPayment | null = this.pendingPayment;
+
+    if (!pendingPayment)
+      return;
+
+    this.paymentResumeService.clear(pendingPayment.orderId);
   }
 
   public closeGiftDetails(): void {
     this.showGiftDetailsModal = false;
     this.selectedGift = EMPTY_GIFT;
+    this.selectedResumePayment = null;
   }
 
   public get selectedSort(): SortOption {
@@ -337,6 +399,10 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   public trackByNumber(_: number, value: number): number {
     return value;
+  }
+
+  public trackByCategory(_: number, category: GiftCategory): GiftCategory {
+    return category;
   }
 
   public onTouchStart(event: TouchEvent): void {
@@ -383,8 +449,30 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   public resetFilters(): void {
     this.searchTerm = '';
     this.selectedSortId = 'name-asc';
+    this.selectedCategory = null;
+    this.minTotal = '';
+    this.maxTotal = '';
     this.onlyAvailable = false;
     this.closeFilterSheet();
     this.loadGifts(1);
+  }
+
+  public selectCategory(category: GiftCategory | null): void {
+    this.selectedCategory = category;
+    this.onFilterChange();
+  }
+
+  private parsedMoney(value: string): number | undefined {
+    const normalizedValue: string = value.replace(',', '.').trim();
+
+    if (!normalizedValue)
+      return undefined;
+
+    const parsedValue: number = Number(normalizedValue);
+
+    if (Number.isNaN(parsedValue) || parsedValue < 0)
+      return undefined;
+
+    return parsedValue;
   }
 }

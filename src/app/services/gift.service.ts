@@ -2,6 +2,7 @@ import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http'
 import { Injectable, WritableSignal, signal } from '@angular/core';
 import { finalize } from 'rxjs';
 import { EndpointsUrls } from '../constants/api-endpoints';
+import { GiftCategory } from '../enums/gift-category.enum';
 import { GiftSortField } from '../enums/GiftSortField';
 import { SortDirection } from '../enums/SortDirection';
 import { AdminGiftState } from '../models/admin-gift-state.model';
@@ -17,6 +18,9 @@ import { HttpErrorUtil } from '../utils/http-error';
 
 export interface GiftQueryParams {
   search?: string;
+  category?: GiftCategory;
+  minTotal?: number;
+  maxTotal?: number;
   orderBy?: GiftSortField;
   orderDir?: SortDirection;
   onlyAvailable?: boolean;
@@ -89,6 +93,20 @@ export class GiftService {
         },
         error: (err: HttpErrorResponse): void => {
           this.patchGuestState({ error: HttpErrorUtil.extract(err, 'Nao foi possivel carregar os presentes.') });
+        },
+      });
+  }
+
+  public loadGuestGiftById(giftId: string, onSuccess: (gift: Gift) => void, onError?: (message: string) => void): void {
+    this.http.get<ApiResponse<Gift>>(this.endpointsUrls.giftsById(giftId))
+      .pipe(ApiResponseUtil.data<Gift>('Nao foi possivel conferir este presente.'))
+      .subscribe({
+        next: (gift: Gift): void => onSuccess(gift),
+        error: (err: HttpErrorResponse): void => {
+          if (!onError)
+            return;
+
+          onError(HttpErrorUtil.extract(err, 'Nao foi possivel conferir este presente.'));
         },
       });
   }
@@ -307,6 +325,15 @@ export class GiftService {
 
     if (params.search)
       httpParams = httpParams.set('search', params.search);
+
+    if (params.category)
+      httpParams = httpParams.set('category', params.category);
+
+    if (params.minTotal !== undefined)
+      httpParams = httpParams.set('minTotal', String(params.minTotal));
+
+    if (params.maxTotal !== undefined)
+      httpParams = httpParams.set('maxTotal', String(params.maxTotal));
 
     httpParams = httpParams.set('orderBy', params.orderBy ?? GiftSortField.Total);
     httpParams = httpParams.set('orderDir', params.orderDir ?? SortDirection.Asc);

@@ -3,12 +3,25 @@
     <img [src]="gift().image" [alt]="gift().name" loading="lazy" decoding="async" (error)="onImgError($event)" />
     <div class="card-badge unavailable" *ngIf="isUnavailable">Indisponível</div>
     <div class="card-badge funded" *ngIf="!isUnavailable && isFullyFunded">Meta atingida</div>
-    <button type="button" class="card-hover-btn" [disabled]="isUnavailable" (click)="onPresent()">
+    <button type="button" class="card-hover-btn" [disabled]="isUnavailable" (click)="onPresent($event)">
       {{ isUnavailable ? 'Indisponível' : 'Presentear' }}
     </button>
   </div>
   <div class="card-body">
+    <div class="card-meta">
+      <span *ngIf="gift().category">{{ gift().category }}</span>
+      <span>{{ contributionModeLabel }}</span>
+    </div>
     <h3 class="card-name">{{ gift().name }}</h3>
     <div class="card-price">{{ gift().total | currency:'BRL':'symbol':'1.2-2' }}</div>
+    <div class="card-progress" *ngIf="!isPrivateUnlimited">
+      <div class="progress-track">
+        <span class="progress-fill" [style.width.%]="progressPercent"></span>
+      </div>
+      <span class="progress-pct">{{ progressPercent | number:'1.0-0' }}%</span>
+    </div>
+    <p class="card-remaining" *ngIf="!isPrivateUnlimited">
+      Restante: {{ remaining | currency:'BRL':'symbol':'1.2-2' }}
+    </p>
   </div>
 </div>

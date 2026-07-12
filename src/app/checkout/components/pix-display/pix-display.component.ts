@@ -1,13 +1,18 @@
-import { Component, InputSignal, OnDestroy, OutputEmitterRef, WritableSignal, computed, effect, input, output, signal } from '@angular/core';
+import { Component, InputSignal, OnDestroy, OnInit, OutputEmitterRef, WritableSignal, computed, effect, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { PaymentService } from '../../services/payment.service';
 import { PaymentState } from '../../models/payment-state.model';
 import { PaymentStatusState } from '../../models/payment-status-state.model';
 import { PixPaymentDto } from '../../models/pix-payment-dto.model';
+import { PaymentResult } from '../../models/payment-result.model';
+import { PaymentResponse } from '../../models/payment-response.model';
+import { PendingPayment } from '../../models/pending-payment.model';
 import { CpfValidators } from '../../utils/cpf-validators';
 import { PixStep } from '../../enums/pix-step.enum';
+import { PaymentMethod } from '../../enums/payment-method.enum';
 import { PaymentStatus } from '../../enums/payment-status.enum';
+import { PaymentStatusUtil } from '../../utils/payment-status.util';
 import { ApiErrorCode } from '../../../enums/api-error-code.enum';
 import { ToastService } from '../../../services/toast.service';
 import { FormFieldErrorComponent } from '../../../components/form-field-error/form-field-error.component';
@@ -15,18 +20,23 @@ import { FormFieldErrorComponent } from '../../../components/form-field-error/fo
 const PIX_EXPIRATION_SECONDS = 10 * 60;
 
 @Component({
-    selector: 'app-pix-display',
-    templateUrl: './pix-display.component.html',
-    styleUrl: './pix-display.component.scss',
-    imports: [CommonModule, ReactiveFormsModule, FormFieldErrorComponent]
+  standalone: true,
+  selector: 'app-pix-display',
+  templateUrl: './pix-display.component.html',
+  styleUrl: './pix-display.component.scss',
+  imports: [CommonModule, ReactiveFormsModule, FormFieldErrorComponent],
 })
-export class PixDisplayComponent implements OnDestroy {
+export class PixDisplayComponent implements OnInit, OnDestroy {
   public readonly orderId: InputSignal<string> = input<string>('');
   public readonly amount: InputSignal<number> = input<number>(0);
   public readonly giftId: InputSignal<string> = input<string>('');
+  public readonly giftName: InputSignal<string> = input<string>('');
   public readonly contributorName: InputSignal<string> = input<string>('');
   public readonly message: InputSignal<string> = input<string>('');
+  public readonly resumePayment: InputSignal<PendingPayment | null> = input<PendingPayment | null>(null);
   public readonly paymentApproved: OutputEmitterRef<void> = output<void>();
+  public readonly paymentResolved: OutputEmitterRef<PaymentResult> = output<PaymentResult>();
+  public readonly pixReady: OutputEmitterRef<PaymentResponse> = output<PaymentResponse>();
   public readonly cancelled: OutputEmitterRef<void> = output<void>();
 
   public readonly PixStep: typeof PixStep = PixStep;
@@ -63,6 +73,31 @@ export class PixDisplayComponent implements OnDestroy {
 
     effect((): void => this.handlePaymentState(this.paymentService.paymentState()), { allowSignalWrites: true });
     effect((): void => this.handleStatusState(this.paymentService.statusState()), { allowSignalWrites: true });
+  }
+
+  public ngOnInit(): void {
+    const pendingPayment: PendingPayment | null = this.resumePayment();
+
+    if (!pendingPayment || pendingPayment.method !== PaymentMethod.Pix || !pendingPayment.mpOrderId)
+      return;
+
+    this.mpOrderId.set(pendingPayment.mpOrderId);
+    this.qrCode.set(pendingPayment.qrCode ?? '');
+    this.qrCodeBase64.set(pendingPayment.qrCodeBase64 ?? '');
+    this.pixStep.set(PixStep.Qr);
+
+    if (pendingPayment.expiresAt) {
+      const secondsLeft: number = Math.floor((new Date(pendingPayment.expiresAt).getTime() - Date.now()) / 1000);
+      this.remainingSeconds.set(Math.max(secondsLeft, 0));
+    }
+
+    if (this.remainingSeconds() <= 0) {
+      this.expired.set(true);
+      return;
+    }
+
+    this.startPolling();
+    this.startCountdown(false);
   }
 
   private showError(code: string, detail: string): void {
@@ -144,8 +179,9 @@ export class PixDisplayComponent implements OnDestroy {
       this.qrCodeBase64.set(qrCodeBase64);
       this.error.set('');
       this.pixStep.set(PixStep.Qr);
+      this.pixReady.emit(response);
       this.startPolling();
-      this.startCountdown();
+      this.startCountdown(true);
       return;
     }
 
@@ -161,25 +197,36 @@ export class PixDisplayComponent implements OnDestroy {
 
     if (state.hasResponse && state.response.status === PaymentStatus.Approved) {
       this.stopPolling();
+      this.paymentResolved.emit(this.toPaymentResult(state.response));
       this.paymentApproved.emit();
       return;
     }
 
-    if (state.hasResponse && state.response.status === PaymentStatus.Rejected) {
+    if (state.hasResponse && PaymentStatusUtil.isFinalFailure(state.response.status)) {
       this.stopPolling();
       this.showError(state.response.errorCode ?? ApiErrorCode.PixRejected, 'Pagamento PIX rejeitado. Tente novamente.');
+      return;
+    }
+
+    if (state.hasResponse && (state.response.status === PaymentStatus.Pending || state.response.status === PaymentStatus.InProcess)) {
+      this.toastService.info('Ainda estamos aguardando a confirmacao do PIX.', 'Pagamento pendente');
     }
   }
 
   private startPolling(): void {
     this.pollingInterval = window.setInterval((): void => {
+      if (this.awaitingStatusCheck)
+        return;
+
       this.awaitingStatusCheck = true;
       this.paymentService.checkStatus(this.mpOrderId());
     }, 5000);
   }
 
-  private startCountdown(): void {
-    this.remainingSeconds.set(PIX_EXPIRATION_SECONDS);
+  private startCountdown(reset: boolean): void {
+    if (reset)
+      this.remainingSeconds.set(PIX_EXPIRATION_SECONDS);
+
     this.countdownInterval = window.setInterval((): void => {
       this.remainingSeconds.update(s => s - 1);
       if (this.remainingSeconds() <= 0) {
@@ -203,6 +250,14 @@ export class PixDisplayComponent implements OnDestroy {
     this.cancelled.emit();
   }
 
+  public verifyNow(): void {
+    if (!this.mpOrderId() || this.awaitingStatusCheck)
+      return;
+
+    this.awaitingStatusCheck = true;
+    this.paymentService.checkStatus(this.mpOrderId());
+  }
+
   public copyCode(): void {
     navigator.clipboard.writeText(this.qrCode()).then(() => {
       this.copied.set(true);
@@ -223,5 +278,22 @@ export class PixDisplayComponent implements OnDestroy {
 
   public ngOnDestroy(): void {
     this.stopPolling();
+  }
+
+  private toPaymentResult(response: PaymentResponse): PaymentResult {
+    return {
+      orderId: response.orderId ?? this.orderId(),
+      amount: response.amount ?? this.amount(),
+      giftId: response.giftId ?? this.giftId(),
+      giftName: response.giftName ?? this.giftName(),
+      contributorName: response.contributorName ?? this.contributorName(),
+      message: response.message ?? this.message(),
+      method: PaymentMethod.Pix,
+      status: response.status,
+      statusDetail: response.statusDetail,
+      mpOrderId: response.mpOrderId ?? this.mpOrderId(),
+      paidAt: response.paidAt ?? response.updatedAt ?? new Date().toISOString(),
+      contributionCreated: response.contributionCreated ?? false,
+    };
   }
 }
