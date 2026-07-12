@@ -7,6 +7,7 @@ import { GiftDisplayMode } from '../../enums/gift-display-mode.enum';
 import { PaymentResumeService } from '../../checkout/services/payment-resume.service';
 import { GiftService } from '../../services/gift.service';
 import { CoupleService } from '../../services/couple.service';
+import { CoupleDraftService } from '../../services/couple-draft.service';
 import { ToastService } from '../../services/toast.service';
 
 const emptyCouple = {
@@ -30,6 +31,7 @@ describe('GuestViewComponent — controle de skeleton (anti-flicker)', () => {
         { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: { get: jest.fn((): null => null) } } } },
         { provide: Router, useValue: { navigate: jest.fn() } },
         { provide: ToastService, useValue: { success: jest.fn(), error: jest.fn() } },
+        { provide: CoupleDraftService, useValue: { load: jest.fn((): null => null) } },
       ],
     });
     TestBed.overrideComponent(GuestViewComponent, { set: { template: '<div></div>', imports: [] } });

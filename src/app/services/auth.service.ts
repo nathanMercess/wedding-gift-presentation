@@ -49,6 +49,32 @@ export class AuthService {
       });
   }
 
+  public requestPasswordReset(email: string): void {
+    this.patchLoginState({ loading: true, error: '', success: false });
+    this.http.post<ApiResponse<null>>(this.endpointsUrls.authForgotPassword, { email })
+      .pipe(
+        ApiResponseUtil.nullableData<null>('Erro ao solicitar redefinição de senha.'),
+        finalize((): void => this.patchLoginState({ loading: false })),
+      )
+      .subscribe({
+        next: (): void => this.patchLoginState({ success: true }),
+        error: (err: HttpErrorResponse): void => this.patchLoginState({ error: HttpErrorUtil.extract(err, 'Erro ao solicitar redefinição de senha.') }),
+      });
+  }
+
+  public resetPassword(email: string, token: string, password: string): void {
+    this.patchLoginState({ loading: true, error: '', success: false });
+    this.http.post<ApiResponse<null>>(this.endpointsUrls.authResetPassword, { email, token, password })
+      .pipe(
+        ApiResponseUtil.nullableData<null>('Erro ao redefinir a senha.'),
+        finalize((): void => this.patchLoginState({ loading: false })),
+      )
+      .subscribe({
+        next: (): void => this.patchLoginState({ success: true }),
+        error: (err: HttpErrorResponse): void => this.patchLoginState({ error: HttpErrorUtil.extract(err, 'Erro ao redefinir a senha.') }),
+      });
+  }
+
   public resetLoginState(): void {
     this.patchLoginState({ error: '', success: false });
   }

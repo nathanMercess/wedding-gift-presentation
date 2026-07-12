@@ -1,0 +1,51 @@
+<section class="operations-section">
+  <div class="operations-header">
+    <div>
+      <h2>Usuários e permissões</h2>
+      <p>{{ operations.state().userTotal }} usuário{{ operations.state().userTotal !== 1 ? 's' : '' }}</p>
+    </div>
+  </div>
+
+  <div class="operations-filters">
+    <label>
+      <span>Buscar usuário</span>
+      <input type="search" [(ngModel)]="searchTerm" placeholder="Nome ou e-mail" (keyup.enter)="load()" />
+    </label>
+    <button type="button" (click)="load()">Buscar</button>
+  </div>
+
+  <div *ngIf="operations.state().loading" class="operations-status">Carregando usuários...</div>
+  <div *ngIf="operations.state().error" class="operations-error">{{ operations.state().error }}</div>
+
+  <div class="users-list">
+    <article *ngFor="let user of operations.state().users; trackBy: trackByUser" class="user-card" [class.inactive]="!user.isActive">
+      <div class="user-identity">
+        <strong>{{ user.name }}</strong>
+        <span>{{ user.email }}</span>
+        <small>{{ user.isEmailConfirmed ? 'E-mail confirmado' : 'E-mail pendente' }} · criado em {{ user.createdAt | date:'shortDate' }}</small>
+      </div>
+      <label>
+        <span>Permissão</span>
+        <select [ngModel]="user.role" (ngModelChange)="changeRole(user, $event)" [disabled]="operations.state().actionLoading">
+          <option *ngFor="let role of roleOptions" [ngValue]="role">{{ role }}</option>
+        </select>
+      </label>
+      <button type="button" [class.danger]="user.isActive" (click)="toggleActive(user)" [disabled]="operations.state().actionLoading">
+        {{ user.isActive ? 'Desativar' : 'Reativar' }}
+      </button>
+    </article>
+  </div>
+
+  <div *ngIf="!operations.state().loading && operations.state().users.length === 0" class="empty-operations">Nenhum usuário encontrado.</div>
+
+  <div *ngIf="operations.state().userPages > 1" class="operations-pagination">
+    <button type="button" [disabled]="currentPage <= 1" (click)="load(currentPage - 1)">Anterior</button>
+    <span>Página {{ currentPage }} de {{ operations.state().userPages }}</span>
+    <button type="button" [disabled]="currentPage >= operations.state().userPages" (click)="load(currentPage + 1)">Próxima</button>
+  </div>
+
+  <app-confirm-dialog *ngIf="showDeactivateConfirm" title="Desativar usuário?"
+    [message]="'O acesso de ' + (userPendingDeactivation?.name || '') + ' será revogado e as sessões atuais serão encerradas.'"
+    confirmLabel="Desativar" cancelLabel="Cancelar" (confirmed)="confirmDeactivate()" (cancelled)="cancelDeactivate()">
+  </app-confirm-dialog>
+</section>

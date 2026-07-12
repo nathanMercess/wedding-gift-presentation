@@ -173,6 +173,14 @@
   }
 }
 
+.section-actions { display: flex; align-items: center; gap: .75rem; }
+.import-action { display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.bulk-actions { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; margin-bottom: 1rem; padding: .75rem 1rem; border: 1px solid var(--hairline); border-radius: var(--radius-lg); background: var(--card); }
+.bulk-select-all { display: flex; align-items: center; gap: .4rem; }
+.bulk-actions select { min-height: 2.5rem; padding: 0 .65rem; border: 1px solid var(--hairline-strong); border-radius: var(--radius-md); background: var(--secondary); color: var(--foreground); }
+.bulk-danger { min-height: 2.5rem; padding: 0 .8rem; border: 1px solid var(--danger-border); border-radius: var(--radius-md); background: var(--danger-bg); color: var(--danger); cursor: pointer; }
+.nav-badge { display: inline-grid; place-items: center; min-width: 1.1rem; height: 1.1rem; margin-left: .35rem; padding: 0 .2rem; border-radius: var(--radius-pill); background: var(--danger); color: white; font-size: .65rem; }
+
 @media (max-width: 640px) {
   .section-header {
     flex-direction: column;

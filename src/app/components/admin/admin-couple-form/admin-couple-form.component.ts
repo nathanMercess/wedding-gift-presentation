@@ -6,6 +6,7 @@ import { GiftCategory } from '../../../enums/gift-category.enum';
 import { GiftDisplayMode } from '../../../enums/gift-display-mode.enum';
 import { CarouselPhoto, Couple } from '../../../models/couple.model';
 import { CoupleService } from '../../../services/couple.service';
+import { CoupleDraftService } from '../../../services/couple-draft.service';
 import { ThemeService } from '../../../services/theme.service';
 import { ColorUtil } from '../../../utils/color.util';
 
@@ -25,11 +26,13 @@ export class AdminCoupleFormComponent {
   public carouselUploading: boolean = false;
   public carouselUploadError: string = '';
   public isDraggingFiles: boolean = false;
+  public hasDraft: boolean = false;
 
   private coupleSignature: string = '';
   private savedFormSignature: string = '';
 
-  public constructor(public readonly coupleService: CoupleService, public readonly theme: ThemeService) {
+  public constructor(public readonly coupleService: CoupleService, public readonly theme: ThemeService, public readonly draftService: CoupleDraftService) {
+    this.hasDraft = this.draftService.exists();
     effect((): void => {
       const loaded: Couple = this.coupleService.state().couple;
       const signature: string = `${loaded.names}|${loaded.weddingDate}|${loaded.photoUrl}|${loaded.message}|${loaded.eventLocation}|${loaded.primaryColor}|${loaded.secondaryColor}|${loaded.giftDisplayMode}|${JSON.stringify(loaded.carouselPhotos)}|${JSON.stringify(loaded.siteSettings)}`;
@@ -62,6 +65,11 @@ export class AdminCoupleFormComponent {
         },
       };
       this.savedFormSignature = JSON.stringify(this.couple);
+
+      if (this.coupleService.state().success) {
+        this.draftService.clear();
+        this.hasDraft = false;
+      }
     }, { allowSignalWrites: true });
   }
 
@@ -165,7 +173,35 @@ export class AdminCoupleFormComponent {
   }
 
   public save(): void {
+    this.publish();
+  }
+
+  public publish(): void {
     this.coupleService.saveCouple(this.couple);
+  }
+
+  public saveDraft(): void {
+    this.draftService.save(this.couple);
+    this.hasDraft = true;
+  }
+
+  public loadDraft(): void {
+    const draft: Couple | null = this.draftService.load();
+
+    if (!draft)
+      return;
+
+    this.couple = {
+      ...draft,
+      carouselPhotos: (draft.carouselPhotos ?? []).map((photo: CarouselPhoto): CarouselPhoto => ({ ...photo })),
+      siteSettings: { ...draft.siteSettings, enabledCategories: [...draft.siteSettings.enabledCategories] },
+    };
+    this.previewTheme();
+  }
+
+  public previewDraft(): void {
+    this.saveDraft();
+    window.open('/gifts?preview=1', '_blank', 'noopener');
   }
 
   public discardChanges(): void {

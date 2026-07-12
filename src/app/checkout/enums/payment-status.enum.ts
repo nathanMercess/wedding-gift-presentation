@@ -7,4 +7,6 @@ export enum PaymentStatus {
   Processed = 'processed',
   Expired = 'expired',
   Cancelled = 'cancelled',
+  Refunded = 'refunded',
+  ChargedBack = 'charged_back',
 }

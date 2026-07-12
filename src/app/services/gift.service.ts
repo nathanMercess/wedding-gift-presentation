@@ -1,6 +1,6 @@
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable, WritableSignal, signal } from '@angular/core';
-import { finalize } from 'rxjs';
+import { forkJoin, finalize } from 'rxjs';
 import { EndpointsUrls } from '../constants/api-endpoints';
 import { GiftCategory } from '../enums/gift-category.enum';
 import { GiftSortField } from '../enums/GiftSortField';
@@ -231,6 +231,60 @@ export class GiftService {
           this.patchAdminState({ gifts: snapshot, totalCount: snapshotCount, giftsError: HttpErrorUtil.extract(err, 'Erro ao remover presente.') });
         },
       });
+  }
+
+  public saveAdminGiftsBatch(gifts: Gift[], category: GiftCategory | null, onSuccess: () => void): void {
+    if (gifts.length === 0)
+      return;
+
+    this.patchAdminState({ giftSaving: true, giftError: '' });
+    forkJoin(gifts.map((gift: Gift) => this.http.put<ApiResponse<Gift>>(this.endpointsUrls.adminGiftsById(gift.id), { ...gift, category }).pipe(ApiResponseUtil.data<Gift>('Erro ao atualizar presentes.'))))
+      .pipe(finalize((): void => this.patchAdminState({ giftSaving: false })))
+      .subscribe({
+        next: (savedGifts: Gift[]): void => {
+          const savedById: Map<string, Gift> = new Map(savedGifts.map((gift: Gift): [string, Gift] => [gift.id, gift]));
+          this.adminState.update((state: AdminGiftState): AdminGiftState => ({ ...state, gifts: state.gifts.map((gift: Gift): Gift => savedById.get(gift.id) ?? gift) }));
+          onSuccess();
+        },
+        error: (err: HttpErrorResponse): void => this.patchAdminState({ giftError: HttpErrorUtil.extract(err, 'Erro ao atualizar presentes.') }),
+      });
+  }
+
+  public deleteAdminGiftsBatch(gifts: Gift[], onSuccess: () => void): void {
+    if (gifts.length === 0)
+      return;
+
+    this.patchAdminState({ giftSaving: true, giftsError: '' });
+    forkJoin(gifts.map((gift: Gift) => this.http.delete<ApiResponse<null>>(this.endpointsUrls.adminGiftsById(gift.id)).pipe(ApiResponseUtil.nullableData<null>('Erro ao remover presentes.'))))
+      .pipe(finalize((): void => this.patchAdminState({ giftSaving: false })))
+      .subscribe({
+        next: (): void => {
+          const deletedIds: Set<string> = new Set(gifts.map((gift: Gift): string => gift.id));
+          this.adminState.update((state: AdminGiftState): AdminGiftState => ({ ...state, gifts: state.gifts.filter((gift: Gift): boolean => !deletedIds.has(gift.id)), totalCount: Math.max(0, state.totalCount - deletedIds.size) }));
+          onSuccess();
+        },
+        error: (err: HttpErrorResponse): void => this.patchAdminState({ giftsError: HttpErrorUtil.extract(err, 'Erro ao remover presentes.') }),
+      });
+  }
+
+  public createAdminGiftsBatch(gifts: Array<Partial<Gift>>, onSuccess: () => void): void {
+    if (gifts.length === 0)
+      return;
+
+    this.patchAdminState({ giftSaving: true, giftError: '' });
+    forkJoin(gifts.map((gift: Partial<Gift>) => this.http.post<ApiResponse<Gift>>(this.endpointsUrls.adminGiftsList, gift).pipe(ApiResponseUtil.data<Gift>('Erro ao importar presentes.'))))
+      .pipe(finalize((): void => this.patchAdminState({ giftSaving: false })))
+      .subscribe({
+        next: (created: Gift[]): void => {
+          this.adminState.update((state: AdminGiftState): AdminGiftState => ({ ...state, gifts: [...created, ...state.gifts], totalCount: state.totalCount + created.length }));
+          onSuccess();
+        },
+        error: (err: HttpErrorResponse): void => this.patchAdminState({ giftError: HttpErrorUtil.extract(err, 'Erro ao importar presentes.') }),
+      });
+  }
+
+  public duplicateAdminGift(gift: Gift): void {
+    this.saveAdminGift('', { ...gift, id: undefined, name: `${gift.name} (cópia)`, raised: 0, fullyFunded: false });
   }
 
   public clearAdminGiftError(): void {

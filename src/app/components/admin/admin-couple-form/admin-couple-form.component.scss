@@ -415,6 +415,32 @@ textarea.cf-input {
 .cf-actions {
   display: flex;
   justify-content: flex-end;
+  gap: .75rem;
+  flex-wrap: wrap;
+}
+
+.cf-secondary-action {
+  min-height: 2.8rem;
+  padding: 0 1rem;
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cf-draft-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .85rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--hairline));
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--primary) 6%, var(--card));
+  color: var(--foreground);
 }
 
 .cf-save {

@@ -3,11 +3,13 @@ import { RouterOutlet } from '@angular/router';
 import { ToastComponent } from './components/toast/toast.component';
 
 @Component({
-    selector: 'app-root',
-    template: `
+  standalone: true,
+  selector: 'app-root',
+  template: `
+    <a class="skip-link" href="#main-content">Ir para o conteúdo</a>
     <app-toast />
     <router-outlet />
   `,
-    imports: [RouterOutlet, ToastComponent]
+  imports: [RouterOutlet, ToastComponent],
 })
 export class AppComponent {}

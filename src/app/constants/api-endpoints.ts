@@ -13,6 +13,14 @@ export class EndpointsUrls {
         return `${this.apiUrl}/auth/login`;
     }
 
+    public get authForgotPassword(): string {
+        return `${this.apiUrl}/auth/forgot-password`;
+    }
+
+    public get authResetPassword(): string {
+        return `${this.apiUrl}/auth/reset-password`;
+    }
+
     public get giftsList(): string {
         return `${this.apiUrl}/gifts`;
     }
@@ -27,6 +35,26 @@ export class EndpointsUrls {
 
     public get adminDashboard(): string {
         return `${this.apiUrl}/admin/dashboard`;
+    }
+
+    public get adminDashboardOverview(): string {
+        return `${this.apiUrl}/admin/dashboard/overview`;
+    }
+
+    public get adminContributions(): string {
+        return `${this.apiUrl}/admin/contributions`;
+    }
+
+    public get adminPayments(): string {
+        return `${this.apiUrl}/admin/payments`;
+    }
+
+    public get adminUsers(): string {
+        return `${this.apiUrl}/admin/users`;
+    }
+
+    public get adminContributionsExport(): string {
+        return `${this.apiUrl}/admin/contributions/export.csv`;
     }
 
     public get adminPaymentsReconcileApproved(): string {
@@ -53,6 +81,26 @@ export class EndpointsUrls {
         return `${this.apiUrl}/admin/gifts/${id}`;
     }
 
+    public adminContributionMessageRead(id: string): string {
+        return `${this.apiUrl}/admin/contributions/${id}/message-read`;
+    }
+
+    public adminContributionMessageArchive(id: string): string {
+        return `${this.apiUrl}/admin/contributions/${id}/message-archive`;
+    }
+
+    public adminPaymentRefund(orderId: string): string {
+        return `${this.apiUrl}/admin/payments/${orderId}/refund`;
+    }
+
+    public adminUserActive(id: string): string {
+        return `${this.apiUrl}/admin/users/${id}/active`;
+    }
+
+    public adminUserRole(id: string): string {
+        return `${this.apiUrl}/admin/users/${id}/role`;
+    }
+
     public get adminGiftsEnrich(): string {
         return `${this.apiUrl}/admin/gifts/enrich`;
     }
@@ -75,5 +123,13 @@ export class EndpointsUrls {
 
     public paymentOrder(orderId: string): string {
         return `${this.apiUrl}/payment/order/${orderId}`;
+    }
+
+    public get paymentOrderLookupRequest(): string {
+        return `${this.apiUrl}/payment/order-lookup/request`;
+    }
+
+    public paymentOrderLookup(token: string): string {
+        return `${this.apiUrl}/payment/order-lookup/${encodeURIComponent(token)}`;
     }
 }

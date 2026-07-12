@@ -4,6 +4,7 @@ import { AdminCoupleFormComponent } from './admin-couple-form.component';
 import { DEFAULT_SITE_SETTINGS } from '../../../constants/default-site-settings.constant';
 import { GiftDisplayMode } from '../../../enums/gift-display-mode.enum';
 import { CoupleService } from '../../../services/couple.service';
+import { CoupleDraftService } from '../../../services/couple-draft.service';
 import { ThemeService } from '../../../services/theme.service';
 import { CarouselPhoto } from '../../../models/couple.model';
 
@@ -29,6 +30,7 @@ describe('AdminCoupleFormComponent — carrossel', () => {
       providers: [
         { provide: CoupleService, useValue: coupleStub },
         { provide: ThemeService, useValue: { apply: jest.fn() } },
+        { provide: CoupleDraftService, useValue: { exists: jest.fn((): boolean => false), load: jest.fn(), save: jest.fn(), clear: jest.fn() } },
       ],
     });
     TestBed.overrideComponent(AdminCoupleFormComponent, { set: { template: '<div></div>', imports: [] } });

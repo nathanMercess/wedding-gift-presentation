@@ -320,10 +320,16 @@
 
   <div *ngIf="coupleService.state().success" class="success-msg">Informações salvas com sucesso!</div>
   <div *ngIf="coupleService.state().error" class="error-msg">{{ coupleService.state().error }}</div>
+  <div *ngIf="hasDraft" class="cf-draft-notice">
+    <span>Existe um rascunho salvo neste navegador.</span>
+    <button type="button" class="cf-link" (click)="loadDraft()">Carregar rascunho</button>
+  </div>
 
   <div class="cf-actions">
-    <button class="cf-save" (click)="save()" [disabled]="coupleService.state().saving || carouselUploading">
-      {{ coupleService.state().saving ? 'Salvando...' : 'Salvar alterações' }}
+    <button type="button" class="cf-secondary-action" (click)="saveDraft()" [disabled]="carouselUploading">Salvar rascunho</button>
+    <button type="button" class="cf-secondary-action" (click)="previewDraft()" [disabled]="carouselUploading">Pré-visualizar</button>
+    <button type="button" class="cf-save" (click)="publish()" [disabled]="coupleService.state().saving || carouselUploading">
+      {{ coupleService.state().saving ? 'Publicando...' : 'Publicar alterações' }}
     </button>
   </div>
 </div>

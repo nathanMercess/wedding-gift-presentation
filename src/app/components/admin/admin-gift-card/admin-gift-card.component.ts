@@ -13,8 +13,11 @@ import { Gift } from '../../../models/gift.model';
 export class AdminGiftCardComponent {
   public readonly gift: InputSignal<Gift> = input.required<Gift>();
   public readonly isEditing: InputSignal<boolean> = input<boolean>(false);
+  public readonly selected: InputSignal<boolean> = input<boolean>(false);
   public readonly edit: OutputEmitterRef<Gift> = output<Gift>();
   public readonly delete: OutputEmitterRef<Gift> = output<Gift>();
+  public readonly duplicate: OutputEmitterRef<Gift> = output<Gift>();
+  public readonly selectedChange: OutputEmitterRef<boolean> = output<boolean>();
 
   public getProgressPercent(): number {
     if (this.gift().total <= 0)

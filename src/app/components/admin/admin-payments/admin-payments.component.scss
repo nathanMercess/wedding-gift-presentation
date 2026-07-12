@@ -1,0 +1,22 @@
+.operations-section { display: grid; gap: 1.25rem; }
+.operations-header h2 { margin: 0; font-family: var(--font-serif); font-size: clamp(1.5rem, 3vw, 2rem); }
+.operations-header p { margin: .35rem 0 0; color: var(--muted-foreground); }
+.operations-filters { display: flex; gap: .75rem; padding: 1rem; border: 1px solid var(--hairline); border-radius: var(--radius-lg); background: var(--card); }
+.operations-filters label { display: grid; gap: .35rem; min-width: 190px; color: var(--muted-foreground); font-size: .78rem; }
+.operations-filters select { min-height: 2.65rem; padding: 0 .75rem; border: 1px solid var(--hairline-strong); border-radius: var(--radius-md); background: var(--secondary); color: var(--foreground); }
+.payments-table-wrap { overflow-x: auto; border: 1px solid var(--hairline); border-radius: var(--radius-lg); background: var(--card); }
+table { width: 100%; border-collapse: collapse; font-size: .84rem; }
+th, td { padding: .8rem .9rem; border-bottom: 1px solid var(--hairline); text-align: left; vertical-align: top; }
+th { background: var(--secondary); font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; }
+td small { display: block; margin-top: .25rem; color: var(--muted-foreground); }
+.order-code { display: block; max-width: 10rem; overflow: hidden; text-overflow: ellipsis; font-family: monospace; }
+.status { display: inline-flex; padding: .2rem .55rem; border-radius: var(--radius-pill); background: var(--secondary); font-size: .7rem; }
+.status.approved { color: var(--success); background: var(--success-bg); }
+.status.rejected, .status.error, .status.refunded, .status.charged_back { color: var(--danger); background: var(--danger-bg); }
+.danger-action { padding: .4rem .65rem; border: 1px solid var(--danger-border); border-radius: var(--radius-sm); background: var(--danger-bg); color: var(--danger); cursor: pointer; }
+.operations-pagination { display: flex; justify-content: center; align-items: center; gap: 1rem; }
+.operations-pagination button { padding: .45rem .75rem; border: 1px solid var(--hairline-strong); border-radius: var(--radius-sm); background: transparent; color: var(--foreground); }
+.operations-status, .operations-error, .empty-operations { padding: 1rem; border-radius: var(--radius-md); }
+.operations-status, .empty-operations { background: var(--secondary); color: var(--muted-foreground); }
+.operations-error { background: var(--danger-bg); color: var(--danger); }
+@media (max-width: 560px) { .operations-filters { flex-direction: column; } .operations-filters label { min-width: 0; } }

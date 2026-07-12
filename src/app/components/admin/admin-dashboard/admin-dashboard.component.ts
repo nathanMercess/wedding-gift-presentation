@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged, interval, takeUntil } from 'rxjs';
 import { EMPTY_GIFT } from '../../../constants/empty-gift.constant';
 import { Gift } from '../../../models/gift.model';
+import { AdminContribution } from '../../../models/admin-contribution.model';
 import { GiftService } from '../../../services/gift.service';
 import { CoupleService } from '../../../services/couple.service';
 import { AuthService } from '../../../services/auth.service';
@@ -12,28 +13,40 @@ import { ConfirmDialogComponent } from '../../confirm-dialog/confirm-dialog.comp
 import { AdminGiftCardComponent } from '../admin-gift-card/admin-gift-card.component';
 import { AdminGiftFormComponent } from '../admin-gift-form/admin-gift-form.component';
 import { AdminCoupleFormComponent } from '../admin-couple-form/admin-couple-form.component';
+import { AdminContributionsComponent } from '../admin-contributions/admin-contributions.component';
 import { SlideOverComponent } from '../../slide-over/slide-over.component';
+import { AdminOverviewComponent } from '../admin-overview/admin-overview.component';
+import { AdminPaymentsComponent } from '../admin-payments/admin-payments.component';
+import { AdminUsersComponent } from '../admin-users/admin-users.component';
 import { AdminTab } from '../../../enums/admin-tab.enum';
+import { GiftCategory } from '../../../enums/gift-category.enum';
 import { UserRole } from '../../../enums/user-role.enum';
+import { ToastService } from '../../../services/toast.service';
+import { AdminOperationsService } from '../../../services/admin-operations.service';
+import { GiftImportUtil } from '../../../utils/gift-import.util';
 
 @Component({
   standalone: true,
   selector: 'app-admin-dashboard',
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss',
-  imports: [CommonModule, FormsModule, RouterLink, ConfirmDialogComponent, AdminGiftCardComponent, AdminGiftFormComponent, AdminCoupleFormComponent, SlideOverComponent],
+  imports: [CommonModule, FormsModule, RouterLink, ConfirmDialogComponent, AdminGiftCardComponent, AdminGiftFormComponent, AdminCoupleFormComponent, AdminContributionsComponent, AdminOverviewComponent, AdminPaymentsComponent, AdminUsersComponent, SlideOverComponent],
 })
 export class AdminDashboardComponent implements OnInit, OnDestroy {
   public readonly AdminTab: typeof AdminTab = AdminTab;
+  public readonly categoryOptions: GiftCategory[] = Object.values(GiftCategory);
 
-  public activeTab: AdminTab = AdminTab.Gifts;
+  public activeTab: AdminTab = AdminTab.Overview;
   public showGiftForm: boolean = false;
   public editingGift: Gift = EMPTY_GIFT;
   public giftPendingDeletion: Gift = EMPTY_GIFT;
   public showDeleteConfirm: boolean = false;
+  public showBulkDeleteConfirm: boolean = false;
   public showDiscardConfirm: boolean = false;
   public pendingTab: AdminTab | null = null;
   public searchTerm: string = '';
+  public selectedGiftIds: Set<string> = new Set<string>();
+  public bulkCategory: GiftCategory | null = null;
 
   @ViewChild(AdminGiftFormComponent) public giftForm?: AdminGiftFormComponent;
   @ViewChild(AdminCoupleFormComponent) public coupleForm?: AdminCoupleFormComponent;
@@ -46,6 +59,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     public readonly giftService: GiftService,
     public readonly coupleService: CoupleService,
     public readonly auth: AuthService,
+    public readonly toast: ToastService,
+    public readonly operations: AdminOperationsService,
   ) {
     effect((): void => {
       if (!this.giftService.adminState().giftSaved)
@@ -89,9 +104,18 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     return !!this.giftForm?.isDirty || !!this.coupleForm?.isDirty;
   }
 
+  public get selectedGifts(): Gift[] {
+    return this.giftService.adminState().gifts.filter((gift: Gift): boolean => this.selectedGiftIds.has(gift.id));
+  }
+
+  public get unreadMessageCount(): number {
+    return this.operations.state().contributions.filter((contribution: AdminContribution): boolean => !!contribution.message && !contribution.messageReadAtUtc && !contribution.messageArchivedAtUtc).length;
+  }
+
   public ngOnInit(): void {
     this.loadGifts();
     this.coupleService.loadCouple();
+    this.operations.loadContributions({ hasMessage: true, page: 1, pageSize: 100 });
   }
 
   public ngOnDestroy(): void {
@@ -127,6 +151,70 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   public openEditGift(gift: Gift): void {
     this.editingGift = gift;
     this.showGiftForm = true;
+  }
+
+  public duplicateGift(gift: Gift): void {
+    this.giftService.duplicateAdminGift(gift);
+  }
+
+  public toggleGiftSelection(gift: Gift, selected: boolean): void {
+    const nextSelection: Set<string> = new Set(this.selectedGiftIds);
+
+    if (selected)
+      nextSelection.add(gift.id);
+
+    if (!selected)
+      nextSelection.delete(gift.id);
+
+    this.selectedGiftIds = nextSelection;
+  }
+
+  public toggleAllDisplayed(selected: boolean): void {
+    this.selectedGiftIds = selected ? new Set(this.giftService.adminState().gifts.map((gift: Gift): string => gift.id)) : new Set<string>();
+  }
+
+  public applyBulkCategory(): void {
+    this.giftService.saveAdminGiftsBatch(this.selectedGifts, this.bulkCategory, (): void => {
+      this.selectedGiftIds = new Set<string>();
+      this.toast.success('Categoria atualizada nos presentes selecionados.');
+    });
+  }
+
+  public requestBulkDelete(): void {
+    if (this.selectedGiftIds.size === 0)
+      return;
+
+    this.showBulkDeleteConfirm = true;
+  }
+
+  public confirmBulkDelete(): void {
+    this.showBulkDeleteConfirm = false;
+    this.giftService.deleteAdminGiftsBatch(this.selectedGifts, (): void => {
+      this.selectedGiftIds = new Set<string>();
+      this.toast.success('Presentes removidos.');
+    });
+  }
+
+  public cancelBulkDelete(): void {
+    this.showBulkDeleteConfirm = false;
+  }
+
+  public async onGiftImport(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file: File | undefined = input.files?.[0];
+    input.value = '';
+
+    if (!file)
+      return;
+
+    const gifts: Array<Partial<Gift>> = GiftImportUtil.parse(await file.text());
+
+    if (gifts.length === 0) {
+      this.toast.error('A planilha não contém presentes válidos.');
+      return;
+    }
+
+    this.giftService.createAdminGiftsBatch(gifts, (): void => this.toast.success(`${gifts.length} presente${gifts.length === 1 ? '' : 's'} importado${gifts.length === 1 ? '' : 's'}.`));
   }
 
   public requestTabChange(tab: AdminTab): void {

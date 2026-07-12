@@ -1,0 +1,41 @@
+<main id="main-content" class="lookup-root">
+  <section class="lookup-card">
+    <a routerLink="/gifts" class="back-link">← Voltar para os presentes</a>
+    <div *ngIf="!token" class="lookup-heading">
+      <span class="lookup-icon">✓</span>
+      <h1>Consultar meu pedido</h1>
+      <p>Informe o pedido e o e-mail usado no pagamento. Enviaremos um link seguro de uso único.</p>
+    </div>
+
+    <div *ngIf="token" class="lookup-heading">
+      <span class="lookup-icon">✓</span>
+      <h1>Detalhes do pedido</h1>
+      <p>Este link é pessoal e pode ser usado uma única vez.</p>
+    </div>
+
+    <form *ngIf="!token && !paymentService.orderLookupState().requested" (ngSubmit)="lookup()" class="lookup-form">
+      <label for="orderId">Número do pedido</label>
+      <input id="orderId" type="text" name="orderId" [(ngModel)]="orderId" autocomplete="off"
+        placeholder="00000000-0000-0000-0000-000000000000" />
+      <p *ngIf="submitted && !orderId.trim()" class="field-error">Informe o número do pedido.</p>
+      <label for="lookupEmail">E-mail usado no pagamento</label>
+      <input id="lookupEmail" type="email" name="email" [(ngModel)]="email" autocomplete="email" placeholder="voce@exemplo.com" />
+      <p *ngIf="submitted && !email.trim()" class="field-error">Informe o e-mail usado no pagamento.</p>
+      <button type="submit" [disabled]="paymentService.orderLookupState().loading">{{ paymentService.orderLookupState().loading ? 'Enviando...' : 'Enviar link seguro' }}</button>
+    </form>
+
+    <div *ngIf="paymentService.orderLookupState().requested" class="lookup-success">Se os dados corresponderem a um pedido, você receberá o link de consulta por e-mail.</div>
+    <div *ngIf="paymentService.orderLookupState().error" class="lookup-error">{{ paymentService.orderLookupState().error }}</div>
+    <div *ngIf="token && paymentService.orderLookupState().loading" class="lookup-loading">Consultando pedido...</div>
+
+    <article *ngIf="paymentService.orderLookupState().hasResponse && paymentService.orderLookupState().response as order" class="order-result">
+      <div><span>Status</span><strong class="status-pill">{{ statusLabel }}</strong></div>
+      <div><span>Presente</span><strong>{{ order.giftName }}</strong></div>
+      <div><span>Valor</span><strong>{{ order.amount | currency:'BRL' }}</strong></div>
+      <div><span>Pedido</span><strong class="order-code">{{ order.orderId }}</strong></div>
+      <div><span>Atualizado em</span><strong>{{ order.updatedAtUtc | date:'short' }}</strong></div>
+    </article>
+
+    <p class="privacy-note">Nunca informe dados do cartão ou o código PIX para consultar um pedido.</p>
+  </section>
+</main>

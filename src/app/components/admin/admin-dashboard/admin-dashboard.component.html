@@ -8,22 +8,54 @@
       <span>Admin</span>
     </div>
     <nav class="dash-nav">
+      <button type="button" [class.active]="activeTab === AdminTab.Overview" [attr.aria-pressed]="activeTab === AdminTab.Overview"
+        (click)="requestTabChange(AdminTab.Overview)">Resumo</button>
       <button type="button" [class.active]="activeTab === AdminTab.Gifts" [attr.aria-pressed]="activeTab === AdminTab.Gifts"
         (click)="requestTabChange(AdminTab.Gifts)">Presentes</button>
+      <button type="button" [class.active]="activeTab === AdminTab.Contributions" [attr.aria-pressed]="activeTab === AdminTab.Contributions"
+        (click)="requestTabChange(AdminTab.Contributions)">Contribuições <span *ngIf="unreadMessageCount" class="nav-badge">{{ unreadMessageCount }}</span></button>
+      <button *ngIf="isSuperAdmin" type="button" [class.active]="activeTab === AdminTab.Payments"
+        [attr.aria-pressed]="activeTab === AdminTab.Payments" (click)="requestTabChange(AdminTab.Payments)">Pagamentos</button>
       <button type="button" [class.active]="activeTab === AdminTab.Couple" [attr.aria-pressed]="activeTab === AdminTab.Couple"
         (click)="requestTabChange(AdminTab.Couple)">Casal</button>
+      <button *ngIf="isSuperAdmin" type="button" [class.active]="activeTab === AdminTab.Users"
+        [attr.aria-pressed]="activeTab === AdminTab.Users" (click)="requestTabChange(AdminTab.Users)">Usuários</button>
       <a routerLink="/gifts" target="_blank" rel="noopener">Ver vitrine</a>
       <a *ngIf="isSuperAdmin" routerLink="/super-admin/dashboard">Dashboard</a>
     </nav>
     <button class="logout-btn" (click)="logout()">Sair</button>
   </header>
-  <main class="dash-main">
+  <main id="main-content" class="dash-main">
+
+    <app-admin-overview *ngIf="activeTab === AdminTab.Overview"></app-admin-overview>
 
     <!-- GIFTS TAB -->
     <section *ngIf="activeTab === AdminTab.Gifts" class="tab-section">
       <div class="section-header">
         <h2>Presentes</h2>
-        <button class="btn-primary" (click)="openNewGift()">+ Adicionar presente</button>
+        <div class="section-actions">
+          <label class="btn-outline import-action">Importar CSV
+            <input type="file" accept=".csv,text/csv" hidden (change)="onGiftImport($event)" />
+          </label>
+          <button type="button" class="btn-primary" (click)="openNewGift()">+ Adicionar presente</button>
+        </div>
+      </div>
+
+      <div *ngIf="giftService.adminState().gifts.length > 0" class="bulk-actions">
+        <label class="bulk-select-all">
+          <input type="checkbox" [checked]="selectedGiftIds.size === giftService.adminState().gifts.length"
+            (change)="toggleAllDisplayed($any($event.target).checked)" />
+          Selecionar página
+        </label>
+        <span>{{ selectedGiftIds.size }} selecionado{{ selectedGiftIds.size !== 1 ? 's' : '' }}</span>
+        <select [(ngModel)]="bulkCategory" [disabled]="selectedGiftIds.size === 0">
+          <option [ngValue]="null">Sem categoria</option>
+          <option *ngFor="let category of categoryOptions" [ngValue]="category">{{ category }}</option>
+        </select>
+        <button type="button" class="btn-outline" [disabled]="selectedGiftIds.size === 0 || giftService.adminState().giftSaving"
+          (click)="applyBulkCategory()">Aplicar categoria</button>
+        <button type="button" class="bulk-danger" [disabled]="selectedGiftIds.size === 0 || giftService.adminState().giftSaving"
+          (click)="requestBulkDelete()">Remover selecionados</button>
       </div>
 
       <div *ngIf="giftService.adminState().giftsLoading" class="status-msg">Carregando...</div>
@@ -47,7 +79,8 @@
       <div *ngIf="!giftService.adminState().giftsLoading && giftService.adminState().gifts.length > 0"
         class="gifts-cards-grid">
         <app-admin-gift-card *ngFor="let gift of giftService.adminState().gifts; trackBy: trackByGiftId"
-          [gift]="gift" [isEditing]="editingGift.id === gift.id"
+          [gift]="gift" [isEditing]="editingGift.id === gift.id" [selected]="selectedGiftIds.has(gift.id)"
+          (selectedChange)="toggleGiftSelection(gift, $event)" (duplicate)="duplicateGift($event)"
           (edit)="openEditGift($event)" (delete)="requestDeleteGift($event)"></app-admin-gift-card>
       </div>
 
@@ -67,6 +100,10 @@
       </div>
     </section>
 
+    <app-admin-contributions *ngIf="activeTab === AdminTab.Contributions"></app-admin-contributions>
+
+    <app-admin-payments *ngIf="activeTab === AdminTab.Payments && isSuperAdmin"></app-admin-payments>
+
     <!-- COUPLE TAB -->
     <section *ngIf="activeTab === AdminTab.Couple" class="tab-section">
       <div class="section-header">
@@ -79,6 +116,8 @@
       <app-admin-couple-form *ngIf="!coupleService.state().loading && !coupleService.state().error"></app-admin-couple-form>
     </section>
 
+    <app-admin-users *ngIf="activeTab === AdminTab.Users && isSuperAdmin"></app-admin-users>
+
   </main>
 
   <app-slide-over *ngIf="showGiftForm" [title]="isEditingGift ? 'Editar presente' : 'Novo presente'"
@@ -89,6 +128,11 @@
   <app-confirm-dialog *ngIf="showDeleteConfirm" title="Remover presente?"
     [message]="'Tem certeza que deseja remover \'' + giftPendingDeletion.name + '\'? Essa ação não pode ser desfeita.'"
     confirmLabel="Remover" cancelLabel="Cancelar" (confirmed)="confirmDeleteGift()" (cancelled)="cancelDeleteGift()">
+  </app-confirm-dialog>
+
+  <app-confirm-dialog *ngIf="showBulkDeleteConfirm" title="Remover presentes selecionados?"
+    [message]="selectedGiftIds.size + ' presente(s) serão removidos permanentemente.'"
+    confirmLabel="Remover todos" cancelLabel="Cancelar" (confirmed)="confirmBulkDelete()" (cancelled)="cancelBulkDelete()">
   </app-confirm-dialog>
 
   <app-confirm-dialog *ngIf="showDiscardConfirm" title="Descartar alterações?"

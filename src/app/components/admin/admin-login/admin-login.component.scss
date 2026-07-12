@@ -197,6 +197,14 @@
   &:disabled { opacity: .5; cursor: not-allowed; }
 }
 
+.forgot-link {
+  justify-self: end;
+  color: var(--primary);
+  font-size: .82rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
 /* ── Mobile: esconde a foto, form ocupa tudo ── */
 @media (max-width: 860px) {
   .login-aside {

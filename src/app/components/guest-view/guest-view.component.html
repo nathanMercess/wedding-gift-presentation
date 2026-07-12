@@ -1,4 +1,4 @@
-<div class="gv-root">
+<main id="main-content" class="gv-root">
   <div *ngIf="isInitialLoading" class="sk-root" aria-live="polite" aria-busy="true">
     <div class="sk-hero-block"></div>
     <div class="sk-body">
@@ -284,6 +284,7 @@
           d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
       </svg>
       <span>{{ coupleService.state().couple.names }}</span>
+      <a routerLink="/pedido">Consultar pedido</a>
     </footer>
 
   </ng-container>
@@ -295,4 +296,4 @@
     (paymentCompleted)="onGiftPaymentCompleted()">
   </app-gift-details-modal>
 
-</div>
+</main>

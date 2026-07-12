@@ -1094,6 +1094,12 @@
   border-top: 1px solid var(--hairline);
 }
 
+.gv-footer a {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
 .footer-heart {
   color: color-mix(in srgb, var(--primary) 60%, transparent);
 }

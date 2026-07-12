@@ -1,0 +1,73 @@
+<section class="operations-section">
+  <div class="operations-header">
+    <div>
+      <h2>Visão geral</h2>
+      <p>Acompanhe presentes, contribuições e pagamentos.</p>
+    </div>
+    <label class="period-control">
+      Período
+      <select [(ngModel)]="selectedDays" (change)="load()">
+        <option [ngValue]="7">7 dias</option>
+        <option [ngValue]="30">30 dias</option>
+        <option [ngValue]="90">90 dias</option>
+      </select>
+    </label>
+  </div>
+
+  <div *ngIf="operations.state().loading" class="operations-status">Carregando resumo...</div>
+  <div *ngIf="operations.state().error" class="operations-error">{{ operations.state().error }}</div>
+
+  <ng-container *ngIf="operations.state().overview as dashboard">
+    <div class="metric-grid">
+      <article class="metric-card">
+        <span>Total arrecadado</span>
+        <strong>{{ dashboard.overview.totalRaised | currency:'BRL' }}</strong>
+        <small>{{ dashboard.overview.fundingPercent | number:'1.0-1' }}% da meta</small>
+      </article>
+      <article class="metric-card">
+        <span>Contribuições pagas</span>
+        <strong>{{ dashboard.overview.paidContributions }}</strong>
+        <small>{{ dashboard.overview.uniqueContributors }} pessoas</small>
+      </article>
+      <article class="metric-card">
+        <span>Presentes concluídos</span>
+        <strong>{{ dashboard.overview.fullyFundedGifts }}</strong>
+        <small>de {{ dashboard.overview.totalGifts }} presentes</small>
+      </article>
+      <article class="metric-card attention">
+        <span>Pagamentos pendentes</span>
+        <strong>{{ dashboard.payments.pending }}</strong>
+        <small>{{ dashboard.payments.pendingAmount | currency:'BRL' }}</small>
+      </article>
+    </div>
+
+    <div class="summary-grid">
+      <article class="summary-card">
+        <h3>Presentes</h3>
+        <dl>
+          <div><dt>Disponíveis</dt><dd>{{ dashboard.gifts.available }}</dd></div>
+          <div><dt>Parcialmente pagos</dt><dd>{{ dashboard.gifts.partiallyFunded }}</dd></div>
+          <div><dt>Sem contribuição</dt><dd>{{ dashboard.gifts.withoutContributions }}</dd></div>
+          <div><dt>Saldo restante</dt><dd>{{ dashboard.gifts.remainingAmount | currency:'BRL' }}</dd></div>
+        </dl>
+      </article>
+      <article class="summary-card">
+        <h3>Pagamentos</h3>
+        <dl>
+          <div><dt>Aprovados</dt><dd>{{ dashboard.payments.approved }}</dd></div>
+          <div><dt>Pendentes</dt><dd>{{ dashboard.payments.pending }}</dd></div>
+          <div><dt>Falharam</dt><dd>{{ dashboard.payments.failed }}</dd></div>
+          <div><dt>Taxa de sucesso</dt><dd>{{ dashboard.payments.successRate | number:'1.0-1' }}%</dd></div>
+        </dl>
+      </article>
+      <article class="summary-card">
+        <h3>Mensagens</h3>
+        <dl>
+          <div><dt>Recebidas</dt><dd>{{ dashboard.messages.total }}</dd></div>
+          <div><dt>Com contribuições</dt><dd>{{ dashboard.messages.contributionMessages }}</dd></div>
+          <div><dt>Em pagamentos</dt><dd>{{ dashboard.messages.paymentIntentMessages }}</dd></div>
+        </dl>
+      </article>
+    </div>
+  </ng-container>
+</section>

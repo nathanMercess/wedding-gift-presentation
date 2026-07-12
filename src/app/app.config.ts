@@ -29,6 +29,16 @@ export const appConfig: ApplicationConfig = {
           import('./components/admin/admin-login/admin-login.component').then(m => m.AdminLoginComponent),
       },
       {
+        path: 'admin/forgot-password',
+        loadComponent: () =>
+          import('./components/admin/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent),
+      },
+      {
+        path: 'reset-password',
+        loadComponent: () =>
+          import('./components/admin/reset-password/reset-password.component').then(m => m.ResetPasswordComponent),
+      },
+      {
         path: 'admin/access-denied',
         canActivate: [authGuard],
         loadComponent: () =>
@@ -50,6 +60,16 @@ export const appConfig: ApplicationConfig = {
         path: 'checkout',
         loadChildren: () =>
           import('./checkout/checkout.routes').then(m => m.CHECKOUT_ROUTES),
+      },
+      {
+        path: 'pedido/:token',
+        loadComponent: () =>
+          import('./components/order-lookup/order-lookup.component').then(m => m.OrderLookupComponent),
+      },
+      {
+        path: 'pedido',
+        loadComponent: () =>
+          import('./components/order-lookup/order-lookup.component').then(m => m.OrderLookupComponent),
       },
       { path: '**', redirectTo: 'gifts' },
     ]),

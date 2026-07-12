@@ -1,0 +1,58 @@
+<section class="operations-section">
+  <div class="operations-header">
+    <div>
+      <h2>Pagamentos</h2>
+      <p>{{ operations.state().paymentTotal }} pagamento{{ operations.state().paymentTotal !== 1 ? 's' : '' }}</p>
+    </div>
+  </div>
+
+  <div class="operations-filters">
+    <label>
+      <span>Status</span>
+      <select [(ngModel)]="selectedStatus" (change)="load()">
+        <option *ngFor="let status of statusOptions" [ngValue]="status">{{ statusLabel(status) }}</option>
+      </select>
+    </label>
+    <label>
+      <span>Forma de pagamento</span>
+      <select [(ngModel)]="selectedMethod" (change)="load()">
+        <option value="">Todas</option>
+        <option value="pix">PIX</option>
+        <option value="credit_card">Cartão de crédito</option>
+        <option value="debit_card">Cartão de débito</option>
+      </select>
+    </label>
+  </div>
+
+  <div *ngIf="operations.state().loading" class="operations-status">Carregando pagamentos...</div>
+  <div *ngIf="operations.state().error" class="operations-error">{{ operations.state().error }}</div>
+  <div *ngIf="!operations.state().loading && operations.state().payments.length === 0" class="empty-operations">Nenhum pagamento encontrado.</div>
+
+  <div class="payments-table-wrap" *ngIf="operations.state().payments.length > 0">
+    <table>
+      <thead><tr><th>Pedido</th><th>Convidado</th><th>Presente</th><th>Valor</th><th>Método</th><th>Status</th><th>Ações</th></tr></thead>
+      <tbody>
+        <tr *ngFor="let payment of operations.state().payments; trackBy: trackByPayment">
+          <td><span class="order-code">{{ payment.orderId }}</span><small>{{ payment.createdAt | date:'short' }}</small></td>
+          <td>{{ payment.contributorName }}</td>
+          <td>{{ payment.giftName || payment.giftId }}</td>
+          <td>{{ payment.amount | currency:'BRL' }}</td>
+          <td>{{ payment.method === 'pix' ? 'PIX' : 'Cartão' }}</td>
+          <td><span [class]="'status ' + payment.status">{{ statusLabel(payment.status) }}</span></td>
+          <td><button *ngIf="canRefund(payment)" type="button" class="danger-action" (click)="requestRefund(payment)">Estornar</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="operations.state().paymentPages > 1" class="operations-pagination">
+    <button type="button" [disabled]="currentPage <= 1" (click)="load(currentPage - 1)">Anterior</button>
+    <span>Página {{ currentPage }} de {{ operations.state().paymentPages }}</span>
+    <button type="button" [disabled]="currentPage >= operations.state().paymentPages" (click)="load(currentPage + 1)">Próxima</button>
+  </div>
+
+  <app-confirm-dialog *ngIf="showRefundConfirm" title="Estornar pagamento?"
+    [message]="'O pagamento de ' + (paymentPendingRefund?.contributorName || '') + ' no valor de ' + ((paymentPendingRefund?.amount || 0) | currency:'BRL') + ' será estornado.'"
+    confirmLabel="Confirmar estorno" cancelLabel="Cancelar" (confirmed)="confirmRefund()" (cancelled)="cancelRefund()">
+  </app-confirm-dialog>
+</section>

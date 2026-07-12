@@ -7,6 +7,8 @@ import { ApiResponseUtil } from '../../utils/api-response.util';
 import { HttpErrorUtil } from '../../utils/http-error';
 import { EMPTY_PAYMENT_RESPONSE } from '../constants/empty-payment-response.constant';
 import { CardPaymentDto } from '../models/card-payment-dto.model';
+import { OrderLookupResponse } from '../models/order-lookup-response.model';
+import { OrderLookupState } from '../models/order-lookup-state.model';
 import { PaymentResponse } from '../models/payment-response.model';
 import { PaymentState } from '../models/payment-state.model';
 import { PaymentStatusState } from '../models/payment-status-state.model';
@@ -26,6 +28,14 @@ export class PaymentService {
   public readonly statusState: WritableSignal<PaymentStatusState> = signal<PaymentStatusState>({
     hasResponse: false,
     response: EMPTY_PAYMENT_RESPONSE,
+    error: '',
+  });
+
+  public readonly orderLookupState: WritableSignal<OrderLookupState> = signal<OrderLookupState>({
+    loading: false,
+    requested: false,
+    hasResponse: false,
+    response: null,
     error: '',
   });
 
@@ -99,11 +109,43 @@ export class PaymentService {
       });
   }
 
+  public requestOrderLookup(orderId: string, email: string): void {
+    this.patchOrderLookupState({ loading: true, requested: false, hasResponse: false, response: null, error: '' });
+
+    this.http.post<ApiResponse<{ accepted: boolean }>>(this.endpointsUrls.paymentOrderLookupRequest, { orderId, email })
+      .pipe(
+        ApiResponseUtil.data<{ accepted: boolean }>('Não foi possível solicitar a consulta do pedido.'),
+        finalize((): void => this.patchOrderLookupState({ loading: false })),
+      )
+      .subscribe({
+        next: (): void => this.patchOrderLookupState({ requested: true, error: '' }),
+        error: (err: HttpErrorResponse): void => this.patchOrderLookupState({ error: HttpErrorUtil.extract(err, 'Não foi possível solicitar a consulta do pedido.') }),
+      });
+  }
+
+  public consumeOrderLookup(token: string): void {
+    this.patchOrderLookupState({ loading: true, requested: false, hasResponse: false, response: null, error: '' });
+
+    this.http.get<ApiResponse<OrderLookupResponse>>(this.endpointsUrls.paymentOrderLookup(token))
+      .pipe(
+        ApiResponseUtil.data<OrderLookupResponse>('Este link de consulta é inválido ou expirou.'),
+        finalize((): void => this.patchOrderLookupState({ loading: false })),
+      )
+      .subscribe({
+        next: (response: OrderLookupResponse): void => this.patchOrderLookupState({ hasResponse: true, response, error: '' }),
+        error: (err: HttpErrorResponse): void => this.patchOrderLookupState({ error: HttpErrorUtil.extract(err, 'Este link de consulta é inválido ou expirou.') }),
+      });
+  }
+
   public patchPaymentState(partialState: Partial<PaymentState>): void {
     this.paymentState.update((currentState: PaymentState): PaymentState => ({ ...currentState, ...partialState }));
   }
 
   public patchStatusState(partialState: Partial<PaymentStatusState>): void {
     this.statusState.update((currentState: PaymentStatusState): PaymentStatusState => ({ ...currentState, ...partialState }));
+  }
+
+  public patchOrderLookupState(partialState: Partial<OrderLookupState>): void {
+    this.orderLookupState.update((currentState: OrderLookupState): OrderLookupState => ({ ...currentState, ...partialState }));
   }
 }

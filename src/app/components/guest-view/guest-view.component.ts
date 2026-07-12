@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewChecked, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, WritableSignal, effect, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { EMPTY_GIFT } from '../../constants/empty-gift.constant';
 import { DEFAULT_SITE_SETTINGS } from '../../constants/default-site-settings.constant';
@@ -14,6 +14,7 @@ import { GiftDisplayMode } from '../../enums/gift-display-mode.enum';
 import { CarouselPhoto, Couple, CoupleSiteSettings } from '../../models/couple.model';
 import { Gift } from '../../models/gift.model';
 import { CoupleService } from '../../services/couple.service';
+import { CoupleDraftService } from '../../services/couple-draft.service';
 import { GiftService } from '../../services/gift.service';
 import { ToastService } from '../../services/toast.service';
 import { DateUtil } from '../../utils/date.util';
@@ -26,7 +27,7 @@ import { GiftDetailsModalComponent } from '../gift-details-modal/gift-details-mo
   selector: 'app-guest-view',
   templateUrl: './guest-view.component.html',
   styleUrl: './guest-view.component.scss',
-  imports: [CommonModule, FormsModule, GiftCardComponent, GiftDetailsModalComponent, CountdownComponent],
+  imports: [CommonModule, FormsModule, RouterLink, GiftCardComponent, GiftDetailsModalComponent, CountdownComponent],
 })
 export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   public searchTerm: string = '';
@@ -163,7 +164,7 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   private initialPage: number = 1;
   private sharedGiftId: string = '';
 
-  public constructor(public readonly giftService: GiftService, public readonly coupleService: CoupleService, public readonly paymentResumeService: PaymentResumeService, public readonly route: ActivatedRoute, public readonly router: Router, public readonly toast: ToastService) {
+  public constructor(public readonly giftService: GiftService, public readonly coupleService: CoupleService, public readonly paymentResumeService: PaymentResumeService, public readonly route: ActivatedRoute, public readonly router: Router, public readonly toast: ToastService, public readonly coupleDraft: CoupleDraftService) {
     effect((): void => {
       const stateCouple: Couple = this.coupleService.state().couple;
       const nextSignature: string = `${stateCouple.names}|${stateCouple.weddingDate}|${stateCouple.photoUrl}|${stateCouple.message}|${stateCouple.eventLocation}|${stateCouple.primaryColor}|${stateCouple.secondaryColor}|${stateCouple.giftDisplayMode}`;
@@ -269,7 +270,7 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   public ngOnInit(): void {
     this.restoreFiltersFromUrl();
-    this.loadCouple();
+    this.loadCoupleOrPreview();
     this.loadGifts(this.initialPage);
     this.giftService.loadGuestStats();
     this.openSharedGift();
@@ -325,6 +326,19 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   public loadCouple(): void {
     this.coupleService.loadCouple();
+  }
+
+  public loadCoupleOrPreview(): void {
+    const preview: boolean = this.route.snapshot.queryParamMap.get('preview') === '1';
+    const draft: Couple | null = preview ? this.coupleDraft.load() : null;
+
+    if (!draft) {
+      this.loadCouple();
+      return;
+    }
+
+    this.coupleService.patchState({ couple: draft, loading: false, error: '' });
+    this.coupleService.theme.apply(draft.primaryColor, draft.secondaryColor);
   }
 
   public loadGifts(page: number = 1): void {

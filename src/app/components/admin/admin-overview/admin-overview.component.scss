@@ -1,0 +1,23 @@
+.operations-section { display: grid; gap: 1.5rem; }
+.operations-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; }
+.operations-header h2 { margin: 0; font-family: var(--font-serif); font-size: clamp(1.6rem, 3vw, 2rem); }
+.operations-header p { margin: .35rem 0 0; color: var(--muted-foreground); }
+.period-control { display: grid; gap: .35rem; font-size: .78rem; color: var(--muted-foreground); }
+.period-control select { min-height: 2.6rem; padding: 0 .75rem; border: 1px solid var(--hairline-strong); border-radius: var(--radius-md); background: var(--card); color: var(--foreground); }
+.metric-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
+.metric-card, .summary-card { padding: 1.25rem; border: 1px solid var(--hairline); border-radius: var(--radius-lg); background: var(--card); box-shadow: var(--shadow-sm); }
+.metric-card { display: grid; gap: .45rem; }
+.metric-card span, .metric-card small { color: var(--muted-foreground); }
+.metric-card strong { font-size: 1.55rem; color: var(--foreground); }
+.metric-card.attention { border-color: color-mix(in srgb, var(--primary) 35%, var(--hairline)); }
+.summary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.summary-card h3 { margin: 0 0 1rem; }
+.summary-card dl { display: grid; gap: .75rem; margin: 0; }
+.summary-card dl div { display: flex; justify-content: space-between; gap: 1rem; }
+.summary-card dt { color: var(--muted-foreground); }
+.summary-card dd { margin: 0; font-weight: 650; }
+.operations-status, .operations-error { padding: 1rem; border-radius: var(--radius-md); }
+.operations-status { background: var(--secondary); color: var(--muted-foreground); }
+.operations-error { background: var(--danger-bg); color: var(--danger); }
+@media (max-width: 900px) { .metric-grid { grid-template-columns: repeat(2, 1fr); } .summary-grid { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { .operations-header { align-items: stretch; flex-direction: column; } .metric-grid { grid-template-columns: 1fr; } }

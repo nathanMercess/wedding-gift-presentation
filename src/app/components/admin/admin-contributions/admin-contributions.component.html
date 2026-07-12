@@ -1,0 +1,64 @@
+<section class="operations-section">
+  <div class="operations-header">
+    <div>
+      <h2>Contribuições e mensagens</h2>
+      <p>{{ operations.state().contributionTotal }} registro{{ operations.state().contributionTotal !== 1 ? 's' : '' }}</p>
+    </div>
+    <button type="button" class="primary-action" (click)="export()">Exportar CSV</button>
+  </div>
+
+  <div class="operations-filters">
+    <label>
+      <span>Buscar</span>
+      <input type="search" [(ngModel)]="searchTerm" placeholder="Nome do convidado ou presente" (keyup.enter)="load()" />
+    </label>
+    <label>
+      <span>Status</span>
+      <select [(ngModel)]="selectedStatus" (change)="load()">
+        <option *ngFor="let status of statusOptions" [ngValue]="status">{{ statusLabel(status) }}</option>
+      </select>
+    </label>
+    <label class="check-filter">
+      <input type="checkbox" [(ngModel)]="onlyMessages" (change)="load()" />
+      Somente com mensagem
+    </label>
+    <button type="button" class="secondary-action" (click)="load()">Aplicar</button>
+  </div>
+
+  <div *ngIf="operations.state().loading" class="operations-status">Carregando contribuições...</div>
+  <div *ngIf="operations.state().error" class="operations-error">{{ operations.state().error }}</div>
+  <div *ngIf="!operations.state().loading && operations.state().contributions.length === 0" class="empty-operations">Nenhuma contribuição encontrada.</div>
+
+  <div class="contribution-list">
+    <article *ngFor="let contribution of operations.state().contributions; trackBy: trackByContribution" class="contribution-card"
+      [class.unread]="contribution.message && !contribution.messageReadAtUtc" [class.archived]="contribution.messageArchivedAtUtc">
+      <div class="contribution-main">
+        <div>
+          <span class="eyebrow">{{ contribution.giftName || contribution.giftId }}</span>
+          <h3>{{ contribution.contributorName }}</h3>
+          <p *ngIf="contribution.message">“{{ contribution.message }}”</p>
+          <small>{{ contribution.paidAt | date:'short' }} · {{ contribution.paymentMethod || 'Não informado' }}</small>
+        </div>
+        <div class="contribution-value">
+          <strong>{{ contribution.amount | currency:'BRL' }}</strong>
+          <span [class]="'status ' + contribution.status.toLowerCase()">{{ statusLabel(contribution.status) }}</span>
+        </div>
+      </div>
+      <div *ngIf="contribution.message" class="message-actions">
+        <button type="button" (click)="markRead(contribution)" [disabled]="operations.state().actionLoading">
+          {{ contribution.messageReadAtUtc ? 'Marcar não lida' : 'Marcar lida' }}
+        </button>
+        <button type="button" (click)="copyMessage(contribution)">Copiar</button>
+        <button type="button" (click)="archive(contribution)" [disabled]="operations.state().actionLoading">
+          {{ contribution.messageArchivedAtUtc ? 'Desarquivar' : 'Arquivar' }}
+        </button>
+      </div>
+    </article>
+  </div>
+
+  <div *ngIf="operations.state().contributionPages > 1" class="operations-pagination">
+    <button type="button" [disabled]="currentPage <= 1" (click)="load(currentPage - 1)">Anterior</button>
+    <span>Página {{ currentPage }} de {{ operations.state().contributionPages }}</span>
+    <button type="button" [disabled]="currentPage >= operations.state().contributionPages" (click)="load(currentPage + 1)">Próxima</button>
+  </div>
+</section>

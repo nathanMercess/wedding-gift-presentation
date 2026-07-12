@@ -53,6 +53,8 @@
 
         <div *ngIf="auth.loginState().error" class="error-msg">{{ auth.loginState().error }}</div>
 
+        <a routerLink="/admin/forgot-password" class="forgot-link">Esqueci minha senha</a>
+
         <button type="submit" class="submit-btn" [disabled]="auth.loginState().loading">
           {{ auth.loginState().loading ? 'Entrando...' : 'Entrar' }}
         </button>
