@@ -6,6 +6,7 @@ import { ButtonComponent } from '../button/button.component';
 import { ButtonVariant } from '../../enums/button-variant.enum';
 import { ButtonType } from '../../enums/button-type.enum';
 import { ContributionType } from '../../enums/contribution-type.enum';
+import { GiftDisplayMode } from '../../enums/gift-display-mode.enum';
 
 export interface ContributionSubmitData {
   guestName: string;
@@ -30,14 +31,16 @@ export const EMPTY_CONTRIBUTION_FORM_DATA: ContributionFormData = {
 };
 
 @Component({
-    selector: 'app-gift-contribution-form',
-    templateUrl: './gift-contribution-form.component.html',
-    styleUrl: './gift-contribution-form.component.scss',
-    imports: [CommonModule, ReactiveFormsModule, ButtonComponent]
+  standalone: true,
+  selector: 'app-gift-contribution-form',
+  templateUrl: './gift-contribution-form.component.html',
+  styleUrl: './gift-contribution-form.component.scss',
+  imports: [CommonModule, ReactiveFormsModule, ButtonComponent],
 })
 export class GiftContributionFormComponent implements OnInit {
   public readonly gift: InputSignal<Gift> = input.required<Gift>();
   public readonly coupleName: InputSignal<string> = input<string>('');
+  public readonly giftDisplayMode: InputSignal<GiftDisplayMode> = input<GiftDisplayMode>(GiftDisplayMode.Traditional);
   public readonly minAmount: InputSignal<number> = input.required<number>();
   public readonly remaining: InputSignal<number> = input.required<number>();
   public readonly availableQuickAmounts: InputSignal<number[]> = input<number[]>([]);
@@ -88,6 +91,16 @@ export class GiftContributionFormComponent implements OnInit {
 
   public get amountControl(): AbstractControl {
     return this.form.get('customAmount')!;
+  }
+
+  public get fullContributionLabel(): string {
+    if (this.giftDisplayMode() === GiftDisplayMode.PrivateUnlimited)
+      return 'Valor do presente';
+
+    if (this.gift().fullyFunded)
+      return 'Valor do presente';
+
+    return 'Valor restante';
   }
 
   public selectType(type: ContributionType): void {

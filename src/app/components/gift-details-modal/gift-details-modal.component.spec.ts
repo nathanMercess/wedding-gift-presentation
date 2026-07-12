@@ -3,6 +3,7 @@ import { GiftDetailsModalComponent } from './gift-details-modal.component';
 import { ContributionSubmitData } from '../gift-contribution-form/gift-contribution-form.component';
 import { ModalStep } from '../../enums/modal-step.enum';
 import { ContributionType } from '../../enums/contribution-type.enum';
+import { GiftDisplayMode } from '../../enums/gift-display-mode.enum';
 import { Gift } from '../../models/gift.model';
 
 function makeGift(over: Partial<Gift> = {}): Gift {
@@ -16,13 +17,14 @@ describe('GiftDetailsModalComponent', () => {
   let fixture: ComponentFixture<GiftDetailsModalComponent>;
   let component: GiftDetailsModalComponent;
 
-  function setup(gift: Gift = makeGift()): void {
+  function setup(gift: Gift = makeGift(), giftDisplayMode: GiftDisplayMode = GiftDisplayMode.Traditional): void {
     TestBed.configureTestingModule({ imports: [GiftDetailsModalComponent] });
     TestBed.overrideComponent(GiftDetailsModalComponent, { set: { template: '<div></div>', imports: [] } });
     fixture = TestBed.createComponent(GiftDetailsModalComponent);
     component = fixture.componentInstance;
     fixture.componentRef.setInput('gift', gift);
     fixture.componentRef.setInput('coupleName', 'David & Maira');
+    fixture.componentRef.setInput('giftDisplayMode', giftDisplayMode);
     fixture.detectChanges();
   }
 
@@ -143,5 +145,13 @@ describe('GiftDetailsModalComponent', () => {
     component.onBackdropClick(event);
 
     expect(closed).toBe(true);
+  });
+
+  it('modo privado ilimitado libera presente indisponivel e usa total como limite', () => {
+    setup(makeGift({ available: false, fullyFunded: true, raised: 300, total: 300 }), GiftDisplayMode.PrivateUnlimited);
+    expect(component.isUnavailable).toBe(false);
+    expect(component.isFullyFunded).toBe(false);
+    expect(component.contributionLimit).toBe(300);
+    expect(component.availableQuickAmounts).toEqual([50, 100, 200, 300]);
   });
 });

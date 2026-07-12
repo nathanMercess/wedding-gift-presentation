@@ -2,6 +2,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, WritableSignal, signal } from '@angular/core';
 import { finalize } from 'rxjs';
 import { EndpointsUrls } from '../constants/api-endpoints';
+import { GiftDisplayMode } from '../enums/gift-display-mode.enum';
 import { ApiResponse } from '../models/api-response.model';
 import { Couple } from '../models/couple.model';
 import { CoupleState } from '../models/couple-state.model';
@@ -14,7 +15,7 @@ import { ThemeService } from './theme.service';
 @Injectable({ providedIn: 'root' })
 export class CoupleService {
   public readonly state: WritableSignal<CoupleState> = signal<CoupleState>({
-    couple: { names: '', weddingDate: '', photoUrl: '', message: '', primaryColor: '#000000', secondaryColor: '#d9d9d9', carouselPhotos: [] },
+    couple: { names: '', weddingDate: '', photoUrl: '', message: '', eventLocation: '', primaryColor: '#000000', secondaryColor: '#d9d9d9', giftDisplayMode: GiftDisplayMode.Traditional, carouselPhotos: [] },
     loading: false,
     saving: false,
     success: false,

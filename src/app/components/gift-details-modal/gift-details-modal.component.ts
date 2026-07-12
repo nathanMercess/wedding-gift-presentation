@@ -11,24 +11,27 @@ import { ModalStep } from '../../enums/modal-step.enum';
 import { ButtonVariant } from '../../enums/button-variant.enum';
 import { ButtonType } from '../../enums/button-type.enum';
 import { ContributionType } from '../../enums/contribution-type.enum';
+import { GiftDisplayMode } from '../../enums/gift-display-mode.enum';
 
 @Component({
-    selector: 'app-gift-details-modal',
-    templateUrl: './gift-details-modal.component.html',
-    styleUrl: './gift-details-modal.component.scss',
-    imports: [
-        CommonModule,
-        ButtonComponent,
-        ConfirmDialogComponent,
-        GiftPhotoCardComponent,
-        GiftContributionFormComponent,
-        GiftPaymentStepComponent,
-        GiftSuccessStepComponent,
-    ]
+  standalone: true,
+  selector: 'app-gift-details-modal',
+  templateUrl: './gift-details-modal.component.html',
+  styleUrl: './gift-details-modal.component.scss',
+  imports: [
+    CommonModule,
+    ButtonComponent,
+    ConfirmDialogComponent,
+    GiftPhotoCardComponent,
+    GiftContributionFormComponent,
+    GiftPaymentStepComponent,
+    GiftSuccessStepComponent,
+  ],
 })
 export class GiftDetailsModalComponent implements OnInit, OnDestroy, AfterViewInit {
   public readonly gift: InputSignal<Gift> = input.required<Gift>();
   public readonly coupleName: InputSignal<string> = input<string>('');
+  public readonly giftDisplayMode: InputSignal<GiftDisplayMode> = input<GiftDisplayMode>(GiftDisplayMode.Traditional);
   public readonly close: OutputEmitterRef<void> = output<void>();
   public readonly paymentCompleted: OutputEmitterRef<void> = output<void>();
 
@@ -60,14 +63,23 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy, AfterViewIn
   }
 
   public get isUnavailable(): boolean {
+    if (this.isPrivateUnlimited)
+      return false;
+
     return this.gift().available === false;
   }
 
   public get isFullyFunded(): boolean {
+    if (this.isPrivateUnlimited)
+      return false;
+
     return this.gift().fullyFunded;
   }
 
   public get contributionLimit(): number {
+    if (this.isPrivateUnlimited)
+      return this.gift().total;
+
     if (!this.gift().allowPartialContribution)
       return this.gift().total;
 
@@ -83,6 +95,10 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy, AfterViewIn
 
   public get availableQuickAmounts(): number[] {
     return [50, 100, 200, 300].filter((a: number): boolean => a <= this.contributionLimit);
+  }
+
+  public get isPrivateUnlimited(): boolean {
+    return this.giftDisplayMode() === GiftDisplayMode.PrivateUnlimited;
   }
 
   public get hasUnsavedInput(): boolean {

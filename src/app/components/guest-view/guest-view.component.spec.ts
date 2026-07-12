@@ -1,11 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { signal, WritableSignal } from '@angular/core';
 import { GuestViewComponent } from './guest-view.component';
+import { GiftDisplayMode } from '../../enums/gift-display-mode.enum';
 import { GiftService } from '../../services/gift.service';
 import { CoupleService } from '../../services/couple.service';
 
 const emptyCouple = {
-  names: '', weddingDate: '', photoUrl: '', message: '', primaryColor: '', secondaryColor: '', carouselPhotos: [],
+  names: '', weddingDate: '', photoUrl: '', message: '', eventLocation: '', primaryColor: '', secondaryColor: '', giftDisplayMode: GiftDisplayMode.Traditional, carouselPhotos: [],
 };
 
 describe('GuestViewComponent — controle de skeleton (anti-flicker)', () => {
@@ -51,5 +52,10 @@ describe('GuestViewComponent — controle de skeleton (anti-flicker)', () => {
     guestState.set({ gifts: [{ id: 'g1' }], loading: false });
     coupleState.set({ loading: false, couple: emptyCouple });
     expect(c.isInitialLoading).toBe(false);
+  });
+  it('esconde estatisticas publicas quando a lista e privada ilimitada', () => {
+    const c = createComponent();
+    coupleState.set({ loading: false, couple: { ...emptyCouple, giftDisplayMode: GiftDisplayMode.PrivateUnlimited } });
+    expect(c.showGuestStats).toBe(false);
   });
 });

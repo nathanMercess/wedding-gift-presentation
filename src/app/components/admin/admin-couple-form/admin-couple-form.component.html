@@ -36,6 +36,11 @@
         <input type="datetime-local" [(ngModel)]="couple.weddingDate" name="cwdate" class="cf-input" />
       </div>
       <div class="cf-group">
+        <label>Localização do evento</label>
+        <input type="text" [(ngModel)]="couple.eventLocation" name="ceventlocation" class="cf-input"
+          placeholder="Ex: Espaço Villa Jardim, São Paulo - SP" />
+      </div>
+      <div class="cf-group">
         <label>Mensagem para os convidados</label>
         <textarea [(ngModel)]="couple.message" name="cmessage" class="cf-input" rows="3"></textarea>
       </div>
@@ -80,6 +85,32 @@
       <span class="cf-preview-chip" [style.background]="couple.secondaryColor"
         [style.color]="couple.primaryColor">Secundária</span>
       <button type="button" class="cf-preview-btn" [style.background]="couple.primaryColor">Botão primário</button>
+    </div>
+  </section>
+
+  <section class="cf-card">
+    <div class="cf-section-head">
+      <h3>Lista de presentes</h3>
+    </div>
+
+    <div class="cf-mode-grid">
+      <label class="cf-mode-option" [class.active]="couple.giftDisplayMode === GiftDisplayMode.Traditional">
+        <input type="radio" name="cgiftdisplaymode" [(ngModel)]="couple.giftDisplayMode"
+          [value]="GiftDisplayMode.Traditional" />
+        <span>
+          <strong>Padrão</strong>
+          <small>Mostra status dos presentes e respeita indisponibilidade.</small>
+        </span>
+      </label>
+
+      <label class="cf-mode-option" [class.active]="couple.giftDisplayMode === GiftDisplayMode.PrivateUnlimited">
+        <input type="radio" name="cgiftdisplaymode" [(ngModel)]="couple.giftDisplayMode"
+          [value]="GiftDisplayMode.PrivateUnlimited" />
+        <span>
+          <strong>Privado ilimitado</strong>
+          <small>Mantém os presentes sempre disponíveis na vitrine pública.</small>
+        </span>
+      </label>
     </div>
   </section>
 

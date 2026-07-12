@@ -26,6 +26,14 @@
       <div class="hero-header container">
         <p class="hero-date">{{ formattedWeddingDate || coupleService.state().couple.weddingDate }}</p>
         <h1 class="hero-names">{{ coupleService.state().couple.names }}</h1>
+        <p *ngIf="coupleService.state().couple.eventLocation" class="hero-location">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2">
+            <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z" />
+            <circle cx="12" cy="10" r="3" />
+          </svg>
+          {{ coupleService.state().couple.eventLocation }}
+        </p>
       </div>
 
       <div class="couple-quote-wrap" *ngIf="coupleService.state().couple.message">
@@ -82,7 +90,7 @@
           </svg>
         </button>
       </div>
-      <div class="hero-stats-wrap container">
+      <div class="hero-stats-wrap container" *ngIf="showGuestStats">
         <div class="hero-stats">
           <div class="hero-stat">
             <span class="hero-stat-value">{{ contributorsCount }}</span>
@@ -168,7 +176,8 @@
           <div class="gifts-grid">
             <div *ngFor="let gift of giftService.guestState().gifts; trackBy: trackByGiftId" class="gift-grid-item"
               (click)="openGiftDetails(gift)">
-              <app-gift-card [gift]="gift" (presentClick)="openGiftDetails(gift)"></app-gift-card>
+              <app-gift-card [gift]="gift" [giftDisplayMode]="giftDisplayMode"
+                (presentClick)="openGiftDetails(gift)"></app-gift-card>
             </div>
           </div>
 
@@ -203,8 +212,9 @@
 
   </ng-container>
 
-  <app-gift-details-modal *ngIf="showGiftDetailsModal" [gift]="selectedGift" [coupleName]="coupleService.state().couple.names"
-    (close)="closeGiftDetails()" (paymentCompleted)="onGiftPaymentCompleted()">
+  <app-gift-details-modal *ngIf="showGiftDetailsModal" [gift]="selectedGift"
+    [coupleName]="coupleService.state().couple.names" [giftDisplayMode]="giftDisplayMode" (close)="closeGiftDetails()"
+    (paymentCompleted)="onGiftPaymentCompleted()">
   </app-gift-details-modal>
 
 </div>

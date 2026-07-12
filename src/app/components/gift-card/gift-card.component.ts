@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, InputSignal, OutputEmitterRef, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { GiftDisplayMode } from '../../enums/gift-display-mode.enum';
 import { Gift } from '../../models/gift.model';
 
 @Component({
@@ -12,6 +13,7 @@ import { Gift } from '../../models/gift.model';
 })
 export class GiftCardComponent {
   public readonly gift: InputSignal<Gift> = input.required<Gift>();
+  public readonly giftDisplayMode: InputSignal<GiftDisplayMode> = input<GiftDisplayMode>(GiftDisplayMode.Traditional);
   public readonly presentClick: OutputEmitterRef<void> = output<void>();
 
   public get progressPercent(): number {
@@ -19,11 +21,21 @@ export class GiftCardComponent {
   }
 
   public get isUnavailable(): boolean {
+    if (this.isPrivateUnlimited)
+      return false;
+
     return this.gift().available === false;
   }
 
   public get isFullyFunded(): boolean {
+    if (this.isPrivateUnlimited)
+      return false;
+
     return this.gift().fullyFunded;
+  }
+
+  public get isPrivateUnlimited(): boolean {
+    return this.giftDisplayMode() === GiftDisplayMode.PrivateUnlimited;
   }
 
   public onPresent(): void {

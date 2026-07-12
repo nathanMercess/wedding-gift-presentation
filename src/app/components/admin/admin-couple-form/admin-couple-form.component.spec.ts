@@ -1,6 +1,7 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { AdminCoupleFormComponent } from './admin-couple-form.component';
+import { GiftDisplayMode } from '../../../enums/gift-display-mode.enum';
 import { CoupleService } from '../../../services/couple.service';
 import { ThemeService } from '../../../services/theme.service';
 import { CarouselPhoto } from '../../../models/couple.model';
@@ -15,7 +16,7 @@ describe('AdminCoupleFormComponent — carrossel', () => {
   beforeEach(() => {
     const coupleStub = {
       state: signal({
-        couple: { names: '', weddingDate: '', photoUrl: '', message: '', primaryColor: '#000000', secondaryColor: '#d9d9d9', carouselPhotos: [] },
+        couple: { names: '', weddingDate: '', photoUrl: '', message: '', eventLocation: '', primaryColor: '#000000', secondaryColor: '#d9d9d9', giftDisplayMode: GiftDisplayMode.Traditional, carouselPhotos: [] },
         loading: false, saving: false, success: false, error: '', photoUploading: false, photoUploadError: '',
       }),
       uploadCouplePhoto: jest.fn(),

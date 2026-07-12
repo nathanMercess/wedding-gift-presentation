@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { GiftCardComponent } from './gift-card.component';
+import { GiftDisplayMode } from '../../enums/gift-display-mode.enum';
 import { Gift } from '../../models/gift.model';
 
 function makeGift(over: Partial<Gift> = {}): Gift {
@@ -73,5 +74,22 @@ describe('GiftCardComponent', () => {
     const btn = (fixture.nativeElement as HTMLElement).querySelector('.card-hover-btn') as HTMLButtonElement;
     btn.click();
     expect(clicked).toBe(true);
+  });
+
+  it('modo privado ilimitado mantem botao habilitado e esconde status publico', () => {
+    fixture.componentRef.setInput('gift', makeGift({ available: false, fullyFunded: true, raised: 100, total: 100 }));
+    fixture.componentRef.setInput('giftDisplayMode', GiftDisplayMode.PrivateUnlimited);
+    fixture.detectChanges();
+
+    let clicked = false;
+    component.presentClick.subscribe((): void => { clicked = true; });
+    const btn = (fixture.nativeElement as HTMLElement).querySelector('.card-hover-btn') as HTMLButtonElement;
+    btn.click();
+    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+
+    expect(btn.disabled).toBe(false);
+    expect(clicked).toBe(true);
+    expect(text).not.toContain('Indispon');
+    expect(text).not.toContain('Meta atingida');
   });
 });

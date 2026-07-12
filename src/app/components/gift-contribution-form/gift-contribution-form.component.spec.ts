@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { GiftContributionFormComponent, ContributionSubmitData } from './gift-contribution-form.component';
 import { ContributionType } from '../../enums/contribution-type.enum';
+import { GiftDisplayMode } from '../../enums/gift-display-mode.enum';
 import { Gift } from '../../models/gift.model';
 
 function makeGift(over: Partial<Gift> = {}): Gift {
@@ -113,5 +114,12 @@ describe('GiftContributionFormComponent', () => {
     component.cancelled.subscribe((): void => { cancelled = true; });
     component.cancelled.emit();
     expect(cancelled).toBe(true);
+  });
+
+  it('modo privado ilimitado mostra valor do presente como rotulo principal', () => {
+    fixture.componentRef.setInput('gift', makeGift({ fullyFunded: false, raised: 100, total: 300 }));
+    fixture.componentRef.setInput('giftDisplayMode', GiftDisplayMode.PrivateUnlimited);
+    fixture.detectChanges();
+    expect(component.fullContributionLabel).toBe('Valor do presente');
   });
 });

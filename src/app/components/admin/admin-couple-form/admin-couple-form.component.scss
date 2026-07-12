@@ -223,6 +223,55 @@
   cursor: default;
 }
 
+.cf-mode-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+
+  @media (max-width: 600px) { grid-template-columns: 1fr; }
+}
+
+.cf-mode-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1.5px solid var(--hairline-strong);
+  border-radius: var(--radius-md);
+  background: var(--secondary);
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
+
+  input {
+    margin-top: 0.2rem;
+    accent-color: var(--primary);
+  }
+
+  span {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-family: var(--font-sans);
+  }
+
+  strong {
+    font-size: 0.9rem;
+    color: var(--foreground);
+  }
+
+  small {
+    font-size: 0.78rem;
+    line-height: 1.45;
+    color: var(--muted-foreground);
+  }
+
+  &.active {
+    border-color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 7%, var(--card));
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 10%, transparent);
+  }
+}
+
 /* ── Ações ── */
 .cf-actions {
   display: flex;

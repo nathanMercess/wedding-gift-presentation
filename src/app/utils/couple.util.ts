@@ -1,4 +1,5 @@
 import { CarouselPhoto, Couple } from '../models/couple.model';
+import { GiftDisplayMode } from '../enums/gift-display-mode.enum';
 
 export abstract class CoupleUtil {
   public static normalize(raw: unknown): Couple {
@@ -9,8 +10,10 @@ export abstract class CoupleUtil {
       weddingDate: CoupleUtil.text(data['weddingDate']),
       photoUrl: CoupleUtil.text(data['photoUrl'] ?? data['photo']),
       message: CoupleUtil.text(data['message']),
+      eventLocation: CoupleUtil.text(data['eventLocation'] ?? data['EventLocation']),
       primaryColor: CoupleUtil.text(data['primaryColor']) || '#000000',
       secondaryColor: CoupleUtil.text(data['secondaryColor']) || '#d9d9d9',
+      giftDisplayMode: CoupleUtil.giftDisplayMode(data['giftDisplayMode'] ?? data['GiftDisplayMode']),
       carouselPhotos: CoupleUtil.normalizeCarouselPhotos(data['carouselPhotos'] ?? data['CarouselPhotos']),
     };
   }
@@ -47,5 +50,12 @@ export abstract class CoupleUtil {
       return value;
 
     return '';
+  }
+
+  public static giftDisplayMode(value: unknown): GiftDisplayMode {
+    if (value === GiftDisplayMode.PrivateUnlimited)
+      return GiftDisplayMode.PrivateUnlimited;
+
+    return GiftDisplayMode.Traditional;
   }
 }

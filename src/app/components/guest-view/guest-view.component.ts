@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { EMPTY_GIFT } from '../../constants/empty-gift.constant';
 import { SORT_OPTIONS, SortOption } from '../../constants/sort-options.constant';
+import { GiftDisplayMode } from '../../enums/gift-display-mode.enum';
 import { CarouselPhoto, Couple } from '../../models/couple.model';
 import { Gift } from '../../models/gift.model';
 import { CoupleService } from '../../services/couple.service';
@@ -14,10 +15,11 @@ import { GiftCardComponent } from '../gift-card/gift-card.component';
 import { GiftDetailsModalComponent } from '../gift-details-modal/gift-details-modal.component';
 
 @Component({
-    selector: 'app-guest-view',
-    templateUrl: './guest-view.component.html',
-    styleUrl: './guest-view.component.scss',
-    imports: [CommonModule, FormsModule, GiftCardComponent, GiftDetailsModalComponent, CountdownComponent]
+  standalone: true,
+  selector: 'app-guest-view',
+  templateUrl: './guest-view.component.html',
+  styleUrl: './guest-view.component.scss',
+  imports: [CommonModule, FormsModule, GiftCardComponent, GiftDetailsModalComponent, CountdownComponent],
 })
 export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   public searchTerm: string = '';
@@ -144,7 +146,7 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   public constructor(public readonly giftService: GiftService, public readonly coupleService: CoupleService) {
     effect((): void => {
       const stateCouple: Couple = this.coupleService.state().couple;
-      const nextSignature: string = `${stateCouple.names}|${stateCouple.weddingDate}|${stateCouple.photoUrl}|${stateCouple.message}|${stateCouple.primaryColor}|${stateCouple.secondaryColor}`;
+      const nextSignature: string = `${stateCouple.names}|${stateCouple.weddingDate}|${stateCouple.photoUrl}|${stateCouple.message}|${stateCouple.eventLocation}|${stateCouple.primaryColor}|${stateCouple.secondaryColor}|${stateCouple.giftDisplayMode}`;
 
       if (this.coupleSignature === nextSignature)
         return;
@@ -182,6 +184,14 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   public get progressPercentage(): number {
     return this.totalGoal > 0 ? (this.totalRaised / this.totalGoal) * 100 : 0;
+  }
+
+  public get giftDisplayMode(): GiftDisplayMode {
+    return this.coupleService.state().couple.giftDisplayMode || GiftDisplayMode.Traditional;
+  }
+
+  public get showGuestStats(): boolean {
+    return this.giftDisplayMode !== GiftDisplayMode.PrivateUnlimited;
   }
 
   public get isInitialLoading(): boolean {

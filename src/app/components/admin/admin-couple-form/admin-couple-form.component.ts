@@ -1,29 +1,33 @@
 import { Component, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { GiftDisplayMode } from '../../../enums/gift-display-mode.enum';
 import { CarouselPhoto, Couple } from '../../../models/couple.model';
 import { CoupleService } from '../../../services/couple.service';
 import { ThemeService } from '../../../services/theme.service';
 import { ColorUtil } from '../../../utils/color.util';
 
 @Component({
-    selector: 'app-admin-couple-form',
-    templateUrl: './admin-couple-form.component.html',
-    styleUrl: './admin-couple-form.component.scss',
-    imports: [CommonModule, FormsModule]
+  standalone: true,
+  selector: 'app-admin-couple-form',
+  templateUrl: './admin-couple-form.component.html',
+  styleUrl: './admin-couple-form.component.scss',
+  imports: [CommonModule, FormsModule],
 })
 export class AdminCoupleFormComponent {
-  public couple: Couple = { names: '', weddingDate: '', photoUrl: '', message: '', primaryColor: '#000000', secondaryColor: '#d9d9d9', carouselPhotos: [] };
+  public readonly GiftDisplayMode: typeof GiftDisplayMode = GiftDisplayMode;
+
+  public couple: Couple = { names: '', weddingDate: '', photoUrl: '', message: '', eventLocation: '', primaryColor: '#000000', secondaryColor: '#d9d9d9', giftDisplayMode: GiftDisplayMode.Traditional, carouselPhotos: [] };
   public carouselUploading: boolean = false;
   public carouselUploadError: string = '';
   public isDraggingFiles: boolean = false;
 
   private coupleSignature: string = '';
 
-  public constructor(public readonly coupleService: CoupleService, private readonly theme: ThemeService) {
+  public constructor(public readonly coupleService: CoupleService, public readonly theme: ThemeService) {
     effect((): void => {
       const loaded: Couple = this.coupleService.state().couple;
-      const signature: string = `${loaded.names}|${loaded.weddingDate}|${loaded.photoUrl}|${loaded.message}|${loaded.primaryColor}|${loaded.secondaryColor}`;
+      const signature: string = `${loaded.names}|${loaded.weddingDate}|${loaded.photoUrl}|${loaded.message}|${loaded.eventLocation}|${loaded.primaryColor}|${loaded.secondaryColor}|${loaded.giftDisplayMode}`;
 
       if (this.coupleSignature === signature)
         return;
@@ -36,8 +40,7 @@ export class AdminCoupleFormComponent {
       if (formattedDate) {
         const d = new Date(formattedDate);
         if (!isNaN(d.getTime())) {
-          const pad = (n: number) => n.toString().padStart(2, '0');
-          formattedDate = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+          formattedDate = `${d.getFullYear()}-${this.padDatePart(d.getMonth() + 1)}-${this.padDatePart(d.getDate())}T${this.padDatePart(d.getHours())}:${this.padDatePart(d.getMinutes())}`;
         }
       }
 
@@ -46,6 +49,7 @@ export class AdminCoupleFormComponent {
         weddingDate: formattedDate, // Usa a data formatada
         primaryColor,
         secondaryColor: loaded.secondaryColor || ColorUtil.lighten(primaryColor, 0.85),
+        giftDisplayMode: loaded.giftDisplayMode || GiftDisplayMode.Traditional,
         carouselPhotos: loaded.carouselPhotos ?? [],
       };
     }, { allowSignalWrites: true });
@@ -148,5 +152,9 @@ export class AdminCoupleFormComponent {
 
   public save(): void {
     this.coupleService.saveCouple(this.couple);
+  }
+
+  private padDatePart(value: number): string {
+    return value.toString().padStart(2, '0');
   }
 }
