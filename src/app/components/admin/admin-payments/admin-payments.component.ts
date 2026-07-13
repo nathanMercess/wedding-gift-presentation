@@ -4,7 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { PaymentStatus } from '../../../checkout/enums/payment-status.enum';
 import { AdminPayment } from '../../../models/admin-payment.model';
 import { AdminOperationsService } from '../../../services/admin-operations.service';
+import { AuthService } from '../../../services/auth.service';
 import { ToastService } from '../../../services/toast.service';
+import { UserRole } from '../../../enums/user-role.enum';
 import { ConfirmDialogComponent } from '../../confirm-dialog/confirm-dialog.component';
 
 @Component({
@@ -24,7 +26,11 @@ export class AdminPaymentsComponent implements OnInit {
   public showRefundConfirm: boolean = false;
   public paymentPendingRefund: AdminPayment | null = null;
 
-  public constructor(public readonly operations: AdminOperationsService, public readonly toast: ToastService) {}
+  public constructor(public readonly operations: AdminOperationsService, public readonly toast: ToastService, public readonly auth: AuthService) {}
+
+  public get isSuperAdmin(): boolean {
+    return this.auth.hasRole(UserRole.SuperAdmin);
+  }
 
   public ngOnInit(): void {
     this.load();
@@ -57,7 +63,7 @@ export class AdminPaymentsComponent implements OnInit {
   }
 
   public canRefund(payment: AdminPayment): boolean {
-    return payment.status === PaymentStatus.Approved && payment.contributionCreated;
+    return this.isSuperAdmin && payment.status === PaymentStatus.Approved && payment.contributionCreated;
   }
 
   public statusLabel(status: PaymentStatus | null): string {

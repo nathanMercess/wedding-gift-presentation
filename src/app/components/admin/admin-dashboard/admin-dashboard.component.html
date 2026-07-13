@@ -8,17 +8,17 @@
       <span>Admin</span>
     </div>
     <nav class="dash-nav">
-      <button type="button" [class.active]="activeTab === AdminTab.Overview" [attr.aria-pressed]="activeTab === AdminTab.Overview"
+      <button *ngIf="canAccessTab(AdminTab.Overview)" type="button" [class.active]="activeTab === AdminTab.Overview" [attr.aria-pressed]="activeTab === AdminTab.Overview"
         (click)="requestTabChange(AdminTab.Overview)">Resumo</button>
-      <button type="button" [class.active]="activeTab === AdminTab.Gifts" [attr.aria-pressed]="activeTab === AdminTab.Gifts"
+      <button *ngIf="canAccessTab(AdminTab.Gifts)" type="button" [class.active]="activeTab === AdminTab.Gifts" [attr.aria-pressed]="activeTab === AdminTab.Gifts"
         (click)="requestTabChange(AdminTab.Gifts)">Presentes</button>
-      <button type="button" [class.active]="activeTab === AdminTab.Contributions" [attr.aria-pressed]="activeTab === AdminTab.Contributions"
+      <button *ngIf="canAccessTab(AdminTab.Contributions)" type="button" [class.active]="activeTab === AdminTab.Contributions" [attr.aria-pressed]="activeTab === AdminTab.Contributions"
         (click)="requestTabChange(AdminTab.Contributions)">Contribuições <span *ngIf="unreadMessageCount" class="nav-badge">{{ unreadMessageCount }}</span></button>
-      <button *ngIf="isSuperAdmin" type="button" [class.active]="activeTab === AdminTab.Payments"
+      <button *ngIf="canAccessTab(AdminTab.Payments)" type="button" [class.active]="activeTab === AdminTab.Payments"
         [attr.aria-pressed]="activeTab === AdminTab.Payments" (click)="requestTabChange(AdminTab.Payments)">Pagamentos</button>
-      <button type="button" [class.active]="activeTab === AdminTab.Couple" [attr.aria-pressed]="activeTab === AdminTab.Couple"
+      <button *ngIf="canAccessTab(AdminTab.Couple)" type="button" [class.active]="activeTab === AdminTab.Couple" [attr.aria-pressed]="activeTab === AdminTab.Couple"
         (click)="requestTabChange(AdminTab.Couple)">Casal</button>
-      <button *ngIf="isSuperAdmin" type="button" [class.active]="activeTab === AdminTab.Users"
+      <button *ngIf="canAccessTab(AdminTab.Users)" type="button" [class.active]="activeTab === AdminTab.Users"
         [attr.aria-pressed]="activeTab === AdminTab.Users" (click)="requestTabChange(AdminTab.Users)">Usuários</button>
       <a routerLink="/gifts" target="_blank" rel="noopener">Ver vitrine</a>
       <a *ngIf="isSuperAdmin" routerLink="/super-admin/dashboard">Dashboard</a>
@@ -27,10 +27,10 @@
   </header>
   <main id="main-content" class="dash-main">
 
-    <app-admin-overview *ngIf="activeTab === AdminTab.Overview"></app-admin-overview>
+    <app-admin-overview *ngIf="activeTab === AdminTab.Overview && canAccessTab(AdminTab.Overview)"></app-admin-overview>
 
     <!-- GIFTS TAB -->
-    <section *ngIf="activeTab === AdminTab.Gifts" class="tab-section">
+    <section *ngIf="activeTab === AdminTab.Gifts && canAccessTab(AdminTab.Gifts)" class="tab-section">
       <div class="section-header">
         <h2>Presentes</h2>
         <div class="section-actions">
@@ -100,12 +100,12 @@
       </div>
     </section>
 
-    <app-admin-contributions *ngIf="activeTab === AdminTab.Contributions"></app-admin-contributions>
+    <app-admin-contributions *ngIf="activeTab === AdminTab.Contributions && canAccessTab(AdminTab.Contributions)"></app-admin-contributions>
 
-    <app-admin-payments *ngIf="activeTab === AdminTab.Payments && isSuperAdmin"></app-admin-payments>
+    <app-admin-payments *ngIf="activeTab === AdminTab.Payments && canAccessTab(AdminTab.Payments)"></app-admin-payments>
 
     <!-- COUPLE TAB -->
-    <section *ngIf="activeTab === AdminTab.Couple" class="tab-section">
+    <section *ngIf="activeTab === AdminTab.Couple && canAccessTab(AdminTab.Couple)" class="tab-section">
       <div class="section-header">
         <h2>Informações do Casal</h2>
       </div>
@@ -116,7 +116,7 @@
       <app-admin-couple-form *ngIf="!coupleService.state().loading && !coupleService.state().error"></app-admin-couple-form>
     </section>
 
-    <app-admin-users *ngIf="activeTab === AdminTab.Users && isSuperAdmin"></app-admin-users>
+    <app-admin-users *ngIf="activeTab === AdminTab.Users && canAccessTab(AdminTab.Users)"></app-admin-users>
 
   </main>
 

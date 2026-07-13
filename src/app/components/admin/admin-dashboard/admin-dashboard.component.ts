@@ -24,6 +24,7 @@ import { UserRole } from '../../../enums/user-role.enum';
 import { ToastService } from '../../../services/toast.service';
 import { AdminOperationsService } from '../../../services/admin-operations.service';
 import { GiftImportUtil } from '../../../utils/gift-import.util';
+import { AdminTabAccessUtil } from '../../../utils/admin-tab-access.util';
 
 @Component({
   standalone: true,
@@ -94,6 +95,10 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   public get isSuperAdmin(): boolean {
     return this.auth.hasRole(UserRole.SuperAdmin);
+  }
+
+  public canAccessTab(tab: AdminTab): boolean {
+    return AdminTabAccessUtil.canAccess(tab, this.auth.getRoles());
   }
 
   public get isEditingGift(): boolean {
@@ -218,6 +223,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   }
 
   public requestTabChange(tab: AdminTab): void {
+    if (!this.canAccessTab(tab))
+      return;
+
     if (tab === this.activeTab)
       return;
 

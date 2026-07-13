@@ -30,7 +30,7 @@
 
   <div class="payments-table-wrap" *ngIf="operations.state().payments.length > 0">
     <table>
-      <thead><tr><th>Pedido</th><th>Convidado</th><th>Presente</th><th>Valor</th><th>Método</th><th>Status</th><th>Ações</th></tr></thead>
+      <thead><tr><th>Pedido</th><th>Convidado</th><th>Presente</th><th>Valor</th><th>Método</th><th>Status</th><th *ngIf="isSuperAdmin">Ações</th></tr></thead>
       <tbody>
         <tr *ngFor="let payment of operations.state().payments; trackBy: trackByPayment">
           <td><span class="order-code">{{ payment.orderId }}</span><small>{{ payment.createdAt | date:'short' }}</small></td>
@@ -39,7 +39,7 @@
           <td>{{ payment.amount | currency:'BRL' }}</td>
           <td>{{ payment.method === 'pix' ? 'PIX' : 'Cartão' }}</td>
           <td><span [class]="'status ' + payment.status">{{ statusLabel(payment.status) }}</span></td>
-          <td><button *ngIf="canRefund(payment)" type="button" class="danger-action" (click)="requestRefund(payment)">Estornar</button></td>
+          <td *ngIf="isSuperAdmin"><button *ngIf="canRefund(payment)" type="button" class="danger-action" (click)="requestRefund(payment)">Estornar</button></td>
         </tr>
       </tbody>
     </table>

@@ -5,6 +5,7 @@ import { provideRouter } from '@angular/router';
 import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
+import { adminGuard } from './guards/admin.guard';
 import { authGuard } from './guards/auth.guard';
 import { superAdminGuard } from './guards/super-admin.guard';
 
@@ -46,7 +47,7 @@ export const appConfig: ApplicationConfig = {
       },
       {
         path: 'admin',
-        canActivate: [authGuard],
+        canActivate: [adminGuard],
         loadComponent: () =>
           import('./components/admin/admin-dashboard/admin-dashboard.component').then(m => m.AdminDashboardComponent),
       },
