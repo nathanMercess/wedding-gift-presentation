@@ -29,6 +29,20 @@ describe('AdminTabAccessUtil', () => {
     expect(AdminTabAccessUtil.canAccess(AdminTab.Users, [UserRole.Member])).toBe(false);
   });
 
+  it('retorna somente as abas visiveis para membro', () => {
+    expect(AdminTabAccessUtil.accessibleTabs([UserRole.Member])).toEqual([
+      AdminTab.Overview,
+      AdminTab.Gifts,
+      AdminTab.Contributions,
+      AdminTab.Showcase,
+      AdminTab.Couple,
+    ]);
+  });
+
+  it('retorna todas as abas para superadministrador', () => {
+    expect(AdminTabAccessUtil.accessibleTabs([UserRole.SuperAdmin])).toEqual(Object.values(AdminTab));
+  });
+
   it('nao permite abas administrativas sem role conhecida', () => {
     expect(AdminTabAccessUtil.canAccess(AdminTab.Overview, [])).toBe(false);
   });

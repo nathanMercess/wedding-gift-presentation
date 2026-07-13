@@ -99,8 +99,34 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     return this.auth.hasRole(UserRole.SuperAdmin);
   }
 
+  public get accessibleTabs(): AdminTab[] {
+    return AdminTabAccessUtil.accessibleTabs(this.auth.getRoles());
+  }
+
   public canAccessTab(tab: AdminTab): boolean {
     return AdminTabAccessUtil.canAccess(tab, this.auth.getRoles());
+  }
+
+  public tabLabel(tab: AdminTab): string {
+    if (tab === AdminTab.Overview)
+      return 'Resumo';
+
+    if (tab === AdminTab.Gifts)
+      return 'Presentes';
+
+    if (tab === AdminTab.Contributions)
+      return 'Contribuições';
+
+    if (tab === AdminTab.Payments)
+      return 'Pagamentos';
+
+    if (tab === AdminTab.Showcase)
+      return 'Vitrine';
+
+    if (tab === AdminTab.Couple)
+      return 'Casal';
+
+    return 'Usuários';
   }
 
   public get isEditingGift(): boolean {

@@ -8,20 +8,11 @@
       <span>Admin</span>
     </div>
     <nav class="dash-nav">
-      <button *ngIf="canAccessTab(AdminTab.Overview)" type="button" [class.active]="activeTab === AdminTab.Overview" [attr.aria-pressed]="activeTab === AdminTab.Overview"
-        (click)="requestTabChange(AdminTab.Overview)">Resumo</button>
-      <button *ngIf="canAccessTab(AdminTab.Gifts)" type="button" [class.active]="activeTab === AdminTab.Gifts" [attr.aria-pressed]="activeTab === AdminTab.Gifts"
-        (click)="requestTabChange(AdminTab.Gifts)">Presentes</button>
-      <button *ngIf="canAccessTab(AdminTab.Contributions)" type="button" [class.active]="activeTab === AdminTab.Contributions" [attr.aria-pressed]="activeTab === AdminTab.Contributions"
-        (click)="requestTabChange(AdminTab.Contributions)">Contribuições <span *ngIf="unreadMessageCount" class="nav-badge">{{ unreadMessageCount }}</span></button>
-      <button *ngIf="canAccessTab(AdminTab.Payments)" type="button" [class.active]="activeTab === AdminTab.Payments"
-        [attr.aria-pressed]="activeTab === AdminTab.Payments" (click)="requestTabChange(AdminTab.Payments)">Pagamentos</button>
-      <button *ngIf="canAccessTab(AdminTab.Showcase)" type="button" [class.active]="activeTab === AdminTab.Showcase"
-        [attr.aria-pressed]="activeTab === AdminTab.Showcase" (click)="requestTabChange(AdminTab.Showcase)">Vitrine</button>
-      <button *ngIf="canAccessTab(AdminTab.Couple)" type="button" [class.active]="activeTab === AdminTab.Couple" [attr.aria-pressed]="activeTab === AdminTab.Couple"
-        (click)="requestTabChange(AdminTab.Couple)">Casal</button>
-      <button *ngIf="canAccessTab(AdminTab.Users)" type="button" [class.active]="activeTab === AdminTab.Users"
-        [attr.aria-pressed]="activeTab === AdminTab.Users" (click)="requestTabChange(AdminTab.Users)">Usuários</button>
+      <button *ngFor="let tab of accessibleTabs" type="button" [class.active]="activeTab === tab"
+        [attr.aria-pressed]="activeTab === tab" (click)="requestTabChange(tab)">
+        {{ tabLabel(tab) }}
+        <span *ngIf="tab === AdminTab.Contributions && unreadMessageCount" class="nav-badge">{{ unreadMessageCount }}</span>
+      </button>
       <a *ngIf="isSuperAdmin" routerLink="/super-admin/dashboard">Dashboard</a>
     </nav>
     <button class="logout-btn" (click)="logout()">Sair</button>

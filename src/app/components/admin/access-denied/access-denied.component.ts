@@ -1,11 +1,17 @@
-import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
-    selector: 'app-access-denied',
-    templateUrl: './access-denied.component.html',
-    styleUrl: './access-denied.component.scss',
-    imports: [CommonModule, RouterLink]
+  standalone: true,
+  selector: 'app-access-denied',
+  templateUrl: './access-denied.component.html',
+  styleUrl: './access-denied.component.scss',
+  imports: [],
 })
-export class AccessDeniedComponent {}
+export class AccessDeniedComponent {
+  public constructor(public readonly auth: AuthService) {}
+
+  public backToLogin(): void {
+    this.auth.logout();
+  }
+}
