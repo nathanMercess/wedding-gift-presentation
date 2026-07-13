@@ -104,7 +104,7 @@ describe('AdminGiftFormComponent', () => {
     expect(component.form.get('total')!.value).toBe(150);
 
     component.save();
-    expect(giftServiceMock.saveAdminGift).toHaveBeenCalledWith('g9', expect.objectContaining({ raised: 50, total: 150 }));
+    expect(giftServiceMock.saveAdminGift).toHaveBeenCalledWith('g9', expect.objectContaining({ price: 150, raised: 50, total: 150 }));
   });
 
   it('anti-double-click: ignora save() enquanto giftSaving estiver ativo', () => {

@@ -51,7 +51,7 @@ export class AdminGiftFormComponent {
       total: [null, [Validators.required, Validators.min(0.01)]],
       image: [''],
       category: [null],
-      description: ['', [Validators.maxLength(1000)]],
+      description: ['', [Validators.maxLength(500)]],
       allowPartialContribution: [true],
       available: [true],
     });
@@ -146,6 +146,7 @@ export class AdminGiftFormComponent {
 
     const payload: Partial<Gift> = {
       name: `${value.name ?? ''}`.trim(),
+      price: Number(value.total),
       total: Number(value.total),
       image: value.image ?? '',
       category: value.category ? value.category as GiftCategory : null,

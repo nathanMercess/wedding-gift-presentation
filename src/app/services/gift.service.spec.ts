@@ -5,6 +5,7 @@ import { EndpointsUrls } from '../constants/api-endpoints';
 import { ApiResponse } from '../models/api-response.model';
 import { Gift } from '../models/gift.model';
 import { PagedResult } from '../models/paged-result.model';
+import { GiftCategory } from '../enums/gift-category.enum';
 
 function makeGift(over: Partial<Gift> = {}): Gift {
   return {
@@ -128,6 +129,37 @@ describe('GiftService', () => {
       expect(service.adminState().totalCount).toBe(2);
       expect(service.adminState().giftSaved).toBe(true);
       httpMock.expectNone((r) => r.method === 'GET' && r.url === endpoints.adminGiftsList);
+    });
+  });
+
+  describe('saveAdminGiftsBatch', () => {
+    it('atualiza categorias em uma unica requisicao', () => {
+      service.patchAdminState({ gifts: [makeGift({ id: 'g1' }), makeGift({ id: 'g2' })], totalCount: 2 });
+      let succeeded: boolean = false;
+
+      service.saveAdminGiftsBatch(service.adminState().gifts, GiftCategory.Kitchen, (): void => { succeeded = true; });
+
+      const req = httpMock.expectOne(endpoints.adminGiftsCategory);
+      expect(req.request.method).toBe('PATCH');
+      expect(req.request.body).toEqual({ giftIds: ['g1', 'g2'], category: GiftCategory.Kitchen });
+      req.flush(apiSuccess({ giftIds: ['g1', 'g2'], category: GiftCategory.Kitchen }));
+
+      expect(service.adminState().gifts.every((gift: Gift): boolean => gift.category === GiftCategory.Kitchen)).toBe(true);
+      expect(service.adminState().giftSaving).toBe(false);
+      expect(succeeded).toBe(true);
+      httpMock.expectNone((request) => request.method === 'PUT');
+    });
+
+    it('exibe o erro da lista quando a atualizacao em lote falha', () => {
+      service.patchAdminState({ gifts: [makeGift({ id: 'g1' })], totalCount: 1 });
+
+      service.saveAdminGiftsBatch(service.adminState().gifts, null, (): void => {});
+
+      const req = httpMock.expectOne(endpoints.adminGiftsCategory);
+      req.flush(apiError('VALIDATION_ERROR'), { status: 400, statusText: 'Bad Request' });
+
+      expect(service.adminState().giftsError).toBeTruthy();
+      expect(service.adminState().giftSaving).toBe(false);
     });
   });
 

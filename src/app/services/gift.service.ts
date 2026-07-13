@@ -8,6 +8,7 @@ import { SortDirection } from '../enums/SortDirection';
 import { AdminGiftState } from '../models/admin-gift-state.model';
 import { ApiResponse } from '../models/api-response.model';
 import { ContributionRequest } from '../models/contribution-request.model';
+import { GiftCategoryBatchUpdate } from '../models/gift-category-batch-update.model';
 import { GiftContributionState } from '../models/gift-contribution-state.model';
 import { Gift } from '../models/gift.model';
 import { GuestGiftState } from '../models/guest-gift-state.model';
@@ -237,16 +238,20 @@ export class GiftService {
     if (gifts.length === 0)
       return;
 
-    this.patchAdminState({ giftSaving: true, giftError: '' });
-    forkJoin(gifts.map((gift: Gift) => this.http.put<ApiResponse<Gift>>(this.endpointsUrls.adminGiftsById(gift.id), { ...gift, category }).pipe(ApiResponseUtil.data<Gift>('Erro ao atualizar presentes.'))))
-      .pipe(finalize((): void => this.patchAdminState({ giftSaving: false })))
+    const payload: GiftCategoryBatchUpdate = { giftIds: gifts.map((gift: Gift): string => gift.id), category };
+    this.patchAdminState({ giftSaving: true, giftsError: '' });
+    this.http.patch<ApiResponse<GiftCategoryBatchUpdate>>(this.endpointsUrls.adminGiftsCategory, payload)
+      .pipe(
+        ApiResponseUtil.data<GiftCategoryBatchUpdate>('Erro ao atualizar presentes.'),
+        finalize((): void => this.patchAdminState({ giftSaving: false })),
+      )
       .subscribe({
-        next: (savedGifts: Gift[]): void => {
-          const savedById: Map<string, Gift> = new Map(savedGifts.map((gift: Gift): [string, Gift] => [gift.id, gift]));
-          this.adminState.update((state: AdminGiftState): AdminGiftState => ({ ...state, gifts: state.gifts.map((gift: Gift): Gift => savedById.get(gift.id) ?? gift) }));
+        next: (updated: GiftCategoryBatchUpdate): void => {
+          const updatedIds: Set<string> = new Set(updated.giftIds);
+          this.adminState.update((state: AdminGiftState): AdminGiftState => ({ ...state, gifts: state.gifts.map((gift: Gift): Gift => updatedIds.has(gift.id) ? { ...gift, category: updated.category } : gift) }));
           onSuccess();
         },
-        error: (err: HttpErrorResponse): void => this.patchAdminState({ giftError: HttpErrorUtil.extract(err, 'Erro ao atualizar presentes.') }),
+        error: (err: HttpErrorResponse): void => this.patchAdminState({ giftsError: HttpErrorUtil.extract(err, 'Erro ao atualizar presentes.') }),
       });
   }
 

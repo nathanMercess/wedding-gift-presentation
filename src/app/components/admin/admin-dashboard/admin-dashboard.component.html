@@ -45,7 +45,7 @@
           <option *ngFor="let category of categoryOptions" [ngValue]="category">{{ category }}</option>
         </select>
         <button type="button" class="btn-outline" [disabled]="selectedGiftIds.size === 0 || giftService.adminState().giftSaving"
-          (click)="applyBulkCategory()">Aplicar categoria</button>
+          (click)="applyBulkCategory()">{{ giftService.adminState().giftSaving ? 'Aplicando...' : 'Aplicar categoria' }}</button>
         <button type="button" class="bulk-danger" [disabled]="selectedGiftIds.size === 0 || giftService.adminState().giftSaving"
           (click)="requestBulkDelete()">Remover selecionados</button>
       </div>

@@ -33,6 +33,10 @@ export class EndpointsUrls {
         return `${this.apiUrl}/admin/gifts`;
     }
 
+    public get adminGiftsCategory(): string {
+        return `${this.apiUrl}/admin/gifts/category`;
+    }
+
     public get adminDashboard(): string {
         return `${this.apiUrl}/admin/dashboard`;
     }
