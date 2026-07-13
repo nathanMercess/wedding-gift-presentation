@@ -14,13 +14,22 @@ describe('AdminTabAccessUtil', () => {
     expect(AdminTabAccessUtil.canAccess(AdminTab.Gifts, [UserRole.Admin])).toBe(true);
     expect(AdminTabAccessUtil.canAccess(AdminTab.Contributions, [UserRole.Admin])).toBe(true);
     expect(AdminTabAccessUtil.canAccess(AdminTab.Payments, [UserRole.Admin])).toBe(true);
+    expect(AdminTabAccessUtil.canAccess(AdminTab.Showcase, [UserRole.Admin])).toBe(true);
     expect(AdminTabAccessUtil.canAccess(AdminTab.Couple, [UserRole.Admin])).toBe(true);
     expect(AdminTabAccessUtil.canAccess(AdminTab.Users, [UserRole.Admin])).toBe(false);
   });
 
-  it('nao permite abas administrativas para membro', () => {
-    Object.values(AdminTab).forEach((tab: AdminTab): void => {
-      expect(AdminTabAccessUtil.canAccess(tab, [UserRole.Member])).toBe(false);
-    });
+  it('permite abas operacionais para membro sem liberar pagamentos e usuarios', () => {
+    expect(AdminTabAccessUtil.canAccess(AdminTab.Overview, [UserRole.Member])).toBe(true);
+    expect(AdminTabAccessUtil.canAccess(AdminTab.Gifts, [UserRole.Member])).toBe(true);
+    expect(AdminTabAccessUtil.canAccess(AdminTab.Contributions, [UserRole.Member])).toBe(true);
+    expect(AdminTabAccessUtil.canAccess(AdminTab.Showcase, [UserRole.Member])).toBe(true);
+    expect(AdminTabAccessUtil.canAccess(AdminTab.Couple, [UserRole.Member])).toBe(true);
+    expect(AdminTabAccessUtil.canAccess(AdminTab.Payments, [UserRole.Member])).toBe(false);
+    expect(AdminTabAccessUtil.canAccess(AdminTab.Users, [UserRole.Member])).toBe(false);
+  });
+
+  it('nao permite abas administrativas sem role conhecida', () => {
+    expect(AdminTabAccessUtil.canAccess(AdminTab.Overview, [])).toBe(false);
   });
 });

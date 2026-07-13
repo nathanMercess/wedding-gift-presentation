@@ -17,6 +17,7 @@ import { AdminContributionsComponent } from '../admin-contributions/admin-contri
 import { SlideOverComponent } from '../../slide-over/slide-over.component';
 import { AdminOverviewComponent } from '../admin-overview/admin-overview.component';
 import { AdminPaymentsComponent } from '../admin-payments/admin-payments.component';
+import { AdminShowcaseComponent } from '../admin-showcase/admin-showcase.component';
 import { AdminUsersComponent } from '../admin-users/admin-users.component';
 import { AdminTab } from '../../../enums/admin-tab.enum';
 import { GiftCategory } from '../../../enums/gift-category.enum';
@@ -31,7 +32,7 @@ import { AdminTabAccessUtil } from '../../../utils/admin-tab-access.util';
   selector: 'app-admin-dashboard',
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss',
-  imports: [CommonModule, FormsModule, RouterLink, ConfirmDialogComponent, AdminGiftCardComponent, AdminGiftFormComponent, AdminCoupleFormComponent, AdminContributionsComponent, AdminOverviewComponent, AdminPaymentsComponent, AdminUsersComponent, SlideOverComponent],
+  imports: [CommonModule, FormsModule, RouterLink, ConfirmDialogComponent, AdminGiftCardComponent, AdminGiftFormComponent, AdminCoupleFormComponent, AdminContributionsComponent, AdminOverviewComponent, AdminPaymentsComponent, AdminShowcaseComponent, AdminUsersComponent, SlideOverComponent],
 })
 export class AdminDashboardComponent implements OnInit, OnDestroy {
   public readonly AdminTab: typeof AdminTab = AdminTab;
@@ -48,6 +49,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   public searchTerm: string = '';
   public selectedGiftIds: Set<string> = new Set<string>();
   public bulkCategory: GiftCategory | null = null;
+  public loadDraftOnCoupleOpen: boolean = false;
 
   @ViewChild(AdminGiftFormComponent) public giftForm?: AdminGiftFormComponent;
   @ViewChild(AdminCoupleFormComponent) public coupleForm?: AdminCoupleFormComponent;
@@ -236,6 +238,15 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     }
 
     this.activeTab = tab;
+  }
+
+  public openShowcase(): void {
+    this.loadDraftOnCoupleOpen = true;
+    this.activeTab = AdminTab.Showcase;
+  }
+
+  public openShowcaseEditor(): void {
+    this.activeTab = AdminTab.Couple;
   }
 
   public requestCloseGiftForm(): void {

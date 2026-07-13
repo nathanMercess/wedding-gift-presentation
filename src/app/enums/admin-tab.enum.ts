@@ -3,6 +3,7 @@ export enum AdminTab {
   Gifts = 'gifts',
   Contributions = 'contributions',
   Payments = 'payments',
+  Showcase = 'showcase',
   Couple = 'couple',
   Users = 'users',
 }

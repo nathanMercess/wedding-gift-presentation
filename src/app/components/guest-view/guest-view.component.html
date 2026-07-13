@@ -292,7 +292,7 @@
   <app-gift-details-modal *ngIf="showGiftDetailsModal" [gift]="selectedGift" [resumePayment]="selectedResumePayment"
     [coupleName]="coupleService.state().couple.names" [giftDisplayMode]="giftDisplayMode"
     [showGiftCategory]="siteSettings.showGiftCategories" [showGiftProgress]="siteSettings.showGiftProgress"
-    [showContributionType]="siteSettings.showContributionType" (close)="closeGiftDetails()"
+    [showContributionType]="siteSettings.showContributionType" [previewMode]="previewMode" (close)="closeGiftDetails()"
     (paymentCompleted)="onGiftPaymentCompleted()">
   </app-gift-details-modal>
 

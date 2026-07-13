@@ -2,8 +2,29 @@
 
 <div *ngIf="!coupleService.state().loading" class="couple-form">
 
+  <nav class="cf-tabs" aria-label="Seções das informações do casal">
+    <button type="button" [class.active]="activeTab === CoupleFormTab.Information"
+      [attr.aria-pressed]="activeTab === CoupleFormTab.Information"
+      (click)="selectTab(CoupleFormTab.Information)">
+      <strong>Dados do casal</strong>
+      <span>Nomes, data, local e mensagem</span>
+    </button>
+    <button type="button" [class.active]="activeTab === CoupleFormTab.Appearance"
+      [attr.aria-pressed]="activeTab === CoupleFormTab.Appearance"
+      (click)="selectTab(CoupleFormTab.Appearance)">
+      <strong>Site e aparência</strong>
+      <span>Cores, lista e textos da vitrine</span>
+    </button>
+    <button type="button" [class.active]="activeTab === CoupleFormTab.Gallery"
+      [attr.aria-pressed]="activeTab === CoupleFormTab.Gallery"
+      (click)="selectTab(CoupleFormTab.Gallery)">
+      <strong>Galeria de fotos</strong>
+      <span>Upload, ordem e legendas</span>
+    </button>
+  </nav>
+
   <!-- Foto + dados principais -->
-  <section class="cf-card cf-hero">
+  <section *ngIf="activeTab === CoupleFormTab.Information" class="cf-card cf-hero">
     <div class="cf-photo">
       <div class="cf-photo-preview">
         <img *ngIf="couple.photoUrl" [src]="couple.photoUrl" alt="Foto do casal" />
@@ -48,7 +69,7 @@
   </section>
 
   <!-- Aparência / cores -->
-  <section class="cf-card">
+  <section *ngIf="activeTab === CoupleFormTab.Appearance" class="cf-card">
     <div class="cf-section-head">
       <h3>Aparência</h3>
       <p>As cores aplicam ao site dos convidados em tempo real conforme você ajusta.</p>
@@ -88,7 +109,7 @@
     </div>
   </section>
 
-  <section class="cf-card">
+  <section *ngIf="activeTab === CoupleFormTab.Appearance" class="cf-card">
     <div class="cf-section-head">
       <h3>Lista de presentes</h3>
     </div>
@@ -114,13 +135,13 @@
     </div>
   </section>
 
-  <section class="cf-card">
+  <section *ngIf="activeTab === CoupleFormTab.Appearance" class="cf-card">
     <div class="cf-section-head cf-section-head-row">
       <div>
-        <h3>Personalizacao do site</h3>
-        <p>Controle o que convidados enxergam na vitrine publica.</p>
+        <h3>Personalização do site</h3>
+        <p>Controle o que convidados enxergam na vitrine pública.</p>
       </div>
-      <button type="button" class="cf-link" (click)="resetSiteSettings()">restaurar padrao</button>
+      <button type="button" class="cf-link" (click)="resetSiteSettings()">restaurar padrão</button>
     </div>
 
     <div class="cf-settings-grid">
@@ -151,7 +172,7 @@
       <label class="cf-check-option">
         <input type="checkbox" [(ngModel)]="couple.siteSettings.showGuestStats" name="showGuestStats" />
         <span>
-          <strong>Estatisticas publicas</strong>
+          <strong>Estatísticas públicas</strong>
           <small>Mostra quantidade de presentes garantidos.</small>
         </span>
       </label>
@@ -167,7 +188,7 @@
       <label class="cf-check-option">
         <input type="checkbox" [(ngModel)]="couple.siteSettings.showContributionType" name="showContributionType" />
         <span>
-          <strong>Tipo de contribuicao</strong>
+          <strong>Tipo de contribuição</strong>
           <small>Mostra se o presente aceita valor parcial ou integral.</small>
         </span>
       </label>
@@ -196,15 +217,15 @@
           <input type="checkbox" [(ngModel)]="couple.siteSettings.showPriceFilter" name="showPriceFilter" />
           <span>
             <strong>Filtro por valor</strong>
-            <small>Mostra campos de valor minimo e maximo.</small>
+            <small>Mostra campos de valor mínimo e máximo.</small>
           </span>
         </label>
 
         <label class="cf-check-option">
           <input type="checkbox" [(ngModel)]="couple.siteSettings.showAvailabilityFilter" name="showAvailabilityFilter" />
           <span>
-            <strong>Filtro de disponiveis</strong>
-            <small>Permite ver apenas presentes disponiveis.</small>
+            <strong>Filtro de disponíveis</strong>
+            <small>Permite ver apenas presentes disponíveis.</small>
           </span>
         </label>
       </div>
@@ -221,11 +242,11 @@
       <h4>Textos da vitrine</h4>
       <div class="cf-text-grid">
         <div class="cf-group">
-          <label>Titulo da lista</label>
+          <label>Título da lista</label>
           <input type="text" [(ngModel)]="couple.siteSettings.giftSectionTitle" name="giftSectionTitle" class="cf-input" />
         </div>
         <div class="cf-group">
-          <label>Subtitulo da lista</label>
+          <label>Subtítulo da lista</label>
           <input type="text" [(ngModel)]="couple.siteSettings.giftSectionSubtitle" name="giftSectionSubtitle" class="cf-input" />
         </div>
         <div class="cf-group">
@@ -233,11 +254,11 @@
           <input type="text" [(ngModel)]="couple.siteSettings.searchPlaceholder" name="searchPlaceholder" class="cf-input" />
         </div>
         <div class="cf-group">
-          <label>Texto do botao de presente</label>
+          <label>Texto do botão de presente</label>
           <input type="text" [(ngModel)]="couple.siteSettings.presentButtonLabel" name="presentButtonLabel" class="cf-input" />
         </div>
         <div class="cf-group">
-          <label>Titulo quando vazio</label>
+          <label>Título quando vazio</label>
           <input type="text" [(ngModel)]="couple.siteSettings.emptyStateTitle" name="emptyStateTitle" class="cf-input" />
         </div>
         <div class="cf-group">
@@ -249,7 +270,7 @@
   </section>
 
   <!-- Carousel de fotos -->
-  <section class="cf-card">
+  <section *ngIf="activeTab === CoupleFormTab.Gallery" class="cf-card">
     <div class="cf-section-head">
       <h3>Fotos do Carrossel</h3>
       <p>As fotos passam no topo do site na ordem abaixo. Use as setas para reordenar — a primeira é a que abre o

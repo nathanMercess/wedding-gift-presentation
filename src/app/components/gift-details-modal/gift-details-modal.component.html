@@ -41,8 +41,26 @@
         <!-- Direita: muda conforme step / disponibilidade -->
         <div class="right-side">
 
+          <div *ngIf="previewMode()" class="completed-panel">
+            <div class="completed-notice">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              <div>
+                <p class="completed-title">Modo de pré-visualização</p>
+                <p class="completed-sub">Os detalhes estão visíveis, mas a contribuição e o pagamento ficam desativados no preview.</p>
+              </div>
+            </div>
+            <div class="completed-actions">
+              <app-button [variant]="ButtonVariant.Primary" [type]="ButtonType.Button"
+                (click)="close.emit()">Continuar navegando</app-button>
+            </div>
+          </div>
+
           <!-- Presente indisponível -->
-          <div *ngIf="isUnavailable" class="completed-panel">
+          <div *ngIf="!previewMode() && isUnavailable" class="completed-panel">
             <div class="completed-notice">
               <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
                 <path
@@ -62,7 +80,7 @@
           @switch (step) {
             @case (ModalStep.Contribution) {
               <div *ngIf="validationError" class="validation-alert" role="alert">{{ validationError }}</div>
-              <app-gift-contribution-form *ngIf="!isUnavailable" [gift]="currentGift" [coupleName]="coupleName()"
+              <app-gift-contribution-form *ngIf="!previewMode() && !isUnavailable" [gift]="currentGift" [coupleName]="coupleName()"
                 [giftDisplayMode]="giftDisplayMode()" [minAmount]="minAmount" [remaining]="contributionLimit"
                 [availableQuickAmounts]="availableQuickAmounts" [initialData]="contributionFormData"
                 [hasInitialData]="hasStoredContribution" [submitting]="validatingContribution"
@@ -71,7 +89,7 @@
             }
 
             @case (ModalStep.Payment) {
-              <app-gift-payment-step *ngIf="!isUnavailable" [gift]="currentGift" [giftId]="currentGift.id"
+              <app-gift-payment-step *ngIf="!previewMode() && !isUnavailable" [gift]="currentGift" [giftId]="currentGift.id"
                 [amount]="contributionAmount" [orderId]="orderId" [contributorName]="contributorName"
                 [message]="contributorMessage" [resumePayment]="resumePayment()" (paymentResolved)="onPaymentResolved($event)">
               </app-gift-payment-step>

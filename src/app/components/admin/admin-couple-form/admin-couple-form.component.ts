@@ -1,7 +1,8 @@
-import { Component, effect } from '@angular/core';
+import { Component, InputSignal, OutputEmitterRef, effect, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DEFAULT_SITE_SETTINGS } from '../../../constants/default-site-settings.constant';
+import { CoupleFormTab } from '../../../enums/couple-form-tab.enum';
 import { GiftCategory } from '../../../enums/gift-category.enum';
 import { GiftDisplayMode } from '../../../enums/gift-display-mode.enum';
 import { CarouselPhoto, Couple } from '../../../models/couple.model';
@@ -18,10 +19,14 @@ import { ColorUtil } from '../../../utils/color.util';
   imports: [CommonModule, FormsModule],
 })
 export class AdminCoupleFormComponent {
+  public readonly CoupleFormTab: typeof CoupleFormTab = CoupleFormTab;
   public readonly GiftDisplayMode: typeof GiftDisplayMode = GiftDisplayMode;
   public readonly GiftCategory: typeof GiftCategory = GiftCategory;
+  public readonly loadDraftOnOpen: InputSignal<boolean> = input<boolean>(false);
+  public readonly previewRequested: OutputEmitterRef<void> = output<void>();
 
   public couple: Couple = { names: '', weddingDate: '', photoUrl: '', message: '', eventLocation: '', primaryColor: '#000000', secondaryColor: '#d9d9d9', giftDisplayMode: GiftDisplayMode.Traditional, carouselPhotos: [], siteSettings: { ...DEFAULT_SITE_SETTINGS, enabledCategories: [...DEFAULT_SITE_SETTINGS.enabledCategories] } };
+  public activeTab: CoupleFormTab = CoupleFormTab.Information;
   public readonly categoryOptions: GiftCategory[] = [...DEFAULT_SITE_SETTINGS.enabledCategories];
   public carouselUploading: boolean = false;
   public carouselUploadError: string = '';
@@ -30,6 +35,7 @@ export class AdminCoupleFormComponent {
 
   private coupleSignature: string = '';
   private savedFormSignature: string = '';
+  private requestedDraftLoaded: boolean = false;
 
   public constructor(public readonly coupleService: CoupleService, public readonly theme: ThemeService, public readonly draftService: CoupleDraftService) {
     this.hasDraft = this.draftService.exists();
@@ -71,6 +77,17 @@ export class AdminCoupleFormComponent {
         this.hasDraft = false;
       }
     }, { allowSignalWrites: true });
+
+    effect((): void => {
+      if (!this.loadDraftOnOpen())
+        return;
+
+      if (this.requestedDraftLoaded)
+        return;
+
+      this.requestedDraftLoaded = true;
+      this.loadDraft();
+    });
   }
 
   public get isDirty(): boolean {
@@ -201,7 +218,11 @@ export class AdminCoupleFormComponent {
 
   public previewDraft(): void {
     this.saveDraft();
-    window.open('/gifts?preview=1', '_blank', 'noopener');
+    this.previewRequested.emit();
+  }
+
+  public selectTab(tab: CoupleFormTab): void {
+    this.activeTab = tab;
   }
 
   public discardChanges(): void {

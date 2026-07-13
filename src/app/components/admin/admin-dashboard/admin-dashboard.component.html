@@ -16,11 +16,12 @@
         (click)="requestTabChange(AdminTab.Contributions)">Contribuições <span *ngIf="unreadMessageCount" class="nav-badge">{{ unreadMessageCount }}</span></button>
       <button *ngIf="canAccessTab(AdminTab.Payments)" type="button" [class.active]="activeTab === AdminTab.Payments"
         [attr.aria-pressed]="activeTab === AdminTab.Payments" (click)="requestTabChange(AdminTab.Payments)">Pagamentos</button>
+      <button *ngIf="canAccessTab(AdminTab.Showcase)" type="button" [class.active]="activeTab === AdminTab.Showcase"
+        [attr.aria-pressed]="activeTab === AdminTab.Showcase" (click)="requestTabChange(AdminTab.Showcase)">Vitrine</button>
       <button *ngIf="canAccessTab(AdminTab.Couple)" type="button" [class.active]="activeTab === AdminTab.Couple" [attr.aria-pressed]="activeTab === AdminTab.Couple"
         (click)="requestTabChange(AdminTab.Couple)">Casal</button>
       <button *ngIf="canAccessTab(AdminTab.Users)" type="button" [class.active]="activeTab === AdminTab.Users"
         [attr.aria-pressed]="activeTab === AdminTab.Users" (click)="requestTabChange(AdminTab.Users)">Usuários</button>
-      <a routerLink="/gifts" target="_blank" rel="noopener">Ver vitrine</a>
       <a *ngIf="isSuperAdmin" routerLink="/super-admin/dashboard">Dashboard</a>
     </nav>
     <button class="logout-btn" (click)="logout()">Sair</button>
@@ -104,6 +105,9 @@
 
     <app-admin-payments *ngIf="activeTab === AdminTab.Payments && canAccessTab(AdminTab.Payments)"></app-admin-payments>
 
+    <app-admin-showcase *ngIf="activeTab === AdminTab.Showcase && canAccessTab(AdminTab.Showcase)"
+      (editRequested)="openShowcaseEditor()"></app-admin-showcase>
+
     <!-- COUPLE TAB -->
     <section *ngIf="activeTab === AdminTab.Couple && canAccessTab(AdminTab.Couple)" class="tab-section">
       <div class="section-header">
@@ -113,7 +117,8 @@
       <div *ngIf="!coupleService.state().loading && coupleService.state().error" class="error-msg">
         {{ coupleService.state().error }}
       </div>
-      <app-admin-couple-form *ngIf="!coupleService.state().loading && !coupleService.state().error"></app-admin-couple-form>
+      <app-admin-couple-form *ngIf="!coupleService.state().loading && !coupleService.state().error"
+        [loadDraftOnOpen]="loadDraftOnCoupleOpen" (previewRequested)="openShowcase()"></app-admin-couple-form>
     </section>
 
     <app-admin-users *ngIf="activeTab === AdminTab.Users && canAccessTab(AdminTab.Users)"></app-admin-users>

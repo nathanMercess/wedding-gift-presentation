@@ -7,6 +7,55 @@
   min-width: 0;
 }
 
+.cf-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+  padding: 0.5rem;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  box-shadow: var(--shadow-xs);
+
+  button {
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.18rem;
+    min-width: 0;
+    padding: 0.85rem 1rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--muted-foreground);
+    font-family: var(--font-sans);
+    text-align: left;
+    cursor: pointer;
+    transition: background var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
+
+    strong {
+      color: var(--foreground);
+      font-size: 0.86rem;
+    }
+
+    span {
+      font-size: 0.72rem;
+      line-height: 1.35;
+    }
+
+    &:hover {
+      background: color-mix(in srgb, var(--primary) 5%, transparent);
+    }
+
+    &.active {
+      border-color: color-mix(in srgb, var(--primary) 35%, var(--hairline));
+      background: color-mix(in srgb, var(--primary) 8%, var(--card));
+      color: var(--primary);
+      box-shadow: var(--shadow-xs);
+    }
+  }
+}
+
 .cf-card {
   background: var(--card);
   border: 1px solid var(--hairline);
@@ -397,6 +446,10 @@ textarea.cf-input {
 }
 
 @media (max-width: 600px) {
+  .cf-tabs {
+    grid-template-columns: 1fr;
+  }
+
   .cf-card {
     padding: 1rem;
   }

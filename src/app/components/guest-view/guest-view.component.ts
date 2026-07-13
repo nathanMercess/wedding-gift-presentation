@@ -158,6 +158,7 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
     GiftCategory.Table,
     GiftCategory.Home,
   ];
+  public previewMode: boolean = false;
 
   private readonly destroy$ = new Subject<void>();
   private readonly searchSubject = new Subject<string>();
@@ -329,8 +330,8 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   public loadCoupleOrPreview(): void {
-    const preview: boolean = this.route.snapshot.queryParamMap.get('preview') === '1';
-    const draft: Couple | null = preview ? this.coupleDraft.load() : null;
+    this.previewMode = this.route.snapshot.queryParamMap.get('preview') === '1';
+    const draft: Couple | null = this.previewMode ? this.coupleDraft.load() : null;
 
     if (!draft) {
       this.loadCouple();
@@ -601,6 +602,7 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
         available: this.onlyAvailable || undefined,
         page: page > 1 ? page : undefined,
         gift: this.sharedGiftId || undefined,
+        preview: this.previewMode || undefined,
       },
       replaceUrl: true,
     });

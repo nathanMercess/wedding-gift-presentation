@@ -6,9 +6,12 @@ export abstract class AdminTabAccessUtil {
     if (roles.includes(UserRole.SuperAdmin))
       return true;
 
-    if (!roles.includes(UserRole.Admin))
+    if (roles.includes(UserRole.Admin))
+      return tab !== AdminTab.Users;
+
+    if (!roles.includes(UserRole.Member))
       return false;
 
-    return tab !== AdminTab.Users;
+    return tab !== AdminTab.Payments && tab !== AdminTab.Users;
   }
 }

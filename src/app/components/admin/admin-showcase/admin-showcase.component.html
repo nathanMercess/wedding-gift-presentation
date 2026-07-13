@@ -1,0 +1,37 @@
+<section class="showcase-section">
+  <div class="showcase-header">
+    <div>
+      <span class="showcase-eyebrow">Pré-visualização</span>
+      <h2>Vitrine do casamento</h2>
+      <p>Confira a experiência dos convidados sem sair do painel.</p>
+    </div>
+    <div class="showcase-header-actions">
+      <button type="button" class="showcase-secondary" (click)="edit()">Editar vitrine</button>
+      <a class="showcase-primary" routerLink="/gifts" target="_blank" rel="noopener">Abrir site publicado</a>
+    </div>
+  </div>
+
+  <div class="showcase-status" [class.published]="!hasDraft">
+    <span class="showcase-status-dot"></span>
+    <div>
+      <strong>{{ hasDraft ? 'Visualizando rascunho' : 'Visualizando versão publicada' }}</strong>
+      <p>{{ hasDraft ? 'As alterações salvas como rascunho aparecem abaixo e ainda não estão públicas.' : 'Salve um rascunho na área Casal para testar mudanças antes de publicar.' }}</p>
+    </div>
+  </div>
+
+  <div class="showcase-toolbar" aria-label="Controles da pré-visualização">
+    <div class="showcase-viewports" role="group" aria-label="Tamanho da tela">
+      <button type="button" [class.active]="activeViewport === ShowcaseViewport.Desktop"
+        [attr.aria-pressed]="activeViewport === ShowcaseViewport.Desktop"
+        (click)="setViewport(ShowcaseViewport.Desktop)">Desktop</button>
+      <button type="button" [class.active]="activeViewport === ShowcaseViewport.Mobile"
+        [attr.aria-pressed]="activeViewport === ShowcaseViewport.Mobile"
+        (click)="setViewport(ShowcaseViewport.Mobile)">Celular</button>
+    </div>
+    <button type="button" class="showcase-refresh" (click)="refresh()">Recarregar preview</button>
+  </div>
+
+  <div class="showcase-canvas" [class.mobile]="activeViewport === ShowcaseViewport.Mobile">
+    <iframe #showcaseFrame src="/gifts?preview=1" title="Pré-visualização da vitrine do casamento"></iframe>
+  </div>
+</section>

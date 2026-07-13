@@ -41,6 +41,7 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy, AfterViewIn
   public readonly showGiftCategory: InputSignal<boolean> = input<boolean>(true);
   public readonly showGiftProgress: InputSignal<boolean> = input<boolean>(true);
   public readonly showContributionType: InputSignal<boolean> = input<boolean>(true);
+  public readonly previewMode: InputSignal<boolean> = input<boolean>(false);
   public readonly resumePayment: InputSignal<PendingPayment | null> = input<PendingPayment | null>(null);
   public readonly close: OutputEmitterRef<void> = output<void>();
   public readonly paymentCompleted: OutputEmitterRef<void> = output<void>();
@@ -159,6 +160,10 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy, AfterViewIn
     this.previousFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : document.body;
     document.body.classList.add('modal-open');
     this.hidePageSiblings();
+
+    if (this.previewMode())
+      return;
+
     this.restorePendingPayment();
   }
 
