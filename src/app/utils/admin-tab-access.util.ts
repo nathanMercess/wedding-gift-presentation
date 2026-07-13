@@ -16,6 +16,6 @@ export abstract class AdminTabAccessUtil {
     if (!roles.includes(UserRole.Member))
       return false;
 
-    return tab !== AdminTab.Payments && tab !== AdminTab.Users;
+    return tab !== AdminTab.Contributions && tab !== AdminTab.Payments && tab !== AdminTab.Users;
   }
 }

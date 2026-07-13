@@ -1,10 +1,10 @@
 import { AdminContribution } from './admin-contribution.model';
 import { AdminPayment } from './admin-payment.model';
 import { AdminUser } from './admin-user.model';
-import { DashboardOverviewResponse } from './dashboard-response.model';
+import { CoupleOverview } from './couple-overview.model';
 
 export interface AdminOperationsState {
-  overview: DashboardOverviewResponse | null;
+  overview: CoupleOverview | null;
   contributions: AdminContribution[];
   contributionTotal: number;
   contributionPages: number;

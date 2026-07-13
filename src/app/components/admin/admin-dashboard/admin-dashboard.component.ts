@@ -148,6 +148,10 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   public ngOnInit(): void {
     this.loadGifts();
     this.coupleService.loadCouple();
+
+    if (!this.canAccessTab(AdminTab.Contributions))
+      return;
+
     this.operations.loadContributions({ hasMessage: true, page: 1, pageSize: 100 });
   }
 

@@ -41,6 +41,10 @@ export class EndpointsUrls {
         return `${this.apiUrl}/admin/dashboard/overview`;
     }
 
+    public get adminOverview(): string {
+        return `${this.apiUrl}/admin/overview`;
+    }
+
     public get adminContributions(): string {
         return `${this.apiUrl}/admin/contributions`;
     }

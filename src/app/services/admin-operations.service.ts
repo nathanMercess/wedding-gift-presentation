@@ -10,7 +10,7 @@ import { AdminOperationsState } from '../models/admin-operations-state.model';
 import { AdminPayment } from '../models/admin-payment.model';
 import { AdminUser } from '../models/admin-user.model';
 import { ApiResponse } from '../models/api-response.model';
-import { DashboardOverviewResponse } from '../models/dashboard-response.model';
+import { CoupleOverview } from '../models/couple-overview.model';
 import { PagedResult } from '../models/paged-result.model';
 import { ApiResponseUtil } from '../utils/api-response.util';
 import { HttpErrorUtil } from '../utils/http-error';
@@ -58,15 +58,15 @@ export class AdminOperationsService {
 
   public loadOverview(days: number = 30): void {
     this.patchState({ loading: true, error: '' });
-    const params: HttpParams = new HttpParams().set('days', String(days)).set('recentItems', '5');
+    const params: HttpParams = new HttpParams().set('days', String(days));
 
-    this.http.get<ApiResponse<DashboardOverviewResponse>>(this.endpointsUrls.adminDashboardOverview, { params })
+    this.http.get<ApiResponse<CoupleOverview>>(this.endpointsUrls.adminOverview, { params })
       .pipe(
-        ApiResponseUtil.data<DashboardOverviewResponse>('Erro ao carregar o resumo.'),
+        ApiResponseUtil.data<CoupleOverview>('Erro ao carregar o resumo.'),
         finalize((): void => this.patchState({ loading: false })),
       )
       .subscribe({
-        next: (overview: DashboardOverviewResponse): void => this.patchState({ overview }),
+        next: (overview: CoupleOverview): void => this.patchState({ overview }),
         error: (err: HttpErrorResponse): void => this.patchState({ error: HttpErrorUtil.extract(err, 'Erro ao carregar o resumo.') }),
       });
   }

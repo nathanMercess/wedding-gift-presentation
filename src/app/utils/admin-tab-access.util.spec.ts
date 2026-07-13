@@ -19,10 +19,10 @@ describe('AdminTabAccessUtil', () => {
     expect(AdminTabAccessUtil.canAccess(AdminTab.Users, [UserRole.Admin])).toBe(false);
   });
 
-  it('permite abas operacionais para membro sem liberar pagamentos e usuarios', () => {
+  it('permite somente as abas basicas para membro', () => {
     expect(AdminTabAccessUtil.canAccess(AdminTab.Overview, [UserRole.Member])).toBe(true);
     expect(AdminTabAccessUtil.canAccess(AdminTab.Gifts, [UserRole.Member])).toBe(true);
-    expect(AdminTabAccessUtil.canAccess(AdminTab.Contributions, [UserRole.Member])).toBe(true);
+    expect(AdminTabAccessUtil.canAccess(AdminTab.Contributions, [UserRole.Member])).toBe(false);
     expect(AdminTabAccessUtil.canAccess(AdminTab.Showcase, [UserRole.Member])).toBe(true);
     expect(AdminTabAccessUtil.canAccess(AdminTab.Couple, [UserRole.Member])).toBe(true);
     expect(AdminTabAccessUtil.canAccess(AdminTab.Payments, [UserRole.Member])).toBe(false);
@@ -33,7 +33,6 @@ describe('AdminTabAccessUtil', () => {
     expect(AdminTabAccessUtil.accessibleTabs([UserRole.Member])).toEqual([
       AdminTab.Overview,
       AdminTab.Gifts,
-      AdminTab.Contributions,
       AdminTab.Showcase,
       AdminTab.Couple,
     ]);

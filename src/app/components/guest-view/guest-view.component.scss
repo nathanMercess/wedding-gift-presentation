@@ -179,10 +179,18 @@
   color: var(--muted-foreground);
   text-align: center;
 
-  svg {
-    flex-shrink: 0;
-    color: var(--primary);
-  }
+}
+
+.hero-location-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  color: var(--primary);
+}
+
+.hero-location-text {
+  min-width: 0;
 }
 
 .hero-names {
@@ -1134,6 +1142,31 @@
   .hero-stats-wrap.container {
     padding-top: 0.25rem;
     padding-bottom: 0.25rem;
+  }
+
+  .hero-location {
+    align-items: flex-start;
+    gap: 0.55rem;
+    width: min(100%, 21rem);
+  }
+
+  .hero-location-icon {
+    width: 1.65rem;
+    height: 1.65rem;
+    margin-top: 0.05rem;
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--primary) 10%, var(--card));
+
+    svg {
+      width: 0.95rem;
+      height: 0.95rem;
+    }
+  }
+
+  .hero-location-text {
+    flex: 1;
+    padding-top: 0.14rem;
+    text-align: left;
   }
 
   .resume-payment-content {
