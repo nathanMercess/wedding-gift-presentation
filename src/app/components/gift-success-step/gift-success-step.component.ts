@@ -34,6 +34,29 @@ export class GiftSuccessStepComponent {
     return PaymentStatusUtil.message(this.result().status, this.coupleName());
   }
 
+  public get isApproved(): boolean {
+    return PaymentStatusUtil.isApproved(this.result().status);
+  }
+
+  public get dateLabel(): string {
+    return this.isApproved ? 'Data do pagamento' : 'Atualizado em';
+  }
+
+  public get amountLabel(): string {
+    return this.isApproved ? 'Valor pago' : 'Valor da contribuição';
+  }
+
+  public get copyLabel(): string {
+    if (this.receiptCopied)
+      return this.isApproved ? 'Comprovante copiado' : 'Resumo copiado';
+
+    return this.isApproved ? 'Copiar comprovante' : 'Copiar resumo';
+  }
+
+  public get receiptFileName(): string {
+    return `${this.isApproved ? 'comprovante' : 'resumo'}-${this.result().orderId}.txt`;
+  }
+
   public get receiptText(): string {
     const result: PaymentResult = this.result();
     const lines: string[] = [
@@ -42,7 +65,7 @@ export class GiftSuccessStepComponent {
       `Presente: ${result.giftName}`,
       `Valor: ${this.formatCurrency(result.amount)}`,
       `Nome: ${result.contributorName}`,
-      `Data: ${this.formatDate(result.paidAt)}`,
+      `${this.dateLabel}: ${this.formatDate(result.paidAt)}`,
     ];
 
     if (result.mpOrderId)
@@ -66,7 +89,7 @@ export class GiftSuccessStepComponent {
     const url: string = URL.createObjectURL(blob);
     const link: HTMLAnchorElement = document.createElement('a');
     link.href = url;
-    link.download = `comprovante-${this.result().orderId}.txt`;
+    link.download = this.receiptFileName;
     link.click();
     URL.revokeObjectURL(url);
   }

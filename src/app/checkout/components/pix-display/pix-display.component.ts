@@ -1,4 +1,4 @@
-import { Component, InputSignal, OnDestroy, OnInit, OutputEmitterRef, WritableSignal, computed, effect, input, output, signal } from '@angular/core';
+import { Component, HostListener, InputSignal, OnDestroy, OnInit, OutputEmitterRef, WritableSignal, computed, effect, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { PaymentService } from '../../services/payment.service';
@@ -38,6 +38,7 @@ export class PixDisplayComponent implements OnInit, OnDestroy {
   public readonly paymentResolved: OutputEmitterRef<PaymentResult> = output<PaymentResult>();
   public readonly pixReady: OutputEmitterRef<PaymentResponse> = output<PaymentResponse>();
   public readonly cancelled: OutputEmitterRef<void> = output<void>();
+  public readonly retryRequested: OutputEmitterRef<void> = output<void>();
 
   public readonly PixStep: typeof PixStep = PixStep;
   public readonly ApiErrorCode: typeof ApiErrorCode = ApiErrorCode;
@@ -47,9 +48,12 @@ export class PixDisplayComponent implements OnInit, OnDestroy {
   public readonly qrCodeBase64: WritableSignal<string> = signal('');
   public readonly mpOrderId: WritableSignal<string> = signal('');
   public readonly error: WritableSignal<string> = signal('');
+  public readonly errorMessage: WritableSignal<string> = signal('');
+  public readonly terminalFailure: WritableSignal<boolean> = signal(false);
   public readonly expired: WritableSignal<boolean> = signal(false);
   public readonly copied: WritableSignal<boolean> = signal(false);
   public readonly remainingSeconds: WritableSignal<number> = signal(PIX_EXPIRATION_SECONDS);
+  public recoverableStatusError: boolean = false;
 
   public readonly formattedCountdown = computed((): string => {
     const total = Math.max(this.remainingSeconds(), 0);
@@ -60,7 +64,8 @@ export class PixDisplayComponent implements OnInit, OnDestroy {
 
   public readonly payerForm: FormGroup;
 
-  private pollingInterval: number = 0;
+  private pollingTimeout: number = 0;
+  private pollingAttempt: number = 0;
   private countdownInterval: number = 0;
   private awaitingPixResponse: boolean = false;
   private awaitingStatusCheck: boolean = false;
@@ -78,18 +83,19 @@ export class PixDisplayComponent implements OnInit, OnDestroy {
   public ngOnInit(): void {
     const pendingPayment: PendingPayment | null = this.resumePayment();
 
-    if (!pendingPayment || pendingPayment.method !== PaymentMethod.Pix || !pendingPayment.mpOrderId)
+    if (!pendingPayment || pendingPayment.method !== PaymentMethod.Pix)
       return;
 
-    this.mpOrderId.set(pendingPayment.mpOrderId);
+    if (pendingPayment.orderId !== this.orderId() || pendingPayment.gift.id !== this.giftId())
+      return;
+
+    this.mpOrderId.set(pendingPayment.mpOrderId ?? '');
     this.qrCode.set(pendingPayment.qrCode ?? '');
     this.qrCodeBase64.set(pendingPayment.qrCodeBase64 ?? '');
-    this.pixStep.set(PixStep.Qr);
+    this.pixStep.set(this.qrCode() || this.qrCodeBase64() ? PixStep.Qr : PixStep.Loading);
 
-    if (pendingPayment.expiresAt) {
-      const secondsLeft: number = Math.floor((new Date(pendingPayment.expiresAt).getTime() - Date.now()) / 1000);
-      this.remainingSeconds.set(Math.max(secondsLeft, 0));
-    }
+    if (pendingPayment.expiresAt)
+      this.resetCountdown(pendingPayment.expiresAt);
 
     if (this.remainingSeconds() <= 0) {
       this.expired.set(true);
@@ -97,11 +103,13 @@ export class PixDisplayComponent implements OnInit, OnDestroy {
     }
 
     this.startPolling();
-    this.startCountdown(false);
+    this.startCountdown();
+    this.verifyNow();
   }
 
   private showError(code: string, detail: string): void {
     this.error.set(code);
+    this.errorMessage.set(detail);
     this.toastService.error(detail, 'Erro no pagamento');
   }
 
@@ -135,6 +143,9 @@ export class PixDisplayComponent implements OnInit, OnDestroy {
 
     this.pixStep.set(PixStep.Loading);
     this.error.set('');
+    this.errorMessage.set('');
+    this.terminalFailure.set(false);
+    this.recoverableStatusError = false;
 
     const rawCpf = (this.payerForm.value.cpf as string).replace(/\D/g, '');
 
@@ -161,6 +172,10 @@ export class PixDisplayComponent implements OnInit, OnDestroy {
 
     if (state.error) {
       this.showError(ApiErrorCode.ProviderError, state.error);
+
+      if (!state.uncertainFailure)
+        this.retryRequested.emit();
+
       this.pixStep.set(PixStep.Form);
       return;
     }
@@ -173,19 +188,30 @@ export class PixDisplayComponent implements OnInit, OnDestroy {
     const qrCode: string = response.qrCode ?? response.pixQrCode ?? '';
     const qrCodeBase64: string = response.qrCodeBase64 ?? '';
 
-    if (response.mpOrderId && (qrCode || qrCodeBase64)) {
-      this.mpOrderId.set(response.mpOrderId);
+    if (qrCode || qrCodeBase64) {
+      this.mpOrderId.set(response.mpOrderId ?? '');
       this.qrCode.set(qrCode);
       this.qrCodeBase64.set(qrCodeBase64);
       this.error.set('');
+      this.errorMessage.set('');
+      this.recoverableStatusError = false;
       this.pixStep.set(PixStep.Qr);
       this.pixReady.emit(response);
+      this.pollingAttempt = 0;
+      this.resetCountdown(response.expiresAt);
+
+      if (this.remainingSeconds() <= 0) {
+        this.expired.set(true);
+        return;
+      }
+
       this.startPolling();
-      this.startCountdown(true);
+      this.startCountdown();
       return;
     }
 
     this.showError(response.errorCode ?? ApiErrorCode.ProviderError, 'Erro ao gerar o PIX. Tente novamente.');
+    this.retryRequested.emit();
     this.pixStep.set(PixStep.Form);
   }
 
@@ -193,9 +219,26 @@ export class PixDisplayComponent implements OnInit, OnDestroy {
     if (!this.awaitingStatusCheck)
       return;
 
+    if (state.orderId !== this.orderId())
+      return;
+
+    if (!state.hasResponse && !state.error)
+      return;
+
     this.awaitingStatusCheck = false;
 
-    if (state.hasResponse && state.response.status === PaymentStatus.Approved) {
+    if (state.error) {
+      if (this.qrCode() || this.qrCodeBase64())
+        return;
+
+      this.stopPolling();
+      this.recoverableStatusError = true;
+      this.pixStep.set(PixStep.Qr);
+      this.showError(ApiErrorCode.ProviderError, state.error);
+      return;
+    }
+
+    if (state.hasResponse && PaymentStatusUtil.isApproved(state.response.status)) {
       this.stopPolling();
       this.paymentResolved.emit(this.toPaymentResult(state.response));
       this.paymentApproved.emit();
@@ -204,31 +247,74 @@ export class PixDisplayComponent implements OnInit, OnDestroy {
 
     if (state.hasResponse && PaymentStatusUtil.isFinalFailure(state.response.status)) {
       this.stopPolling();
-      this.showError(state.response.errorCode ?? ApiErrorCode.PixRejected, 'Pagamento PIX rejeitado. Tente novamente.');
+      this.terminalFailure.set(true);
+      this.showError(state.response.errorCode ?? ApiErrorCode.PixRejected, 'Não foi possível concluir este PIX. Gere um novo código para tentar novamente.');
       return;
     }
 
-    if (state.hasResponse && (state.response.status === PaymentStatus.Pending || state.response.status === PaymentStatus.InProcess)) {
-      this.toastService.info('Ainda estamos aguardando a confirmacao do PIX.', 'Pagamento pendente');
+    if (!state.hasResponse || !PaymentStatusUtil.isPending(state.response.status))
+      return;
+
+    const response: PaymentResponse = state.response;
+    const qrCode: string = response.qrCode ?? response.pixQrCode ?? '';
+    const qrCodeBase64: string = response.qrCodeBase64 ?? '';
+    const hasPixCode: boolean = Boolean(qrCode || qrCodeBase64 || this.qrCode() || this.qrCodeBase64());
+
+    if (!hasPixCode) {
+      this.stopPolling();
+      this.recoverableStatusError = true;
+      this.pixStep.set(PixStep.Qr);
+      this.showError(ApiErrorCode.ProviderError, 'Não foi possível recuperar o código PIX. Informe os dados novamente para tentar com o mesmo pedido.');
+      return;
     }
+
+    if (response.mpOrderId)
+      this.mpOrderId.set(response.mpOrderId);
+
+    if (qrCode)
+      this.qrCode.set(qrCode);
+
+    if (qrCodeBase64)
+      this.qrCodeBase64.set(qrCodeBase64);
+
+    if (response.expiresAt)
+      this.resetCountdown(response.expiresAt);
+
+    this.error.set('');
+    this.errorMessage.set('');
+    this.recoverableStatusError = false;
+    this.pixStep.set(PixStep.Qr);
+    this.pixReady.emit(response);
   }
 
   private startPolling(): void {
-    this.pollingInterval = window.setInterval((): void => {
-      if (this.awaitingStatusCheck)
-        return;
+    if (this.pollingTimeout !== 0)
+      return;
 
-      this.awaitingStatusCheck = true;
-      this.paymentService.checkStatus(this.mpOrderId());
-    }, 5000);
+    this.scheduleNextPoll();
   }
 
-  private startCountdown(reset: boolean): void {
-    if (reset)
-      this.remainingSeconds.set(PIX_EXPIRATION_SECONDS);
+  private scheduleNextPoll(): void {
+    const delay: number = this.pollingAttempt === 0 ? 5000 : this.pollingAttempt === 1 ? 10000 : 15000;
+    this.pollingTimeout = window.setTimeout((): void => {
+      this.pollingTimeout = 0;
 
+      if (document.hidden)
+        return;
+
+      if (!this.awaitingStatusCheck) {
+        this.awaitingStatusCheck = true;
+        this.paymentService.loadOrder(this.orderId());
+        this.pollingAttempt += 1;
+      }
+
+      this.scheduleNextPoll();
+    }, delay);
+  }
+
+  private startCountdown(): void {
     this.countdownInterval = window.setInterval((): void => {
-      this.remainingSeconds.update(s => s - 1);
+      this.remainingSeconds.update((seconds: number): number => seconds - 1);
       if (this.remainingSeconds() <= 0) {
         this.stopPolling();
         this.expired.set(true);
@@ -236,26 +322,58 @@ export class PixDisplayComponent implements OnInit, OnDestroy {
     }, 1000);
   }
 
+  private resetCountdown(expiresAt?: string): void {
+    const expirationTimestamp: number = expiresAt ? new Date(expiresAt).getTime() : Number.NaN;
+    const resolvedTimestamp: number = Number.isFinite(expirationTimestamp) ? expirationTimestamp : Date.now() + PIX_EXPIRATION_SECONDS * 1000;
+    const secondsLeft: number = Math.floor((resolvedTimestamp - Date.now()) / 1000);
+    this.remainingSeconds.set(Math.max(secondsLeft, 0));
+  }
+
   public retryPix(): void {
+    this.stopPolling();
+    this.awaitingStatusCheck = false;
+    this.pollingAttempt = 0;
+    this.retryRequested.emit();
     this.pixStep.set(PixStep.Form);
     this.expired.set(false);
+    this.terminalFailure.set(false);
+    this.recoverableStatusError = false;
     this.error.set('');
+    this.errorMessage.set('');
+    this.qrCode.set('');
+    this.qrCodeBase64.set('');
+    this.mpOrderId.set('');
+  }
+
+  public retryPixLookup(): void {
+    this.stopPolling();
+    this.awaitingStatusCheck = false;
+    this.pollingAttempt = 0;
+    this.pixStep.set(PixStep.Form);
+    this.expired.set(false);
+    this.terminalFailure.set(false);
+    this.recoverableStatusError = false;
+    this.error.set('');
+    this.errorMessage.set('');
     this.qrCode.set('');
     this.qrCodeBase64.set('');
     this.mpOrderId.set('');
   }
 
   public cancel(): void {
+    if (this.paymentService.paymentState().submitting)
+      return;
+
     this.stopPolling();
     this.cancelled.emit();
   }
 
   public verifyNow(): void {
-    if (!this.mpOrderId() || this.awaitingStatusCheck)
+    if (!this.orderId() || this.awaitingStatusCheck)
       return;
 
     this.awaitingStatusCheck = true;
-    this.paymentService.checkStatus(this.mpOrderId());
+    this.paymentService.loadOrder(this.orderId());
   }
 
   public copyCode(): void {
@@ -265,15 +383,36 @@ export class PixDisplayComponent implements OnInit, OnDestroy {
     });
   }
 
-  private stopPolling(): void {
-    if (this.pollingInterval !== 0) {
-      clearInterval(this.pollingInterval);
-      this.pollingInterval = 0;
+  @HostListener('document:visibilitychange')
+  public onVisibilityChange(): void {
+    if (document.hidden) {
+      this.pausePolling();
+      return;
     }
+
+    if (this.pixStep() !== PixStep.Qr || this.expired() || this.terminalFailure() || this.recoverableStatusError)
+      return;
+
+    this.pollingAttempt = 0;
+    this.verifyNow();
+    this.startPolling();
+  }
+
+  private stopPolling(): void {
+    this.pausePolling();
+
     if (this.countdownInterval !== 0) {
       clearInterval(this.countdownInterval);
       this.countdownInterval = 0;
     }
+  }
+
+  private pausePolling(): void {
+    if (this.pollingTimeout === 0)
+      return;
+
+    clearTimeout(this.pollingTimeout);
+    this.pollingTimeout = 0;
   }
 
   public ngOnDestroy(): void {

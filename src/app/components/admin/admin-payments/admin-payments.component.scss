@@ -11,9 +11,10 @@ th { background: var(--secondary); font-size: .72rem; text-transform: uppercase;
 td small { display: block; margin-top: .25rem; color: var(--muted-foreground); }
 .order-code { display: block; max-width: 10rem; overflow: hidden; text-overflow: ellipsis; font-family: monospace; }
 .status { display: inline-flex; padding: .2rem .55rem; border-radius: var(--radius-pill); background: var(--secondary); font-size: .7rem; }
-.status.approved { color: var(--success); background: var(--success-bg); }
-.status.rejected, .status.error, .status.refunded, .status.charged_back { color: var(--danger); background: var(--danger-bg); }
+.status.approved, .status.processed { color: var(--success); background: var(--success-bg); }
+.status.rejected, .status.failed, .status.error, .status.cancelled, .status.canceled, .status.refunded, .status.partially_refunded, .status.charged_back { color: var(--danger); background: var(--danger-bg); }
 .danger-action { padding: .4rem .65rem; border: 1px solid var(--danger-border); border-radius: var(--radius-sm); background: var(--danger-bg); color: var(--danger); cursor: pointer; }
+.danger-action:disabled { opacity: .55; cursor: wait; }
 .operations-pagination { display: flex; justify-content: center; align-items: center; gap: 1rem; }
 .operations-pagination button { padding: .45rem .75rem; border: 1px solid var(--hairline-strong); border-radius: var(--radius-sm); background: transparent; color: var(--foreground); }
 .operations-status, .operations-error, .empty-operations { padding: 1rem; border-radius: var(--radius-md); }

@@ -2,6 +2,7 @@ import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http'
 import { Injectable, WritableSignal, signal } from '@angular/core';
 import { Observable, finalize } from 'rxjs';
 import { PaymentStatus } from '../checkout/enums/payment-status.enum';
+import { PaymentResponse } from '../checkout/models/payment-response.model';
 import { EndpointsUrls } from '../constants/api-endpoints';
 import { ContributionStatus } from '../enums/contribution-status.enum';
 import { UserRole } from '../enums/user-role.enum';
@@ -157,16 +158,27 @@ export class AdminOperationsService {
       });
   }
 
-  public refundPayment(payment: AdminPayment, onSuccess: () => void): void {
+  public refundPayment(payment: AdminPayment, idempotencyKey: string, onSuccess: () => void): void {
     this.patchState({ actionLoading: true, error: '' });
-    this.http.post<ApiResponse<AdminPayment>>(this.endpointsUrls.adminPaymentRefund(payment.orderId), {})
+    this.http.post<ApiResponse<PaymentResponse>>(this.endpointsUrls.adminPaymentRefund(payment.orderId), { idempotencyKey })
       .pipe(
-        ApiResponseUtil.data<AdminPayment>('Erro ao estornar o pagamento.'),
+        ApiResponseUtil.data<PaymentResponse>('Erro ao estornar o pagamento.'),
         finalize((): void => this.patchState({ actionLoading: false })),
       )
       .subscribe({
-        next: (updated: AdminPayment): void => {
-          this.state.update((currentState: AdminOperationsState): AdminOperationsState => ({ ...currentState, payments: currentState.payments.map((item: AdminPayment): AdminPayment => item.orderId === updated.orderId ? updated : item) }));
+        next: (updated: PaymentResponse): void => {
+          this.state.update((currentState: AdminOperationsState): AdminOperationsState => ({
+            ...currentState,
+            payments: currentState.payments.map((item: AdminPayment): AdminPayment => item.orderId === payment.orderId ? {
+              ...item,
+              status: updated.status,
+              statusDetail: updated.statusDetail,
+              contributionCreated: updated.contributionCreated ?? item.contributionCreated,
+              refundedAmount: updated.refundedAmount ?? item.refundedAmount,
+              remainingAmount: updated.remainingAmount ?? item.remainingAmount,
+              updatedAt: updated.updatedAt ?? item.updatedAt,
+            } : item),
+          }));
           onSuccess();
         },
         error: (err: HttpErrorResponse): void => this.patchState({ error: HttpErrorUtil.extract(err, 'Erro ao estornar o pagamento.') }),

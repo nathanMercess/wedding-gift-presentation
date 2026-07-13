@@ -15,6 +15,7 @@ import { PaymentStatusState } from '../models/payment-status-state.model';
 import { PixPaymentDto } from '../models/pix-payment-dto.model';
 
 const PAYMENT_TIMEOUT_MS = 25000;
+const PAYMENT_STATUS_TIMEOUT_MS = 10000;
 
 @Injectable({ providedIn: 'root' })
 export class PaymentService {
@@ -23,9 +24,11 @@ export class PaymentService {
     hasResponse: false,
     response: EMPTY_PAYMENT_RESPONSE,
     error: '',
+    uncertainFailure: false,
   });
 
   public readonly statusState: WritableSignal<PaymentStatusState> = signal<PaymentStatusState>({
+    orderId: '',
     hasResponse: false,
     response: EMPTY_PAYMENT_RESPONSE,
     error: '',
@@ -42,7 +45,7 @@ export class PaymentService {
   public constructor(public readonly http: HttpClient, public readonly endpointsUrls: EndpointsUrls) {}
 
   public payWithCard(dto: CardPaymentDto): void {
-    this.patchPaymentState({ submitting: true, hasResponse: false, response: EMPTY_PAYMENT_RESPONSE, error: '' });
+    this.patchPaymentState({ submitting: true, hasResponse: false, response: EMPTY_PAYMENT_RESPONSE, error: '', uncertainFailure: false });
 
     this.http.post<ApiResponse<PaymentResponse>>(this.endpointsUrls.paymentCard, dto)
       .pipe(
@@ -52,16 +55,16 @@ export class PaymentService {
       )
       .subscribe({
         next: (response: PaymentResponse): void => {
-          this.patchPaymentState({ hasResponse: true, response });
+          this.patchPaymentState({ hasResponse: true, response, uncertainFailure: false });
         },
         error: (err: HttpErrorResponse): void => {
-          this.patchPaymentState({ error: HttpErrorUtil.extract(err, 'Erro ao processar o pagamento. Tente novamente.') });
+          this.patchPaymentState({ error: HttpErrorUtil.extract(err, 'Erro ao processar o pagamento. Tente novamente.'), uncertainFailure: err.status === 0 || err.status === 408 || err.status >= 500 });
         },
       });
   }
 
   public payWithPix(dto: PixPaymentDto): void {
-    this.patchPaymentState({ submitting: true, hasResponse: false, response: EMPTY_PAYMENT_RESPONSE, error: '' });
+    this.patchPaymentState({ submitting: true, hasResponse: false, response: EMPTY_PAYMENT_RESPONSE, error: '', uncertainFailure: false });
 
     this.http.post<ApiResponse<PaymentResponse>>(this.endpointsUrls.paymentPix, dto)
       .pipe(
@@ -71,40 +74,28 @@ export class PaymentService {
       )
       .subscribe({
         next: (response: PaymentResponse): void => {
-          this.patchPaymentState({ hasResponse: true, response });
+          this.patchPaymentState({ hasResponse: true, response, uncertainFailure: false });
         },
         error: (err: HttpErrorResponse): void => {
-          this.patchPaymentState({ error: HttpErrorUtil.extract(err, 'Erro ao gerar o PIX. Tente novamente.') });
-        },
-      });
-  }
-
-  public checkStatus(mpOrderId: string): void {
-    this.patchStatusState({ hasResponse: false, response: EMPTY_PAYMENT_RESPONSE, error: '' });
-
-    this.http.get<ApiResponse<PaymentResponse>>(this.endpointsUrls.paymentStatus(mpOrderId))
-      .pipe(ApiResponseUtil.data<PaymentResponse>('Erro ao consultar status do pagamento.'))
-      .subscribe({
-        next: (response: PaymentResponse): void => {
-          this.patchStatusState({ hasResponse: true, response, error: '' });
-        },
-        error: (err: HttpErrorResponse): void => {
-          this.patchStatusState({ error: HttpErrorUtil.extract(err, 'Erro ao consultar status do pagamento.') });
+          this.patchPaymentState({ error: HttpErrorUtil.extract(err, 'Erro ao gerar o PIX. Tente novamente.'), uncertainFailure: err.status === 0 || err.status === 408 || err.status >= 500 });
         },
       });
   }
 
   public loadOrder(orderId: string): void {
-    this.patchStatusState({ hasResponse: false, response: EMPTY_PAYMENT_RESPONSE, error: '' });
+    this.patchStatusState({ orderId, hasResponse: false, response: EMPTY_PAYMENT_RESPONSE, error: '' });
 
     this.http.get<ApiResponse<PaymentResponse>>(this.endpointsUrls.paymentOrder(orderId))
-      .pipe(ApiResponseUtil.data<PaymentResponse>('Erro ao consultar pedido.'))
+      .pipe(
+        timeout({ each: PAYMENT_STATUS_TIMEOUT_MS, with: (): Observable<never> => throwError((): HttpErrorResponse => new HttpErrorResponse({ status: 0, statusText: 'Timeout' })) }),
+        ApiResponseUtil.data<PaymentResponse>('Erro ao consultar pedido.'),
+      )
       .subscribe({
         next: (response: PaymentResponse): void => {
-          this.patchStatusState({ hasResponse: true, response, error: '' });
+          this.patchStatusState({ orderId, hasResponse: true, response, error: '' });
         },
         error: (err: HttpErrorResponse): void => {
-          this.patchStatusState({ error: HttpErrorUtil.extract(err, 'Erro ao consultar pedido.') });
+          this.patchStatusState({ orderId, hasResponse: false, response: EMPTY_PAYMENT_RESPONSE, error: HttpErrorUtil.extract(err, 'Erro ao consultar pedido.') });
         },
       });
   }

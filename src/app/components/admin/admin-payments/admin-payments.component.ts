@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { PaymentStatus } from '../../../checkout/enums/payment-status.enum';
+import { PaymentStatusUtil } from '../../../checkout/utils/payment-status.util';
 import { AdminPayment } from '../../../models/admin-payment.model';
 import { AdminOperationsService } from '../../../services/admin-operations.service';
 import { AuthService } from '../../../services/auth.service';
@@ -19,12 +20,13 @@ import { ConfirmDialogComponent } from '../../confirm-dialog/confirm-dialog.comp
 })
 export class AdminPaymentsComponent implements OnInit {
   public readonly PaymentStatus: typeof PaymentStatus = PaymentStatus;
-  public readonly statusOptions: Array<PaymentStatus | null> = [null, PaymentStatus.Approved, PaymentStatus.Pending, PaymentStatus.InProcess, PaymentStatus.Rejected, PaymentStatus.Expired, PaymentStatus.Refunded, PaymentStatus.ChargedBack];
+  public readonly statusOptions: Array<PaymentStatus | null> = [null, PaymentStatus.Created, PaymentStatus.Approved, PaymentStatus.Processed, PaymentStatus.Pending, PaymentStatus.InProcess, PaymentStatus.Processing, PaymentStatus.ActionRequired, PaymentStatus.InMediation, PaymentStatus.Rejected, PaymentStatus.Failed, PaymentStatus.Expired, PaymentStatus.Cancelled, PaymentStatus.Canceled, PaymentStatus.Error, PaymentStatus.Refunded, PaymentStatus.PartiallyRefunded, PaymentStatus.ChargedBack];
   public selectedStatus: PaymentStatus | null = null;
   public selectedMethod: string = '';
   public currentPage: number = 1;
   public showRefundConfirm: boolean = false;
   public paymentPendingRefund: AdminPayment | null = null;
+  public refundIdempotencyKey: string = '';
 
   public constructor(public readonly operations: AdminOperationsService, public readonly toast: ToastService, public readonly auth: AuthService) {}
 
@@ -42,53 +44,48 @@ export class AdminPaymentsComponent implements OnInit {
   }
 
   public requestRefund(payment: AdminPayment): void {
+    if (this.operations.state().actionLoading)
+      return;
+
+    if (this.paymentPendingRefund?.orderId !== payment.orderId || !this.refundIdempotencyKey)
+      this.refundIdempotencyKey = crypto.randomUUID();
+
     this.paymentPendingRefund = payment;
     this.showRefundConfirm = true;
   }
 
   public confirmRefund(): void {
-    const payment: AdminPayment | null = this.paymentPendingRefund;
-    this.showRefundConfirm = false;
-    this.paymentPendingRefund = null;
-
-    if (!payment)
+    if (this.operations.state().actionLoading)
       return;
 
-    this.operations.refundPayment(payment, (): void => this.toast.success('Estorno solicitado com sucesso.'));
+    const payment: AdminPayment | null = this.paymentPendingRefund;
+    this.showRefundConfirm = false;
+
+    if (!payment || !this.refundIdempotencyKey)
+      return;
+
+    this.operations.refundPayment(payment, this.refundIdempotencyKey, (): void => {
+      this.paymentPendingRefund = null;
+      this.refundIdempotencyKey = '';
+      this.toast.success('Estorno solicitado com sucesso.');
+    });
   }
 
   public cancelRefund(): void {
     this.showRefundConfirm = false;
     this.paymentPendingRefund = null;
+    this.refundIdempotencyKey = '';
   }
 
   public canRefund(payment: AdminPayment): boolean {
-    return this.isSuperAdmin && payment.status === PaymentStatus.Approved && payment.contributionCreated;
+    return this.isSuperAdmin && PaymentStatusUtil.isApproved(payment.status) && payment.contributionCreated;
   }
 
   public statusLabel(status: PaymentStatus | null): string {
     if (!status)
       return 'Todos';
 
-    if (status === PaymentStatus.Approved)
-      return 'Aprovado';
-
-    if (status === PaymentStatus.Pending || status === PaymentStatus.InProcess)
-      return 'Pendente';
-
-    if (status === PaymentStatus.Rejected)
-      return 'Recusado';
-
-    if (status === PaymentStatus.Expired)
-      return 'Expirado';
-
-    if (status === PaymentStatus.Refunded)
-      return 'Estornado';
-
-    if (status === PaymentStatus.ChargedBack)
-      return 'Chargeback';
-
-    return 'Erro';
+    return PaymentStatusUtil.label(status);
   }
 
   public trackByPayment(_: number, payment: AdminPayment): string {

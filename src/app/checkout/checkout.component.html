@@ -4,14 +4,16 @@
 
   <app-payment-method-selector
     *ngIf="!paymentApproved"
+    [disabled]="paymentService.paymentState().submitting"
     (methodSelected)="onMethodSelected($event)">
   </app-payment-method-selector>
 
   <div class="checkout-form" *ngIf="activeMethod !== PaymentMethod.None && !paymentApproved">
     <app-card-brick
-      *ngIf="activeMethod === PaymentMethod.CreditCard || activeMethod === PaymentMethod.DebitCard"
+      *ngIf="activeMethod === PaymentMethod.CreditCard"
       [config]="cardConfig"
-      (paymentApproved)="onPaymentApproved()">
+      (paymentApproved)="onPaymentApproved()"
+      (paymentFailed)="onPaymentFailed($event)">
     </app-card-brick>
 
     <app-pix-display
@@ -22,7 +24,8 @@
       [contributorName]="contributorName"
       [message]="message"
       [amount]="totalAmount"
-      (paymentApproved)="onPaymentApproved()">
+      (paymentApproved)="onPaymentApproved()"
+      (retryRequested)="onPixRetryRequested()">
     </app-pix-display>
   </div>
 

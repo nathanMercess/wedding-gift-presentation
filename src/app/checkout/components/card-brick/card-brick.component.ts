@@ -4,7 +4,6 @@ import { loadMercadoPago } from '@mercadopago/sdk-js';
 import { environment } from '../../../../environments/environment';
 import { MP_CARD_BRICK_CUSTOMIZATION } from '../../constants/mp-card-brick-style.constant';
 import { MP_DECLINE_FALLBACK, MP_DECLINE_MESSAGES } from '../../constants/mp-decline-messages.constant';
-import { PaymentMethod } from '../../enums/payment-method.enum';
 import { PaymentStatus } from '../../enums/payment-status.enum';
 import { CardBrickConfig } from '../../models/card-brick-config.model';
 import { CardPaymentDto } from '../../models/card-payment-dto.model';
@@ -12,6 +11,7 @@ import { PaymentResult } from '../../models/payment-result.model';
 import { PaymentResponse } from '../../models/payment-response.model';
 import { PaymentState } from '../../models/payment-state.model';
 import { PaymentService } from '../../services/payment.service';
+import { PaymentStatusUtil } from '../../utils/payment-status.util';
 import { ApiErrorCode } from '../../../enums/api-error-code.enum';
 import { ToastService } from '../../../services/toast.service';
 import { ColorUtil } from '../../../utils/color.util';
@@ -31,6 +31,7 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
   public readonly config: InputSignal<CardBrickConfig> = input.required<CardBrickConfig>();
   public readonly paymentApproved: OutputEmitterRef<void> = output<void>();
   public readonly paymentResolved: OutputEmitterRef<PaymentResult> = output<PaymentResult>();
+  public readonly paymentFailed: OutputEmitterRef<boolean> = output<boolean>();
 
   public readonly ApiErrorCode: typeof ApiErrorCode = ApiErrorCode;
   public brickReady: boolean = false;
@@ -110,8 +111,7 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
           },
           paymentMethods: {
             creditCard: 'all',
-            debitCard: 'all',
-            maxInstallments: cfg.cardType === PaymentMethod.CreditCard ? cfg.maxInstallments : 1,
+            maxInstallments: cfg.maxInstallments,
           },
         },
         callbacks: {
@@ -160,6 +160,9 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
   }
 
   private onSubmit(formData: any): Promise<void> {
+    if (this.hasPendingSubmission)
+      return Promise.reject(new Error('submission_in_progress'));
+
     return new Promise<void>((resolve: () => void, reject: (reason?: unknown) => void): void => {
       this.pendingResolve = resolve;
       this.pendingReject = reject;
@@ -204,6 +207,7 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
       if (state.error) {
         this.pendingReject(new Error('network_error'));
         this.showError(ApiErrorCode.ProviderError, state.error);
+        this.paymentFailed.emit(!state.uncertainFailure);
         this.clearPending();
         return;
       }
@@ -223,7 +227,7 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
         return;
       }
 
-      if (response.status === PaymentStatus.InProcess || response.status === PaymentStatus.Pending) {
+      if (PaymentStatusUtil.isPending(response.status)) {
         this.pendingResolve();
         this.toastService.info('Pagamento em análise pelo emissor. Sua contribuição será confirmada em instantes.', 'Pagamento recebido');
         this.paymentResolved.emit(this.toPaymentResult(response));
@@ -233,6 +237,7 @@ export class CardBrickComponent implements AfterViewInit, OnDestroy {
 
       this.pendingReject(new Error(response.statusDetail ?? 'declined'));
       this.showError(response.errorCode ?? ApiErrorCode.PaymentDeclined, MP_DECLINE_MESSAGES[response.statusDetail ?? ''] ?? MP_DECLINE_FALLBACK);
+      this.paymentFailed.emit(true);
       this.clearPending();
     });
   }

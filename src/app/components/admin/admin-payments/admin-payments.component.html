@@ -36,10 +36,10 @@
           <td><span class="order-code">{{ payment.orderId }}</span><small>{{ payment.createdAt | date:'short' }}</small></td>
           <td>{{ payment.contributorName }}</td>
           <td>{{ payment.giftName || payment.giftId }}</td>
-          <td>{{ payment.amount | currency:'BRL' }}</td>
+          <td>{{ payment.amount | currency:'BRL' }}<small *ngIf="(payment.refundedAmount || 0) > 0">Estornado: {{ payment.refundedAmount | currency:'BRL' }}</small></td>
           <td>{{ payment.method === 'pix' ? 'PIX' : 'Cartão' }}</td>
           <td><span [class]="'status ' + payment.status">{{ statusLabel(payment.status) }}</span></td>
-          <td *ngIf="isSuperAdmin"><button *ngIf="canRefund(payment)" type="button" class="danger-action" (click)="requestRefund(payment)">Estornar</button></td>
+          <td *ngIf="isSuperAdmin"><button *ngIf="canRefund(payment)" type="button" class="danger-action" [disabled]="operations.state().actionLoading" (click)="requestRefund(payment)">{{ operations.state().actionLoading ? 'Estornando...' : 'Estornar' }}</button></td>
         </tr>
       </tbody>
     </table>

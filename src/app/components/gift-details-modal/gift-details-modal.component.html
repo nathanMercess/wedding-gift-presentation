@@ -8,7 +8,7 @@
     <!-- Header -->
     <div class="modal-header">
       <div class="modal-header-left">
-        <button *ngIf="step === ModalStep.Payment" type="button" class="back-btn" (click)="backToContribution()">
+        <button *ngIf="step === ModalStep.Payment" type="button" class="back-btn" [disabled]="isPaymentBusy" (click)="backToContribution()">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2">
             <polyline points="15 18 9 12 15 6" />
@@ -17,7 +17,7 @@
         </button>
         <h2 [id]="modalTitleId">{{ modalTitle }}</h2>
       </div>
-      <button type="button" class="close-btn" aria-label="Fechar" (click)="requestClose()">
+      <button type="button" class="close-btn" aria-label="Fechar" [disabled]="isPaymentBusy" (click)="requestClose()">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2">
           <line x1="18" y1="6" x2="6" y2="18" />
@@ -89,9 +89,15 @@
             }
 
             @case (ModalStep.Payment) {
-              <app-gift-payment-step *ngIf="!previewMode() && !isUnavailable" [gift]="currentGift" [giftId]="currentGift.id"
+              <div *ngIf="resolvingResumePayment" class="validation-alert" role="status">Consultando o status real do pagamento...</div>
+              <div *ngIf="resumeLookupError" class="validation-alert" role="alert">
+                {{ resumeLookupError }}
+                <button type="button" class="back-btn" (click)="retryResumeLookup()">Tentar novamente</button>
+              </div>
+              <app-gift-payment-step *ngIf="!previewMode() && !isUnavailable && !resolvingResumePayment && !resumeLookupError" [gift]="currentGift" [giftId]="currentGift.id"
                 [amount]="contributionAmount" [orderId]="orderId" [contributorName]="contributorName"
-                [message]="contributorMessage" [resumePayment]="resumePayment()" (paymentResolved)="onPaymentResolved($event)">
+                [message]="contributorMessage" [resumePayment]="activeResumePayment" (paymentResolved)="onPaymentResolved($event)"
+                (processingChanged)="onPaymentProcessingChanged($event)" (orderIdChanged)="onOrderIdChanged($event)">
               </app-gift-payment-step>
             }
 

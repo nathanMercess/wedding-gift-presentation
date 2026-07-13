@@ -5,6 +5,8 @@ export interface AdminPayment {
   giftId: string;
   giftName: string;
   amount: number;
+  refundedAmount?: number;
+  remainingAmount?: number;
   contributorName: string;
   method: string;
   status: PaymentStatus;

@@ -7,7 +7,7 @@ export interface CardBrickConfig {
   giftName: string;
   contributorName: string;
   message: string;
-  cardType: PaymentMethod.CreditCard | PaymentMethod.DebitCard;
+  cardType: PaymentMethod.CreditCard;
   payerEmail: string;
   maxInstallments: number;
 }

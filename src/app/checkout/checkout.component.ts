@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 import { PaymentMethodSelectorComponent } from './components/payment-method-selector/payment-method-selector.component';
 import { CardBrickComponent } from './components/card-brick/card-brick.component';
 import { PixDisplayComponent } from './components/pix-display/pix-display.component';
 import { PaymentMethod } from './enums/payment-method.enum';
 import { CardBrickConfig } from './models/card-brick-config.model';
+import { PaymentService } from './services/payment.service';
 import { CreditCardFeeUtil } from './utils/credit-card-fee.util';
 
 @Component({
@@ -29,10 +30,10 @@ export class CheckoutComponent implements OnInit {
   public message: string = '';
   private payerEmail: string = '';
 
-  public constructor(public readonly route: ActivatedRoute, public readonly router: Router) {}
+  public constructor(public readonly route: ActivatedRoute, public readonly router: Router, public readonly paymentService: PaymentService) {}
 
   public ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.subscribe((params: Params): void => {
       this.orderId = (params['orderId'] as string) ?? '';
       this.totalAmount = Number(params['amount'] ?? 0);
       this.giftId = (params['giftId'] as string) ?? '';
@@ -48,10 +49,13 @@ export class CheckoutComponent implements OnInit {
   }
 
   public onMethodSelected(method: PaymentMethod): void {
+    if (this.paymentService.paymentState().submitting)
+      return;
+
     this.paymentApproved = false;
     this.activeMethod = method;
 
-    if (method !== PaymentMethod.CreditCard && method !== PaymentMethod.DebitCard)
+    if (method !== PaymentMethod.CreditCard)
       return;
 
     this.cardConfig = this.createCardConfig(method);
@@ -62,7 +66,16 @@ export class CheckoutComponent implements OnInit {
     this.activeMethod = PaymentMethod.None;
   }
 
-  private createCardConfig(method: PaymentMethod.CreditCard | PaymentMethod.DebitCard): CardBrickConfig {
+  public onPaymentFailed(finalFailure: boolean): void {
+    if (finalFailure)
+      this.replaceOrderId();
+  }
+
+  public onPixRetryRequested(): void {
+    this.replaceOrderId();
+  }
+
+  private createCardConfig(method: PaymentMethod.CreditCard): CardBrickConfig {
     return {
       amount: this.totalAmount,
       orderId: this.orderId,
@@ -74,5 +87,12 @@ export class CheckoutComponent implements OnInit {
       payerEmail: this.payerEmail,
       maxInstallments: CreditCardFeeUtil.getMaxInstallments(),
     };
+  }
+
+  private replaceOrderId(): void {
+    this.orderId = crypto.randomUUID();
+
+    if (this.activeMethod === PaymentMethod.CreditCard)
+      this.cardConfig = this.createCardConfig(PaymentMethod.CreditCard);
   }
 }

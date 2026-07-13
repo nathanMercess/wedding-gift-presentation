@@ -33,6 +33,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Test
+        run: yarn test --runInBand
+
+      - name: Audit packages
+        run: yarn audit --level high
+
       - name: Authenticate with Google Cloud
         uses: google-github-actions/auth@v2
         with:
@@ -60,7 +75,7 @@ jobs:
           else
             echo "service=wedding-gift-front-dev" >> "$GITHUB_OUTPUT"
             echo "image_name=frontend-dev" >> "$GITHUB_OUTPUT"
-            echo "build_configuration=development" >> "$GITHUB_OUTPUT"
+            echo "build_configuration=development-deploy" >> "$GITHUB_OUTPUT"
             echo "api_proxy_url=https://wedding-gift-api-dev-528711077873.us-central1.run.app" >> "$GITHUB_OUTPUT"
           fi
 
@@ -90,7 +105,7 @@ jobs:
             --cpu 1 \
             --memory 128Mi \
             --concurrency 80 \
-            --timeout 60 \
+            --timeout 120 \
             --min-instances 0 \
             --max-instances 2 \
             --port 8080 \

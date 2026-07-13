@@ -8,27 +8,29 @@
 
   <p class="trust-note">Pagamento seguro via Mercado Pago. Voce pode voltar para conferir os dados antes de pagar.</p>
 
-  <app-payment-method-selector (methodSelected)="onMethodSelected($event)">
+  <app-payment-method-selector [disabled]="paymentService.paymentState().submitting" (methodSelected)="onMethodSelected($event)">
   </app-payment-method-selector>
 
   <ng-container *ngIf="activeMethod !== PaymentMethod.None">
     <app-card-brick
-      *ngIf="activeMethod === PaymentMethod.CreditCard || activeMethod === PaymentMethod.DebitCard"
-      [config]="{ cardType: activeMethod, orderId: orderId(), giftId: giftId(), giftName: gift().name, contributorName: contributorName(), message: message(), amount: this.amount(), payerEmail: '', maxInstallments: maxInstallments }"
-      (paymentResolved)="onPaymentResolved($event)">
+      *ngIf="activeMethod === PaymentMethod.CreditCard"
+      [config]="{ cardType: PaymentMethod.CreditCard, orderId: currentOrderId, giftId: giftId(), giftName: gift().name, contributorName: contributorName(), message: message(), amount: this.amount(), payerEmail: '', maxInstallments: maxInstallments }"
+      (paymentResolved)="onPaymentResolved($event)"
+      (paymentFailed)="onPaymentFailed($event)">
     </app-card-brick>
 
     <app-pix-display
       *ngIf="activeMethod === PaymentMethod.Pix"
-      [orderId]="orderId()"
+      [orderId]="currentOrderId"
       [giftId]="giftId()"
       [giftName]="gift().name"
       [contributorName]="contributorName()"
       [message]="message()"
       [amount]="amount()"
-      [resumePayment]="resumePayment()"
+      [resumePayment]="pixResumePayment"
       (pixReady)="onPixReady($event)"
       (paymentResolved)="onPaymentResolved($event)"
+      (retryRequested)="onPixRetryRequested()"
       (cancelled)="onPixCancelled()">
     </app-pix-display>
   </ng-container>
@@ -39,7 +41,7 @@
 </div>
 
 <!-- Overlay de processamento do cartão: feedback ao pagar + bloqueia duplo-clique -->
-<div class="pay-processing" *ngIf="paymentService.paymentState().submitting && (activeMethod === PaymentMethod.CreditCard || activeMethod === PaymentMethod.DebitCard)" role="status" aria-live="polite">
+<div class="pay-processing" *ngIf="paymentService.paymentState().submitting" role="status" aria-live="polite">
   <div class="pay-progress-bar"><span></span></div>
   <div class="pay-processing-inner">
     <div class="pay-spinner"></div>

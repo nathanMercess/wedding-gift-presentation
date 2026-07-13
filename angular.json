@@ -47,6 +47,20 @@
               "outputHashing": "all",
               "allowedCommonJsDependencies": ["@mercadopago/sdk-js"]
             },
+            "development-deploy": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kb",
+                  "maximumError": "1mb"
+                }
+              ],
+              "optimization": true,
+              "extractLicenses": true,
+              "sourceMap": false,
+              "outputHashing": "all",
+              "allowedCommonJsDependencies": ["@mercadopago/sdk-js"]
+            },
             "development": {
               "optimization": false,
               "extractLicenses": false,

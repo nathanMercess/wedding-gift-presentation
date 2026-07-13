@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, HostListener, InputSignal, OnDestroy, OnInit, OutputEmitterRef, ViewChild, input, output } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, InputSignal, OnDestroy, OnInit, OutputEmitterRef, ViewChild, effect, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Gift } from '../../models/gift.model';
 import { ButtonComponent } from '../button/button.component';
@@ -15,7 +15,11 @@ import { GiftDisplayMode } from '../../enums/gift-display-mode.enum';
 import { PaymentMethod } from '../../checkout/enums/payment-method.enum';
 import { PaymentStatus } from '../../checkout/enums/payment-status.enum';
 import { PaymentResult } from '../../checkout/models/payment-result.model';
+import { PaymentResponse } from '../../checkout/models/payment-response.model';
+import { PaymentStatusState } from '../../checkout/models/payment-status-state.model';
 import { PendingPayment } from '../../checkout/models/pending-payment.model';
+import { PaymentResumeService } from '../../checkout/services/payment-resume.service';
+import { PaymentService } from '../../checkout/services/payment.service';
 import { PaymentStatusUtil } from '../../checkout/utils/payment-status.util';
 import { GiftService } from '../../services/gift.service';
 
@@ -62,6 +66,10 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy, AfterViewIn
   public validationError: string = '';
   public updatedGift: Gift | null = null;
   public paymentResult: PaymentResult | null = null;
+  public activeResumePayment: PendingPayment | null = null;
+  public paymentProcessing: boolean = false;
+  public resolvingResumePayment: boolean = false;
+  public resumeLookupError: string = '';
   public readonly modalTitleId: string = 'gift-details-modal-title';
 
   @ViewChild(GiftContributionFormComponent) private formRef?: GiftContributionFormComponent;
@@ -70,8 +78,12 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy, AfterViewIn
   private previousFocusedElement: HTMLElement = document.body;
   private readonly hiddenSiblings: HTMLElement[] = [];
   private readonly focusableSelector: string = 'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  private awaitingResumeLookup: boolean = false;
+  private resumeLookupOrderId: string = '';
 
-  public constructor(public readonly host: ElementRef<HTMLElement>, public readonly giftService: GiftService) {}
+  public constructor(public readonly host: ElementRef<HTMLElement>, public readonly giftService: GiftService, public readonly paymentService: PaymentService, public readonly paymentResumeService: PaymentResumeService) {
+    effect((): void => this.handleResumeStatusState(this.paymentService.statusState()), { allowSignalWrites: true });
+  }
 
   public get currentGift(): Gift {
     return this.updatedGift ?? this.gift();
@@ -153,7 +165,13 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy, AfterViewIn
     if (this.step === ModalStep.Payment)
       return 'Pagamento';
 
-    return 'Pagamento confirmado';
+    if (this.paymentResult && PaymentStatusUtil.isPending(this.paymentResult.status))
+      return 'Pagamento em análise';
+
+    if (this.paymentResult && PaymentStatusUtil.isApproved(this.paymentResult.status))
+      return 'Pagamento confirmado';
+
+    return 'Status do pagamento';
   }
 
   public ngOnInit(): void {
@@ -164,7 +182,12 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy, AfterViewIn
     if (this.previewMode())
       return;
 
+    this.activeResumePayment = this.resumePayment();
     this.restorePendingPayment();
+  }
+
+  public get isPaymentBusy(): boolean {
+    return this.paymentProcessing || this.resolvingResumePayment || this.paymentService.paymentState().submitting;
   }
 
   public ngAfterViewInit(): void {
@@ -172,6 +195,9 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy, AfterViewIn
   }
 
   public ngOnDestroy(): void {
+    this.awaitingResumeLookup = false;
+    this.resolvingResumePayment = false;
+    this.resumeLookupOrderId = '';
     document.body.classList.remove('modal-open');
     this.restorePageSiblings();
     this.previousFocusedElement.focus();
@@ -224,6 +250,9 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy, AfterViewIn
   }
 
   public requestClose(): void {
+    if (this.isPaymentBusy)
+      return;
+
     if (this.hasUnsavedInput) {
       this.showExitConfirm = true;
       return;
@@ -266,6 +295,11 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy, AfterViewIn
     this.contributionAmount = data.amount;
     this.contributionType = data.contributionType;
     this.customAmount = data.customAmount;
+
+    if (this.activeResumePayment)
+      this.paymentResumeService.clear(this.activeResumePayment.orderId);
+
+    this.activeResumePayment = null;
     this.orderId = crypto.randomUUID();
     this.step = ModalStep.Payment;
   }
@@ -276,7 +310,18 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy, AfterViewIn
   }
 
   public backToContribution(): void {
+    if (this.isPaymentBusy)
+      return;
+
     this.step = ModalStep.Contribution;
+  }
+
+  public onPaymentProcessingChanged(processing: boolean): void {
+    this.paymentProcessing = processing;
+  }
+
+  public onOrderIdChanged(orderId: string): void {
+    this.orderId = orderId;
   }
 
   public onPaymentApproved(): void {
@@ -295,6 +340,7 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy, AfterViewIn
   }
 
   public onPaymentResolved(result: PaymentResult): void {
+    this.paymentProcessing = false;
     this.paymentResult = result;
     this.step = ModalStep.Success;
 
@@ -303,8 +349,11 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy, AfterViewIn
   }
 
   public closeAndRefresh(): void {
-    this.paymentCompleted.emit();
     this.close.emit();
+  }
+
+  public retryResumeLookup(): void {
+    this.requestResumeLookup();
   }
 
   private focusFirstElement(): void {
@@ -348,7 +397,7 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy, AfterViewIn
   }
 
   private restorePendingPayment(): void {
-    const pendingPayment: PendingPayment | null = this.resumePayment();
+    const pendingPayment: PendingPayment | null = this.activeResumePayment;
 
     if (!pendingPayment)
       return;
@@ -366,10 +415,8 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy, AfterViewIn
       return;
     }
 
-    if (PaymentStatusUtil.isPending(pendingPayment.status) || PaymentStatusUtil.isApproved(pendingPayment.status)) {
-      this.paymentResult = this.toPaymentResult(pendingPayment);
-      this.step = ModalStep.Success;
-    }
+    this.step = ModalStep.Payment;
+    this.requestResumeLookup();
   }
 
   private getContributionLimitForGift(gift: Gift): number {
@@ -385,20 +432,81 @@ export class GiftDetailsModalComponent implements OnInit, OnDestroy, AfterViewIn
     return Math.max(gift.total - gift.raised, 0);
   }
 
-  private toPaymentResult(pendingPayment: PendingPayment): PaymentResult {
+  private requestResumeLookup(): void {
+    if (!this.orderId || this.awaitingResumeLookup)
+      return;
+
+    this.awaitingResumeLookup = true;
+    this.resolvingResumePayment = true;
+    this.resumeLookupError = '';
+    this.resumeLookupOrderId = this.orderId;
+    this.paymentService.loadOrder(this.resumeLookupOrderId);
+  }
+
+  private handleResumeStatusState(state: PaymentStatusState): void {
+    if (!this.awaitingResumeLookup)
+      return;
+
+    if (!this.resumeLookupOrderId || state.orderId !== this.resumeLookupOrderId)
+      return;
+
+    if (!state.hasResponse && !state.error)
+      return;
+
+    this.awaitingResumeLookup = false;
+    this.resolvingResumePayment = false;
+    this.resumeLookupOrderId = '';
+
+    if (state.error) {
+      this.resumeLookupError = state.error;
+      return;
+    }
+
+    const pendingPayment: PendingPayment | null = this.activeResumePayment;
+
+    if (!pendingPayment)
+      return;
+
+    const response: PaymentResponse = state.response;
+    const result: PaymentResult = this.toPaymentResult(response, pendingPayment);
+
+    if (PaymentStatusUtil.isApproved(response.status)) {
+      this.paymentResumeService.clear(pendingPayment.orderId);
+      this.activeResumePayment = null;
+      this.paymentResult = result;
+      this.step = ModalStep.Success;
+      this.paymentCompleted.emit();
+      return;
+    }
+
+    if (PaymentStatusUtil.isPending(response.status)) {
+      this.paymentResumeService.update({ status: response.status, statusDetail: response.statusDetail, mpOrderId: response.mpOrderId, contributionCreated: response.contributionCreated ?? false });
+      this.activeResumePayment = this.paymentResumeService.state().pending;
+      this.paymentResult = result;
+      this.step = ModalStep.Success;
+      return;
+    }
+
+    this.paymentResumeService.clear(pendingPayment.orderId);
+    this.activeResumePayment = null;
+    this.validationError = PaymentStatusUtil.message(response.status, this.coupleName());
+    this.step = ModalStep.Contribution;
+  }
+
+  private toPaymentResult(response: PaymentResponse, pendingPayment: PendingPayment): PaymentResult {
     return {
-      orderId: pendingPayment.orderId,
-      amount: pendingPayment.amount,
-      giftId: pendingPayment.gift.id,
-      giftName: pendingPayment.gift.name,
-      contributorName: pendingPayment.contributorName,
-      message: pendingPayment.message,
+      orderId: response.orderId ?? pendingPayment.orderId,
+      amount: response.amount ?? pendingPayment.amount,
+      giftId: response.giftId ?? pendingPayment.gift.id,
+      giftName: response.giftName ?? pendingPayment.gift.name,
+      contributorName: response.contributorName ?? pendingPayment.contributorName,
+      message: response.message ?? pendingPayment.message,
       method: pendingPayment.method,
-      status: pendingPayment.status || PaymentStatus.Pending,
-      statusDetail: pendingPayment.statusDetail,
-      mpOrderId: pendingPayment.mpOrderId,
-      paidAt: pendingPayment.updatedAt,
-      contributionCreated: pendingPayment.contributionCreated,
+      status: response.status,
+      statusDetail: response.statusDetail,
+      mpOrderId: response.mpOrderId ?? pendingPayment.mpOrderId,
+      paidAt: response.paidAt ?? response.updatedAt ?? pendingPayment.updatedAt,
+      contributionCreated: response.contributionCreated ?? pendingPayment.contributionCreated,
     };
   }
 

@@ -1,4 +1,4 @@
-import { Component, InputSignal, OnInit, OutputEmitterRef, input, output } from '@angular/core';
+import { Component, InputSignal, OnInit, OutputEmitterRef, effect, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PaymentMethodSelectorComponent } from '../../checkout/components/payment-method-selector/payment-method-selector.component';
 import { CardBrickComponent } from '../../checkout/components/card-brick/card-brick.component';
@@ -32,15 +32,30 @@ export class GiftPaymentStepComponent implements OnInit {
 
   public readonly paymentApproved: OutputEmitterRef<void> = output<void>();
   public readonly paymentResolved: OutputEmitterRef<PaymentResult> = output<PaymentResult>();
+  public readonly processingChanged: OutputEmitterRef<boolean> = output<boolean>();
+  public readonly orderIdChanged: OutputEmitterRef<string> = output<string>();
 
   public readonly PaymentMethod: typeof PaymentMethod = PaymentMethod;
 
   public activeMethod: PaymentMethod = PaymentMethod.None;
+  public currentOrderId: string = '';
+  private wasProcessing: boolean = false;
 
-  public constructor(public readonly paymentService: PaymentService, public readonly paymentResumeService: PaymentResumeService) {}
+  public constructor(public readonly paymentService: PaymentService, public readonly paymentResumeService: PaymentResumeService) {
+    effect((): void => {
+      const submitting: boolean = this.paymentService.paymentState().submitting;
+      this.processingChanged.emit(submitting);
+
+      if (submitting && !this.wasProcessing && this.activeMethod !== PaymentMethod.None)
+        this.savePending({ method: this.activeMethod, status: PaymentStatus.Pending });
+
+      this.wasProcessing = submitting;
+    }, { allowSignalWrites: true });
+  }
 
   public ngOnInit(): void {
     const pendingPayment: PendingPayment | null = this.resumePayment();
+    this.currentOrderId = pendingPayment?.orderId ?? this.orderId();
 
     if (!pendingPayment)
       return;
@@ -52,13 +67,28 @@ export class GiftPaymentStepComponent implements OnInit {
     return CreditCardFeeUtil.getMaxInstallments();
   }
 
-  public onMethodSelected(method: PaymentMethod): void {
-    this.activeMethod = method;
+  public get pixResumePayment(): PendingPayment | null {
+    const pendingPayment: PendingPayment | null = this.paymentResumeService.state().pending;
 
-    if (method === PaymentMethod.None)
+    if (!pendingPayment || pendingPayment.method !== PaymentMethod.Pix)
+      return null;
+
+    if (pendingPayment.orderId !== this.currentOrderId || pendingPayment.gift.id !== this.giftId())
+      return null;
+
+    return pendingPayment;
+  }
+
+  public onMethodSelected(method: PaymentMethod): void {
+    if (this.paymentService.paymentState().submitting)
       return;
 
-    this.savePending({ method, status: PaymentStatus.Pending });
+    const pendingPayment: PendingPayment | null = this.paymentResumeService.state().pending;
+
+    if (method !== PaymentMethod.None && pendingPayment?.orderId === this.currentOrderId && pendingPayment.method !== method)
+      this.replaceOrderId();
+
+    this.activeMethod = method;
   }
 
   public onPixReady(response: PaymentResponse): void {
@@ -95,14 +125,25 @@ export class GiftPaymentStepComponent implements OnInit {
   }
 
   public onPixCancelled(): void {
+    if (this.paymentService.paymentState().submitting)
+      return;
+
     this.activeMethod = PaymentMethod.None;
-    this.paymentResumeService.update({ method: PaymentMethod.None });
+  }
+
+  public onPaymentFailed(finalFailure: boolean): void {
+    if (finalFailure)
+      this.replaceOrderId();
+  }
+
+  public onPixRetryRequested(): void {
+    this.replaceOrderId();
   }
 
   private savePending(partialPayment: Partial<PendingPayment>): void {
     const now: string = new Date().toISOString();
     const pending: PendingPayment = {
-      orderId: this.orderId(),
+      orderId: this.currentOrderId,
       gift: this.gift(),
       amount: this.amount(),
       contributorName: this.contributorName(),
@@ -116,5 +157,11 @@ export class GiftPaymentStepComponent implements OnInit {
     };
 
     this.paymentResumeService.save(pending);
+  }
+
+  private replaceOrderId(): void {
+    this.paymentResumeService.clear(this.currentOrderId);
+    this.currentOrderId = crypto.randomUUID();
+    this.orderIdChanged.emit(this.currentOrderId);
   }
 }

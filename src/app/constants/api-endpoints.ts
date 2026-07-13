@@ -125,10 +125,6 @@ export class EndpointsUrls {
         return `${this.apiUrl}/payment/pix`;
     }
 
-    public paymentStatus(nsu: string): string {
-        return `${this.apiUrl}/payment/status/${nsu}`;
-    }
-
     public paymentOrder(orderId: string): string {
         return `${this.apiUrl}/payment/order/${orderId}`;
     }

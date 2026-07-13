@@ -1,8 +1,13 @@
 <div class="success-step">
-  <div class="completed-notice success-notice" role="status" aria-live="polite">
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+  <div class="completed-notice success-notice" [class.pending-notice]="!isApproved" role="status" aria-live="polite">
+    <svg *ngIf="isApproved" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
       stroke="currentColor" stroke-width="2">
       <path d="M20 6L9 17l-5-5" />
+    </svg>
+    <svg *ngIf="!isApproved" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
     </svg>
     <div>
       <strong>{{ statusLabel }}</strong>
@@ -24,20 +29,20 @@
       <span class="value status-pill">{{ statusLabel }}</span>
     </div>
     <div class="summary-row">
-      <span class="label">Data</span>
+      <span class="label">{{ dateLabel }}</span>
       <span class="value">{{ result().paidAt | date:'short' }}</span>
     </div>
     <div class="summary-row total-row">
-      <span class="value">Valor pago</span>
+      <span class="value">{{ amountLabel }}</span>
       <span class="total-amount">{{ result().amount | currency:'BRL' }}</span>
     </div>
   </div>
 
   <div class="receipt-actions">
     <button type="button" class="receipt-btn" (click)="copyReceipt()">
-      {{ receiptCopied ? 'Comprovante copiado' : 'Copiar comprovante' }}
+      {{ copyLabel }}
     </button>
-    <button type="button" class="receipt-btn" (click)="downloadReceipt()">Baixar comprovante</button>
+    <button type="button" class="receipt-btn" (click)="downloadReceipt()">{{ isApproved ? 'Baixar comprovante' : 'Baixar resumo' }}</button>
   </div>
 
   <div class="actions">

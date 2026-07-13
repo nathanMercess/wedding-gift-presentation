@@ -5,4 +5,5 @@ export interface PaymentState {
   hasResponse: boolean;
   response: PaymentResponse;
   error: string;
+  uncertainFailure: boolean;
 }

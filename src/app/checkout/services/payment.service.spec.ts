@@ -5,15 +5,18 @@ import { EndpointsUrls } from '../../constants/api-endpoints';
 import { ApiResponse } from '../../models/api-response.model';
 import { CardPaymentDto } from '../models/card-payment-dto.model';
 import { EMPTY_PAYMENT_RESPONSE } from '../constants/empty-payment-response.constant';
+import { PaymentStatus } from '../enums/payment-status.enum';
 import { PaymentResponse } from '../models/payment-response.model';
 import { PixPaymentDto } from '../models/pix-payment-dto.model';
 
-function apiSuccess<T>(data: T): ApiResponse<T> {
-  return { success: true, data, error: null, correlationId: '0HN' };
-}
+abstract class PaymentServiceTestData {
+  public static apiSuccess<T>(data: T): ApiResponse<T> {
+    return { success: true, data, error: null, correlationId: '0HN' };
+  }
 
-function apiError(code: string): ApiResponse<null> {
-  return { success: false, data: null, error: { code, fields: null, details: null }, correlationId: '0HN' };
+  public static apiError(code: string): ApiResponse<null> {
+    return { success: false, data: null, error: { code, fields: null, details: null }, correlationId: '0HN' };
+  }
 }
 
 describe('PaymentService — resiliência de rede', () => {
@@ -37,7 +40,7 @@ describe('PaymentService — resiliência de rede', () => {
   afterEach(() => http.verify());
 
   it('estado inicial limpo', () => {
-    expect(service.paymentState()).toEqual({ submitting: false, hasResponse: false, response: EMPTY_PAYMENT_RESPONSE, error: '' });
+    expect(service.paymentState()).toEqual({ submitting: false, hasResponse: false, response: EMPTY_PAYMENT_RESPONSE, error: '', uncertainFailure: false });
   });
 
   describe('payWithCard', () => {
@@ -47,7 +50,7 @@ describe('PaymentService — resiliência de rede', () => {
 
       const req = http.expectOne(endpoints.paymentCard);
       expect(req.request.method).toBe('POST');
-      req.flush(apiSuccess({ status: 'approved' } as PaymentResponse));
+      req.flush(PaymentServiceTestData.apiSuccess({ status: 'approved' } as PaymentResponse));
 
       expect(service.paymentState().submitting).toBe(false);
       expect(service.paymentState().hasResponse).toBe(true);
@@ -62,6 +65,7 @@ describe('PaymentService — resiliência de rede', () => {
 
       expect(service.paymentState().submitting).toBe(false);
       expect(service.paymentState().error).toContain('Sem conexao');
+      expect(service.paymentState().uncertainFailure).toBe(true);
       expect(service.paymentState().hasResponse).toBe(false);
       expect(service.paymentState().response).toEqual(EMPTY_PAYMENT_RESPONSE);
     });
@@ -69,10 +73,21 @@ describe('PaymentService — resiliência de rede', () => {
     it('erro do servidor com error.code traduz localmente', () => {
       service.payWithCard(cardDto);
       const req = http.expectOne(endpoints.paymentCard);
-      req.flush(apiError('PAYMENT_DECLINED'), { status: 402, statusText: 'Payment Required' });
+      req.flush(PaymentServiceTestData.apiError('PAYMENT_DECLINED'), { status: 402, statusText: 'Payment Required' });
 
       expect(service.paymentState().error).toContain('Pagamento recusado');
+      expect(service.paymentState().uncertainFailure).toBe(false);
       expect(service.paymentState().submitting).toBe(false);
+    });
+
+    it('classifica validação 422 como definitiva e indisponibilidade 503 como incerta', () => {
+      service.payWithCard(cardDto);
+      http.expectOne(endpoints.paymentCard).flush(PaymentServiceTestData.apiError('INVALID_CARD_TOKEN'), { status: 422, statusText: 'Unprocessable Entity' });
+      expect(service.paymentState().uncertainFailure).toBe(false);
+
+      service.payWithCard(cardDto);
+      http.expectOne(endpoints.paymentCard).flush(PaymentServiceTestData.apiError('PROVIDER_ERROR'), { status: 503, statusText: 'Service Unavailable' });
+      expect(service.paymentState().uncertainFailure).toBe(true);
     });
   });
 
@@ -81,7 +96,7 @@ describe('PaymentService — resiliência de rede', () => {
       service.payWithPix(pixDto);
       const req = http.expectOne(endpoints.paymentPix);
       expect(req.request.method).toBe('POST');
-      req.flush(apiSuccess({ status: 'pending', mpOrderId: 'mp1', qrCodeBase64: 'abc' } as PaymentResponse));
+      req.flush(PaymentServiceTestData.apiSuccess({ status: 'pending', mpOrderId: 'mp1', qrCodeBase64: 'abc' } as PaymentResponse));
 
       expect(service.paymentState().response).toBeTruthy();
       expect(service.paymentState().hasResponse).toBe(true);
@@ -97,24 +112,53 @@ describe('PaymentService — resiliência de rede', () => {
     });
   });
 
-  describe('checkStatus (polling)', () => {
+  describe('loadOrder (polling seguro por orderId)', () => {
     it('guarda a resposta de status no sucesso', () => {
-      service.checkStatus('mp1');
-      const req = http.expectOne(endpoints.paymentStatus('mp1'));
+      service.loadOrder('order-1');
+      const req = http.expectOne(endpoints.paymentOrder('order-1'));
       expect(req.request.method).toBe('GET');
-      req.flush(apiSuccess({ status: 'approved' } as PaymentResponse));
+      req.flush(PaymentServiceTestData.apiSuccess({ status: 'approved' } as PaymentResponse));
 
       expect(service.statusState().response).toBeTruthy();
       expect(service.statusState().hasResponse).toBe(true);
       expect(service.statusState().error).toBe('');
+      expect(service.statusState().orderId).toBe('order-1');
+    });
+
+    it('identifica cada resposta quando consultas concorrentes terminam fora de ordem', () => {
+      service.loadOrder('order-a');
+      const requestA = http.expectOne(endpoints.paymentOrder('order-a'));
+      service.loadOrder('order-b');
+      const requestB = http.expectOne(endpoints.paymentOrder('order-b'));
+
+      requestA.flush(PaymentServiceTestData.apiSuccess({ status: PaymentStatus.Pending, orderId: 'order-a' } as PaymentResponse));
+      expect(service.statusState().orderId).toBe('order-a');
+      expect(service.statusState().response.orderId).toBe('order-a');
+
+      requestB.flush(PaymentServiceTestData.apiSuccess({ status: PaymentStatus.Approved, orderId: 'order-b' } as PaymentResponse));
+      expect(service.statusState().orderId).toBe('order-b');
+      expect(service.statusState().response.orderId).toBe('order-b');
     });
 
     it('erro de rede no polling não estoura e registra error', () => {
-      service.checkStatus('mp1');
-      const req = http.expectOne(endpoints.paymentStatus('mp1'));
+      service.loadOrder('order-1');
+      const req = http.expectOne(endpoints.paymentOrder('order-1'));
       req.error(new ProgressEvent('error'), { status: 0 });
 
       expect(service.statusState().error).toContain('Sem conexao');
+      expect(service.statusState().orderId).toBe('order-1');
+    });
+
+    it('interrompe uma consulta que ultrapassa dez segundos', () => {
+      jest.useFakeTimers();
+      service.loadOrder('order-timeout');
+      const req = http.expectOne(endpoints.paymentOrder('order-timeout'));
+
+      jest.advanceTimersByTime(10001);
+
+      expect(req.cancelled).toBe(true);
+      expect(service.statusState().error).toContain('Sem conexao');
+      jest.useRealTimers();
     });
   });
 });

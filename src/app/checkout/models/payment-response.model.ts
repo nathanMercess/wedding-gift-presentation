@@ -6,6 +6,8 @@ export interface PaymentResponse {
   errorCode?: string;
   orderId?: string;
   amount?: number;
+  refundedAmount?: number;
+  remainingAmount?: number;
   giftId?: string;
   giftName?: string;
   contributorName?: string;

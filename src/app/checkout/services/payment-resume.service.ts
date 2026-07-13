@@ -1,8 +1,11 @@
 import { Injectable, WritableSignal, signal } from '@angular/core';
+import { PaymentMethod } from '../enums/payment-method.enum';
+import { PaymentStatus } from '../enums/payment-status.enum';
 import { PaymentResumeState } from '../models/payment-resume-state.model';
 import { PendingPayment } from '../models/pending-payment.model';
 
 const PAYMENT_RESUME_STORAGE_KEY = 'weddingGift.pendingPayment';
+const PAYMENT_RESUME_TTL_MS = 24 * 60 * 60 * 1000;
 
 @Injectable({ providedIn: 'root' })
 export class PaymentResumeService {
@@ -58,7 +61,19 @@ export class PaymentResumeService {
       if (!rawPayment)
         return null;
 
-      return JSON.parse(rawPayment) as PendingPayment;
+      const parsedPayment: unknown = JSON.parse(rawPayment);
+
+      if (!this.isValid(parsedPayment)) {
+        this.remove();
+        return null;
+      }
+
+      if (Date.now() - new Date(parsedPayment.updatedAt).getTime() > PAYMENT_RESUME_TTL_MS) {
+        this.remove();
+        return null;
+      }
+
+      return parsedPayment;
     } catch {
       this.remove();
       return null;
@@ -79,5 +94,39 @@ export class PaymentResumeService {
     } catch {
       return;
     }
+  }
+
+  private isValid(value: unknown): value is PendingPayment {
+    if (!value || typeof value !== 'object')
+      return false;
+
+    const payment: Record<string, unknown> = value as Record<string, unknown>;
+    const gift: Record<string, unknown> | null = payment['gift'] && typeof payment['gift'] === 'object' ? payment['gift'] as Record<string, unknown> : null;
+
+    if (!gift || typeof gift['id'] !== 'string' || typeof gift['name'] !== 'string')
+      return false;
+
+    if (typeof payment['orderId'] !== 'string' || !payment['orderId'])
+      return false;
+
+    if (typeof payment['amount'] !== 'number' || !Number.isFinite(payment['amount']) || payment['amount'] <= 0)
+      return false;
+
+    if (typeof payment['contributorName'] !== 'string' || typeof payment['message'] !== 'string')
+      return false;
+
+    if (!Object.values(PaymentMethod).includes(payment['method'] as PaymentMethod))
+      return false;
+
+    if (!Object.values(PaymentStatus).includes(payment['status'] as PaymentStatus))
+      return false;
+
+    if (typeof payment['createdAt'] !== 'string' || !Number.isFinite(new Date(payment['createdAt']).getTime()))
+      return false;
+
+    if (typeof payment['updatedAt'] !== 'string' || !Number.isFinite(new Date(payment['updatedAt']).getTime()))
+      return false;
+
+    return typeof payment['contributionCreated'] === 'boolean';
   }
 }

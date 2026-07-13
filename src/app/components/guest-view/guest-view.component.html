@@ -55,7 +55,8 @@
           <ng-container *ngIf="carouselPhotos.length > 0">
             <div *ngFor="let photo of loopedPhotos; let i = index" class="carousel-card">
               <img [src]="photo.url" [alt]="coupleService.state().couple.names" class="carousel-card-img"
-                decoding="async" />
+                [attr.loading]="i === carouselPhotos.length ? 'eager' : 'lazy'"
+                [attr.fetchpriority]="i === carouselPhotos.length ? 'high' : 'auto'" decoding="async" />
               <div class="carousel-card-overlay"></div>
               <div class="carousel-card-content">
                 <p class="carousel-card-tag">{{ getPhotoCaption(photo, i).tag }}</p>
@@ -67,7 +68,7 @@
           <ng-container *ngIf="carouselPhotos.length === 0">
             <div class="carousel-card">
               <img [src]="displayCouplePhoto" [alt]="coupleService.state().couple.names" (error)="onCouplePhotoError()"
-                class="carousel-card-img" />
+                class="carousel-card-img" loading="lazy" decoding="async" />
               <div class="carousel-card-overlay"></div>
               <div class="carousel-card-content">
                 <p class="carousel-card-tag">Momentos</p>

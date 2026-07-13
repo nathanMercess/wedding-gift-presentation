@@ -11,7 +11,7 @@ export interface CardPaymentDto {
   issuerId?: string;
   deviceId?: string;
   installments: number;
-  method: PaymentMethod.CreditCard | PaymentMethod.DebitCard;
+  method: PaymentMethod.CreditCard;
   payerEmail: string;
   payerDocType: string;
   payerDocNumber: string;

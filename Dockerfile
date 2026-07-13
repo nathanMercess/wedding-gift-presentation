@@ -16,6 +16,9 @@ ENV API_PROXY_URL=http://localhost:8080
 
 COPY nginx.conf /etc/nginx/templates/default.conf.template
 COPY --from=builder /app/dist/wedding-gift-presentation/browser /usr/share/nginx/html
+RUN envsubst '${PORT} ${API_PROXY_URL}' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf \
+    && nginx -t \
+    && rm /etc/nginx/conf.d/default.conf
 
 EXPOSE 8080
 
