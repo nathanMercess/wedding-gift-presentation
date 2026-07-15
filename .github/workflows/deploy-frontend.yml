@@ -46,7 +46,7 @@ jobs:
         run: yarn test --runInBand
 
       - name: Audit packages
-        run: yarn audit --level high
+        run: yarn audit-ci --high
 
       - name: Authenticate with Google Cloud
         uses: google-github-actions/auth@v2
