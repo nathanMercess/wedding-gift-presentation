@@ -21,6 +21,8 @@
 
     <app-admin-overview *ngIf="activeTab === AdminTab.Overview && canAccessTab(AdminTab.Overview)"></app-admin-overview>
 
+    <app-admin-guests *ngIf="activeTab === AdminTab.Guests && canAccessTab(AdminTab.Guests)"></app-admin-guests>
+
     <!-- GIFTS TAB -->
     <section *ngIf="activeTab === AdminTab.Gifts && canAccessTab(AdminTab.Gifts)" class="tab-section">
       <div class="section-header">

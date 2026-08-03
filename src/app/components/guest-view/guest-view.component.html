@@ -46,6 +46,11 @@
 
       <app-countdown *ngIf="siteSettings.showCountdown" [targetDate]="coupleService.state().couple.weddingDate"></app-countdown>
 
+      <div class="rsvp-action">
+        <p>Vamos celebrar juntos?</p>
+        <button #rsvpButton type="button" (click)="openGuestConfirmation()">Confirmar presença</button>
+      </div>
+
 
       <div class="carousel-section" role="region" aria-label="Fotos do casal" (mouseenter)="stopCarousel()" (mouseleave)="startCarousel()"
         (touchstart)="onTouchStart($event)" (touchend)="onTouchEnd($event)">
@@ -300,3 +305,5 @@
   </app-gift-details-modal>
 
 </main>
+
+<app-guest-confirmation-modal *ngIf="showGuestConfirmation" (closed)="closeGuestConfirmation()"></app-guest-confirmation-modal>

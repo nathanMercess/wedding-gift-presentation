@@ -11,6 +11,7 @@ describe('AdminTabAccessUtil', () => {
 
   it('permite operacao do casal para administrador sem liberar usuarios', () => {
     expect(AdminTabAccessUtil.canAccess(AdminTab.Overview, [UserRole.Admin])).toBe(true);
+    expect(AdminTabAccessUtil.canAccess(AdminTab.Guests, [UserRole.Admin])).toBe(true);
     expect(AdminTabAccessUtil.canAccess(AdminTab.Gifts, [UserRole.Admin])).toBe(true);
     expect(AdminTabAccessUtil.canAccess(AdminTab.Contributions, [UserRole.Admin])).toBe(true);
     expect(AdminTabAccessUtil.canAccess(AdminTab.Payments, [UserRole.Admin])).toBe(true);
@@ -21,6 +22,7 @@ describe('AdminTabAccessUtil', () => {
 
   it('permite somente as abas basicas para membro', () => {
     expect(AdminTabAccessUtil.canAccess(AdminTab.Overview, [UserRole.Member])).toBe(true);
+    expect(AdminTabAccessUtil.canAccess(AdminTab.Guests, [UserRole.Member])).toBe(true);
     expect(AdminTabAccessUtil.canAccess(AdminTab.Gifts, [UserRole.Member])).toBe(true);
     expect(AdminTabAccessUtil.canAccess(AdminTab.Contributions, [UserRole.Member])).toBe(false);
     expect(AdminTabAccessUtil.canAccess(AdminTab.Showcase, [UserRole.Member])).toBe(true);
@@ -32,6 +34,7 @@ describe('AdminTabAccessUtil', () => {
   it('retorna somente as abas visiveis para membro', () => {
     expect(AdminTabAccessUtil.accessibleTabs([UserRole.Member])).toEqual([
       AdminTab.Overview,
+      AdminTab.Guests,
       AdminTab.Gifts,
       AdminTab.Showcase,
       AdminTab.Couple,

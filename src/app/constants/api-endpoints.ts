@@ -57,6 +57,34 @@ export class EndpointsUrls {
         return `${this.apiUrl}/admin/payments`;
     }
 
+    public get guestConfirmations(): string {
+        return `${this.apiUrl}/guest-confirmations`;
+    }
+
+    public get guestConfirmationSuggestions(): string {
+        return `${this.apiUrl}/guest-confirmations/suggestions`;
+    }
+
+    public get adminGuests(): string {
+        return `${this.apiUrl}/admin/guests`;
+    }
+
+    public get adminGuestSummary(): string {
+        return `${this.adminGuests}/summary`;
+    }
+
+    public get adminGuestInvitations(): string {
+        return `${this.adminGuests}/invitations`;
+    }
+
+    public get adminGuestConfirmations(): string {
+        return `${this.adminGuests}/confirmations`;
+    }
+
+    public get adminGuestConfirmationsExport(): string {
+        return `${this.adminGuestConfirmations}/export.csv`;
+    }
+
     public get adminUsers(): string {
         return `${this.apiUrl}/admin/users`;
     }
@@ -107,6 +135,18 @@ export class EndpointsUrls {
 
     public adminUserRole(id: string): string {
         return `${this.apiUrl}/admin/users/${id}/role`;
+    }
+
+    public adminGuestInvitation(id: string): string {
+        return `${this.adminGuestInvitations}/${id}`;
+    }
+
+    public adminGuestInvitationActive(id: string): string {
+        return `${this.adminGuestInvitation(id)}/active`;
+    }
+
+    public adminGuestConfirmation(id: string): string {
+        return `${this.adminGuestConfirmations}/${id}`;
     }
 
     public get adminGiftsEnrich(): string {

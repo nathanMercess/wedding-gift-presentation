@@ -1,0 +1,83 @@
+<section class="guests-admin">
+  <div class="guests-heading">
+    <div><p class="eyebrow">Organização</p><h2>Convidados</h2></div>
+    <div class="heading-actions">
+      <label class="btn-outline">Importar CSV<input type="file" accept=".csv,text/csv" hidden (change)="importCsv($event)" /></label>
+      <button type="button" class="btn-primary" (click)="openInvitationForm()">+ Adicionar convidado</button>
+    </div>
+  </div>
+
+  <div *ngIf="guestsService.state().summary as summary" class="summary-grid">
+    <article><span>Na lista</span><strong>{{ summary.invitationCount }}</strong></article>
+    <article><span>Pendentes</span><strong>{{ summary.pendingInvitationCount }}</strong></article>
+    <article><span>Envios</span><strong>{{ summary.confirmationCount }}</strong></article>
+    <article><span>Confirmados</span><strong>{{ summary.confirmedGuestCount }}</strong><small>{{ summary.freeTextGuestCount }} fora da lista</small></article>
+  </div>
+
+  <div class="view-tabs" role="tablist">
+    <button type="button" role="tab" [class.active]="activeView === AdminGuestView.Invitations" (click)="changeView(AdminGuestView.Invitations)">Lista cadastrada</button>
+    <button type="button" role="tab" [class.active]="activeView === AdminGuestView.Confirmations" (click)="changeView(AdminGuestView.Confirmations)">Confirmações</button>
+  </div>
+
+  <p *ngIf="guestsService.state().error" class="admin-error" role="alert">{{ guestsService.state().error }}</p>
+
+  <ng-container *ngIf="activeView === AdminGuestView.Invitations">
+    <form *ngIf="invitationFormOpen" class="inline-form" (ngSubmit)="saveInvitation()">
+      <label>Nome do convidado<input type="text" maxlength="120" [(ngModel)]="invitationName" name="invitationName" autofocus /></label>
+      <button type="button" class="btn-outline" (click)="closeInvitationForm()">Cancelar</button>
+      <button type="submit" class="btn-primary" [disabled]="!invitationName.trim() || guestsService.state().actionLoading">Salvar</button>
+    </form>
+
+    <div class="filters">
+      <input type="search" placeholder="Buscar convidado..." [(ngModel)]="invitationSearch" (keyup.enter)="loadInvitations(1)" />
+      <select [(ngModel)]="invitationStatus" (change)="loadInvitations(1)">
+        <option [ngValue]="GuestInvitationStatus.All">Todos</option><option [ngValue]="GuestInvitationStatus.Pending">Pendentes</option>
+        <option [ngValue]="GuestInvitationStatus.Confirmed">Confirmados</option><option [ngValue]="GuestInvitationStatus.Active">Ativos</option><option [ngValue]="GuestInvitationStatus.Inactive">Inativos</option>
+      </select>
+      <button type="button" class="btn-outline" (click)="loadInvitations(1)">Buscar</button>
+    </div>
+
+    <div class="invitation-list">
+      <article *ngFor="let invitation of guestsService.state().invitations; trackBy: trackByInvitation" class="invitation-row">
+        <div><strong>{{ invitation.name }}</strong><span [class.confirmed]="invitation.isConfirmed">{{ invitation.isConfirmed ? 'Confirmado' : invitation.isActive ? 'Pendente' : 'Inativo' }}</span></div>
+        <div class="row-actions">
+          <button type="button" (click)="toggleInvitation(invitation)">{{ invitation.isActive ? 'Desativar' : 'Ativar' }}</button>
+          <button type="button" (click)="openInvitationForm(invitation)">Editar</button>
+          <button type="button" class="danger" (click)="requestInvitationDelete(invitation)">Excluir</button>
+        </div>
+      </article>
+      <p *ngIf="!guestsService.state().loading && guestsService.state().invitations.length === 0" class="empty">Nenhum convidado encontrado.</p>
+    </div>
+    <div *ngIf="guestsService.state().invitationPages > 1" class="pager"><button [disabled]="invitationPage <= 1" (click)="loadInvitations(invitationPage - 1)">Anterior</button><span>{{ invitationPage }} de {{ guestsService.state().invitationPages }}</span><button [disabled]="invitationPage >= guestsService.state().invitationPages" (click)="loadInvitations(invitationPage + 1)">Próxima</button></div>
+  </ng-container>
+
+  <ng-container *ngIf="activeView === AdminGuestView.Confirmations">
+    <div class="filters confirmation-filters">
+      <input type="search" placeholder="Buscar por nome..." [(ngModel)]="confirmationSearch" />
+      <select [(ngModel)]="confirmationSource"><option [ngValue]="null">Todas as origens</option><option [ngValue]="GuestSource.RegisteredList">Da lista</option><option [ngValue]="GuestSource.FreeText">Texto livre</option></select>
+      <input type="date" [(ngModel)]="confirmationFrom" aria-label="Data inicial" /><input type="date" [(ngModel)]="confirmationTo" aria-label="Data final" />
+      <button type="button" class="btn-outline" (click)="loadConfirmations(1)">Filtrar</button><button type="button" class="btn-outline" (click)="exportConfirmations()">Exportar CSV</button>
+    </div>
+
+    <div class="confirmation-list">
+      <article *ngFor="let confirmation of guestsService.state().confirmations; trackBy: trackByConfirmation" class="confirmation-card">
+        <div class="confirmation-head"><div><strong>{{ confirmation.submittedByName }}</strong><span>responsável</span><p>Confirmou {{ confirmation.partySize }} pessoa(s) em {{ confirmation.confirmedAtUtc | date:'dd/MM/yyyy \'às\' HH:mm' }}</p></div><div class="row-actions"><button (click)="openConfirmationEdit(confirmation)">Editar</button><button class="danger" (click)="requestConfirmationDelete(confirmation)">Excluir</button></div></div>
+        <ul><li *ngFor="let guest of confirmation.guests"><span>✓ {{ guest.name }} <small *ngIf="guest.isSubmitter">Responsável</small></span><em>{{ sourceLabel(guest.source) }}</em></li></ul>
+      </article>
+      <p *ngIf="!guestsService.state().loading && guestsService.state().confirmations.length === 0" class="empty">Nenhuma confirmação encontrada.</p>
+    </div>
+    <div *ngIf="guestsService.state().confirmationPages > 1" class="pager"><button [disabled]="confirmationPage <= 1" (click)="loadConfirmations(confirmationPage - 1)">Anterior</button><span>{{ confirmationPage }} de {{ guestsService.state().confirmationPages }}</span><button [disabled]="confirmationPage >= guestsService.state().confirmationPages" (click)="loadConfirmations(confirmationPage + 1)">Próxima</button></div>
+  </ng-container>
+
+  <div *ngIf="editingConfirmation" class="edit-backdrop">
+    <section class="edit-panel" role="dialog" aria-modal="true" aria-labelledby="edit-confirmation-title">
+      <h3 id="edit-confirmation-title">Editar confirmação</h3>
+      <div *ngFor="let guest of editingGuests; let i = index" class="edit-guest"><label>{{ guest.isSubmitter ? 'Responsável' : 'Acompanhante' }}<input [(ngModel)]="guest.name" maxlength="120" [disabled]="!!guest.guestInvitationId" /></label><span>{{ guest.guestInvitationId ? 'Da lista' : 'Texto livre' }}</span><button *ngIf="!guest.isSubmitter" type="button" (click)="removeEditingGuest(i)">Remover</button></div>
+      <button type="button" class="btn-outline add-person" [disabled]="editingGuests.length >= 20" (click)="addEditingGuest()">+ Adicionar pessoa</button>
+      <div class="edit-actions"><button type="button" class="btn-outline" (click)="closeConfirmationEdit()">Cancelar</button><button type="button" class="btn-primary" (click)="saveConfirmation()">Salvar grupo</button></div>
+    </section>
+  </div>
+
+  <app-confirm-dialog *ngIf="showInvitationDeleteConfirm" title="Excluir convidado?" [message]="'O registro de ' + (invitationPendingDeletion?.name || '') + ' será removido.'" confirmLabel="Excluir" cancelLabel="Cancelar" (confirmed)="confirmInvitationDelete()" (cancelled)="cancelInvitationDelete()"></app-confirm-dialog>
+  <app-confirm-dialog *ngIf="showConfirmationDeleteConfirm" title="Excluir confirmação?" message="Todo o grupo será removido e os convites vinculados voltarão a ficar disponíveis." confirmLabel="Excluir grupo" cancelLabel="Cancelar" (confirmed)="confirmConfirmationDelete()" (cancelled)="cancelConfirmationDelete()"></app-confirm-dialog>
+</section>

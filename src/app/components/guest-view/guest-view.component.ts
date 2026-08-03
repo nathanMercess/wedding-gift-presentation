@@ -21,13 +21,14 @@ import { DateUtil } from '../../utils/date.util';
 import { CountdownComponent } from '../countdown/countdown.component';
 import { GiftCardComponent } from '../gift-card/gift-card.component';
 import { GiftDetailsModalComponent } from '../gift-details-modal/gift-details-modal.component';
+import { GuestConfirmationModalComponent } from '../guest-confirmation-modal/guest-confirmation-modal.component';
 
 @Component({
   standalone: true,
   selector: 'app-guest-view',
   templateUrl: './guest-view.component.html',
   styleUrl: './guest-view.component.scss',
-  imports: [CommonModule, FormsModule, RouterLink, GiftCardComponent, GiftDetailsModalComponent, CountdownComponent],
+  imports: [CommonModule, FormsModule, RouterLink, GiftCardComponent, GiftDetailsModalComponent, CountdownComponent, GuestConfirmationModalComponent],
 })
 export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   public searchTerm: string = '';
@@ -47,6 +48,7 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   public selectedResumePayment: PendingPayment | null = null;
   public showGiftDetailsModal: boolean = false;
   public filterSheetOpen: boolean = false;
+  public showGuestConfirmation: boolean = false;
 
   public readonly carouselIndex: WritableSignal<number> = signal(0);
   public readonly carouselReady: WritableSignal<boolean> = signal(false);
@@ -54,6 +56,7 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   private touchStartX: number = 0;
 
   @ViewChild('carouselTrack') public carouselTrack?: ElementRef<HTMLDivElement>;
+  @ViewChild('rsvpButton') public rsvpButton?: ElementRef<HTMLButtonElement>;
 
   private loopCenteringSettled: boolean = false;
   private wrapPending: boolean = false;
@@ -444,6 +447,15 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.selectedResumePayment = null;
     this.sharedGiftId = '';
     this.syncUrl(this.currentPage);
+  }
+
+  public openGuestConfirmation(): void {
+    this.showGuestConfirmation = true;
+  }
+
+  public closeGuestConfirmation(): void {
+    this.showGuestConfirmation = false;
+    this.rsvpButton?.nativeElement.focus();
   }
 
   public async shareGift(gift: Gift): Promise<void> {

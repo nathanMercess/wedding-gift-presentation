@@ -1,0 +1,60 @@
+<div class="guest-modal-backdrop" (mousedown)="onBackdropClick($event)">
+  <section #guestDialog class="guest-modal" role="dialog" aria-modal="true" aria-labelledby="guest-modal-title">
+    <div class="guest-modal-handle" aria-hidden="true"></div>
+    <header class="guest-modal-header">
+      <div>
+        <p class="guest-modal-eyebrow">RSVP</p>
+        <h2 id="guest-modal-title">{{ confirmation ? 'Presença confirmada' : 'Confirmar presença' }}</h2>
+      </div>
+      <button type="button" class="guest-modal-close" aria-label="Fechar" (click)="close()">&times;</button>
+    </header>
+
+    <ng-container *ngIf="!confirmation">
+      <p class="guest-modal-intro">Informe seu nome e inclua as pessoas que irão com você.</p>
+
+      <div class="guest-fields">
+        <div *ngFor="let guest of guests; let i = index; trackBy: trackByGuest" class="guest-field-card">
+          <div class="guest-field-heading">
+            <label [for]="'guest-name-' + i">{{ i === 0 ? 'Seu nome' : 'Acompanhante ' + i }}</label>
+            <button *ngIf="i > 0" type="button" class="guest-remove" [attr.aria-label]="'Remover ' + guest.name" (click)="removeCompanion(i)">Remover</button>
+          </div>
+          <div class="guest-combobox">
+            <input #submitterInput *ngIf="i === 0" [id]="'guest-name-' + i" type="text" maxlength="120" autocomplete="off"
+              role="combobox" [attr.aria-expanded]="guest.suggestionsOpen" [attr.aria-controls]="'guest-options-' + i"
+              [(ngModel)]="guest.name" (input)="onNameInput(i)" (keydown)="onInputKeydown($event, i)" placeholder="Digite seu nome" />
+            <input *ngIf="i > 0" [id]="'guest-name-' + i" type="text" maxlength="120" autocomplete="off"
+              role="combobox" [attr.aria-expanded]="guest.suggestionsOpen" [attr.aria-controls]="'guest-options-' + i"
+              [(ngModel)]="guest.name" (input)="onNameInput(i)" (keydown)="onInputKeydown($event, i)" placeholder="Nome do acompanhante" />
+            <ul *ngIf="guest.suggestionsOpen && guest.suggestions.length > 0" [id]="'guest-options-' + i" class="guest-options" role="listbox">
+              <li *ngFor="let suggestion of guest.suggestions; let suggestionIndex = index; trackBy: trackBySuggestion" role="option"
+                [class.active]="suggestionIndex === guest.activeSuggestionIndex" [attr.aria-selected]="suggestionIndex === guest.activeSuggestionIndex"
+                (mousedown)="$event.preventDefault(); selectSuggestion(i, suggestion)">
+                <span>{{ suggestion.name }}</span><small>Na lista</small>
+              </li>
+            </ul>
+          </div>
+          <span *ngIf="guest.name.trim()" class="guest-source" [class.registered]="guest.guestInvitationId">{{ sourceLabel(guest) }}</span>
+        </div>
+      </div>
+
+      <button type="button" class="guest-add" [disabled]="guests.length >= 20" (click)="addCompanion()">+ Adicionar acompanhante</button>
+      <p *ngIf="guestConfirmationService.state().error" class="guest-error" role="alert">{{ guestConfirmationService.state().error }}</p>
+      <button type="button" class="guest-submit" [disabled]="guestConfirmationService.state().submitting" (click)="submit()">
+        {{ guestConfirmationService.state().submitting ? 'Confirmando...' : submitLabel }}
+      </button>
+    </ng-container>
+
+    <div *ngIf="confirmation" class="guest-success" aria-live="polite">
+      <div class="guest-success-icon" aria-hidden="true">✓</div>
+      <h3>Obrigado, {{ confirmation.submittedByName }}!</h3>
+      <p>{{ confirmation.partySize }} presença{{ confirmation.partySize === 1 ? '' : 's' }} confirmada{{ confirmation.partySize === 1 ? '' : 's' }} em {{ confirmation.confirmedAtUtc | date:'dd/MM/yyyy \'às\' HH:mm' }}.</p>
+      <ul>
+        <li *ngFor="let guest of confirmation.guests">
+          <span>{{ guest.name }} <strong *ngIf="guest.isSubmitter">Responsável</strong></span>
+          <small>{{ confirmedSourceLabel(guest.source) }}</small>
+        </li>
+      </ul>
+      <button type="button" class="guest-submit" (click)="close()">Concluir</button>
+    </div>
+  </section>
+</div>

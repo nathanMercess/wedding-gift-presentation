@@ -1193,3 +1193,35 @@
   cursor: pointer;
   box-shadow: var(--shadow-primary);
 }
+.rsvp-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 1.1rem 1rem 0;
+
+  p {
+    margin: 0;
+    color: var(--muted-foreground);
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+  }
+
+  button {
+    min-height: 3rem;
+    padding: 0 1.4rem;
+    border: 1px solid var(--primary);
+    border-radius: var(--radius-pill);
+    background: var(--primary);
+    color: var(--primary-foreground);
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: var(--shadow-primary);
+    transition: transform var(--duration-base) var(--ease-spring), filter var(--duration-fast) var(--ease-out);
+
+    &:hover { filter: brightness(0.96); transform: translateY(-1px); }
+    &:active { transform: scale(0.98); }
+  }
+}

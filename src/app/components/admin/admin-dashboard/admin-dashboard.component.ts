@@ -26,13 +26,14 @@ import { ToastService } from '../../../services/toast.service';
 import { AdminOperationsService } from '../../../services/admin-operations.service';
 import { GiftImportUtil } from '../../../utils/gift-import.util';
 import { AdminTabAccessUtil } from '../../../utils/admin-tab-access.util';
+import { AdminGuestsComponent } from '../admin-guests/admin-guests.component';
 
 @Component({
   standalone: true,
   selector: 'app-admin-dashboard',
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss',
-  imports: [CommonModule, FormsModule, RouterLink, ConfirmDialogComponent, AdminGiftCardComponent, AdminGiftFormComponent, AdminCoupleFormComponent, AdminContributionsComponent, AdminOverviewComponent, AdminPaymentsComponent, AdminShowcaseComponent, AdminUsersComponent, SlideOverComponent],
+  imports: [CommonModule, FormsModule, RouterLink, ConfirmDialogComponent, AdminGiftCardComponent, AdminGiftFormComponent, AdminCoupleFormComponent, AdminContributionsComponent, AdminOverviewComponent, AdminGuestsComponent, AdminPaymentsComponent, AdminShowcaseComponent, AdminUsersComponent, SlideOverComponent],
 })
 export class AdminDashboardComponent implements OnInit, OnDestroy {
   public readonly AdminTab: typeof AdminTab = AdminTab;
@@ -113,6 +114,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
     if (tab === AdminTab.Gifts)
       return 'Presentes';
+
+    if (tab === AdminTab.Guests)
+      return 'Convidados';
 
     if (tab === AdminTab.Contributions)
       return 'Contribuições';
