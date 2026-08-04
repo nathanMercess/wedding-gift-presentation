@@ -19,10 +19,6 @@
   animation: guest-widget-enter 220ms var(--ease-out) both;
 }
 
-.guest-widget-highlight {
-  animation: guest-widget-enter 220ms var(--ease-out) both, guest-widget-attention 1.2s 260ms var(--ease-out);
-}
-
 .guest-widget-header {
   display: flex;
   min-height: 4rem;
@@ -132,11 +128,6 @@
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-@keyframes guest-widget-attention {
-  0%, 100% { box-shadow: 0 16px 44px rgba(24, 20, 18, 0.16); }
-  45% { box-shadow: 0 0 0 8px color-mix(in srgb, var(--primary) 10%, transparent), 0 18px 48px rgba(24, 20, 18, 0.2); }
-}
-
 @media (max-width: 639px) {
   :host { right: 0.5rem; bottom: calc(0.5rem + env(safe-area-inset-bottom)); left: 0.5rem; width: auto; }
   .guest-widget { max-height: calc(100vh - 1rem - env(safe-area-inset-bottom)); border-radius: 1rem; }
@@ -144,5 +135,5 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .guest-widget, .guest-widget-highlight { animation: none; }
+  .guest-widget { animation: none; }
 }

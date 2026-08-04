@@ -34,8 +34,12 @@ describe('GuestConfirmationModalComponent', () => {
 
   it('abre na escolha inicial sem expor informações operacionais', (): void => {
     const text: string = fixture.nativeElement.textContent;
+    const dialog: HTMLElement = fixture.debugElement.query(By.css('.guest-widget')).nativeElement;
+    const primaryAction: HTMLButtonElement = fixture.debugElement.query(By.css('.guest-primary-action')).nativeElement;
 
     expect(component.step).toBe(GuestConfirmationStep.Choice);
+    expect(dialog.getAttribute('aria-modal')).toBe('true');
+    expect(document.activeElement).toBe(primaryAction);
     expect(text).toContain('Confirmar presença');
     expect(text).toContain('Já confirmei');
     expect(text).not.toContain('RSVP');

@@ -48,8 +48,8 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   public selectedResumePayment: PendingPayment | null = null;
   public showGiftDetailsModal: boolean = false;
   public filterSheetOpen: boolean = false;
-  public showGuestConfirmation: boolean = true;
-  public highlightGuestConfirmation: boolean = true;
+  public showGuestConfirmation: boolean = false;
+  public showGuestConfirmationTutorial: boolean = false;
 
   public readonly carouselIndex: WritableSignal<number> = signal(0);
   public readonly carouselReady: WritableSignal<boolean> = signal(false);
@@ -58,11 +58,16 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   @ViewChild('carouselTrack') public carouselTrack?: ElementRef<HTMLDivElement>;
   @ViewChild('rsvpLauncher') public rsvpLauncher?: ElementRef<HTMLButtonElement>;
+  @ViewChild('rsvpTourAction') public rsvpTourAction?: ElementRef<HTMLButtonElement>;
 
   private loopCenteringSettled: boolean = false;
   private wrapPending: boolean = false;
   private focusRsvpLauncherPending: boolean = false;
+  private focusRsvpTourPending: boolean = false;
+  private guestConfirmationTutorialPending: boolean = false;
+  private guestConfirmationTutorialTimer: number = 0;
   private readonly guestConfirmationDismissedStorageKey: string = 'guest-confirmation-dismissed';
+  private readonly guestConfirmationTutorialSeenStorageKey: string = 'guest-confirmation-tutorial-seen-v1';
 
   private readonly defaultCaptions: Array<{ tag: string; title: string }> = [
     { tag: 'Momentos', title: 'Memórias que ficam para sempre' },
@@ -147,6 +152,11 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   public ngAfterViewChecked(): void {
+    if (this.focusRsvpTourPending && this.rsvpTourAction) {
+      this.rsvpTourAction.nativeElement.focus();
+      this.focusRsvpTourPending = false;
+    }
+
     if (this.focusRsvpLauncherPending && this.rsvpLauncher) {
       this.rsvpLauncher.nativeElement.focus();
       this.focusRsvpLauncherPending = false;
@@ -177,9 +187,7 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   private sharedGiftId: string = '';
 
   public constructor(public readonly giftService: GiftService, public readonly coupleService: CoupleService, public readonly paymentResumeService: PaymentResumeService, public readonly route: ActivatedRoute, public readonly router: Router, public readonly toast: ToastService, public readonly coupleDraft: CoupleDraftService) {
-    const guestConfirmationDismissed: boolean = localStorage.getItem(this.guestConfirmationDismissedStorageKey) === 'true';
-    this.showGuestConfirmation = !guestConfirmationDismissed;
-    this.highlightGuestConfirmation = !guestConfirmationDismissed;
+    this.guestConfirmationTutorialPending = localStorage.getItem(this.guestConfirmationTutorialSeenStorageKey) !== 'true';
 
     effect((): void => {
       const stateCouple: Couple = this.coupleService.state().couple;
@@ -290,10 +298,12 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.loadGifts(this.initialPage);
     this.giftService.loadGuestStats();
     this.openSharedGift();
+    this.scheduleGuestConfirmationTutorial();
   }
 
   public ngOnDestroy(): void {
     this.stopCarousel();
+    window.clearTimeout(this.guestConfirmationTutorialTimer);
     document.body.classList.remove('modal-open');
     this.destroy$.next();
     this.destroy$.complete();
@@ -462,15 +472,22 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   public openGuestConfirmation(): void {
+    this.finishGuestConfirmationTutorial();
     localStorage.removeItem(this.guestConfirmationDismissedStorageKey);
-    this.highlightGuestConfirmation = false;
     this.showGuestConfirmation = true;
+    document.body.classList.add('modal-open');
   }
 
   public closeGuestConfirmation(): void {
     localStorage.setItem(this.guestConfirmationDismissedStorageKey, 'true');
-    this.highlightGuestConfirmation = false;
     this.showGuestConfirmation = false;
+    document.body.classList.remove('modal-open');
+    this.focusRsvpLauncherPending = true;
+  }
+
+  public dismissGuestConfirmationTutorial(): void {
+    this.finishGuestConfirmationTutorial();
+    document.body.classList.remove('modal-open');
     this.focusRsvpLauncherPending = true;
   }
 
@@ -533,6 +550,11 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   @HostListener('document:keydown.escape')
   public onEscapePressed(): void {
+    if (this.showGuestConfirmationTutorial) {
+      this.dismissGuestConfirmationTutorial();
+      return;
+    }
+
     if (!this.filterSheetOpen)
       return;
 
@@ -547,6 +569,30 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   public closeFilterSheet(): void {
     this.filterSheetOpen = false;
     document.body.classList.remove('modal-open');
+  }
+
+  private scheduleGuestConfirmationTutorial(): void {
+    if (!this.guestConfirmationTutorialPending)
+      return;
+
+    this.guestConfirmationTutorialTimer = window.setTimeout((): void => {
+      this.guestConfirmationTutorialTimer = 0;
+
+      if (this.showGiftDetailsModal || this.filterSheetOpen || this.showGuestConfirmation)
+        return;
+
+      this.showGuestConfirmationTutorial = true;
+      this.focusRsvpTourPending = true;
+      document.body.classList.add('modal-open');
+    }, 800);
+  }
+
+  private finishGuestConfirmationTutorial(): void {
+    window.clearTimeout(this.guestConfirmationTutorialTimer);
+    this.guestConfirmationTutorialTimer = 0;
+    this.guestConfirmationTutorialPending = false;
+    this.showGuestConfirmationTutorial = false;
+    localStorage.setItem(this.guestConfirmationTutorialSeenStorageKey, 'true');
   }
 
   public applyFilterSheet(): void {

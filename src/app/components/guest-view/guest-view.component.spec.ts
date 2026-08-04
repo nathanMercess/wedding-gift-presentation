@@ -20,6 +20,11 @@ describe('GuestViewComponent — controle de skeleton (anti-flicker)', () => {
 
   beforeEach((): void => localStorage.clear());
 
+  afterEach((): void => {
+    jest.useRealTimers();
+    document.body.classList.remove('modal-open');
+  });
+
   function createComponent(): GuestViewComponent {
     guestState = signal<any>({ gifts: [], loading: false });
     coupleState = signal<any>({ loading: false, couple: emptyCouple });
@@ -46,31 +51,54 @@ describe('GuestViewComponent — controle de skeleton (anti-flicker)', () => {
     expect(c.isInitialLoading).toBe(true);
   });
 
-  it('abre a confirmação de presença ao entrar no site', (): void => {
+  it('destaca a confirmação com um tutorial após entrar no site', (): void => {
+    jest.useFakeTimers();
     const component: GuestViewComponent = createComponent();
+    component.ngOnInit();
 
-    expect(component.showGuestConfirmation).toBe(true);
-    expect(component.highlightGuestConfirmation).toBe(true);
+    expect(component.showGuestConfirmationTutorial).toBe(false);
+    jest.advanceTimersByTime(800);
+
+    expect(component.showGuestConfirmationTutorial).toBe(true);
+    expect(component.showGuestConfirmation).toBe(false);
+    expect(document.body.classList.contains('modal-open')).toBe(true);
   });
 
-  it('mantém a confirmação minimizada após recarregar a página', (): void => {
-    localStorage.setItem('guest-confirmation-dismissed', 'true');
+  it('não repete o tutorial após recarregar a página', (): void => {
+    jest.useFakeTimers();
+    localStorage.setItem('guest-confirmation-tutorial-seen-v1', 'true');
 
     const component: GuestViewComponent = createComponent();
+    component.ngOnInit();
+    jest.advanceTimersByTime(800);
 
     expect(component.showGuestConfirmation).toBe(false);
-    expect(component.highlightGuestConfirmation).toBe(false);
+    expect(component.showGuestConfirmationTutorial).toBe(false);
   });
 
-  it('atualiza o cache ao minimizar e reabrir a confirmação', (): void => {
+  it('bloqueia o scroll ao abrir e atualiza o cache ao minimizar', (): void => {
     const component: GuestViewComponent = createComponent();
+
+    component.openGuestConfirmation();
+    expect(document.body.classList.contains('modal-open')).toBe(true);
+    expect(localStorage.getItem('guest-confirmation-tutorial-seen-v1')).toBe('true');
 
     component.closeGuestConfirmation();
     expect(localStorage.getItem('guest-confirmation-dismissed')).toBe('true');
+    expect(document.body.classList.contains('modal-open')).toBe(false);
+  });
 
-    component.openGuestConfirmation();
-    expect(localStorage.getItem('guest-confirmation-dismissed')).toBeNull();
-    expect(component.highlightGuestConfirmation).toBe(false);
+  it('dispensa o tutorial e mantém o acesso pela ação flutuante', (): void => {
+    const component: GuestViewComponent = createComponent();
+    component.showGuestConfirmationTutorial = true;
+    document.body.classList.add('modal-open');
+
+    component.dismissGuestConfirmationTutorial();
+
+    expect(component.showGuestConfirmationTutorial).toBe(false);
+    expect(component.showGuestConfirmation).toBe(false);
+    expect(localStorage.getItem('guest-confirmation-tutorial-seen-v1')).toBe('true');
+    expect(document.body.classList.contains('modal-open')).toBe(false);
   });
 
   it('NÃO mostra o skeleton em refresh — já há presentes carregados', () => {

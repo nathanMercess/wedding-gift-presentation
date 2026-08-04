@@ -1193,6 +1193,106 @@
   cursor: pointer;
   box-shadow: var(--shadow-primary);
 }
+
+.guest-confirmation-backdrop,
+.guest-confirmation-tour-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 18, 17, 0.58);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  animation: backdropIn 220ms var(--ease-out) both;
+}
+
+.guest-confirmation-backdrop { z-index: 69; }
+.guest-confirmation-tour-backdrop { z-index: 80; }
+
+.guest-confirmation-tour {
+  position: fixed;
+  right: 1.25rem;
+  bottom: calc(5.35rem + env(safe-area-inset-bottom));
+  z-index: 82;
+  width: min(20.5rem, calc(100vw - 2.5rem));
+  box-sizing: border-box;
+  padding: 1.1rem;
+  border: 1px solid var(--hairline);
+  border-radius: 1rem;
+  background: var(--background);
+  color: var(--foreground);
+  box-shadow: 0 18px 54px rgba(20, 18, 17, 0.28);
+  animation: guest-confirmation-tour-in 320ms 120ms var(--ease-spring) both;
+
+  &::after {
+    position: absolute;
+    right: 1.15rem;
+    bottom: -0.5rem;
+    width: 1rem;
+    height: 1rem;
+    border-right: 1px solid var(--hairline);
+    border-bottom: 1px solid var(--hairline);
+    background: var(--background);
+    content: '';
+    transform: rotate(45deg);
+  }
+
+  h2 {
+    margin-top: 0.3rem;
+    font-family: var(--font-serif);
+    font-size: 1.35rem;
+    font-weight: 500;
+  }
+
+  p {
+    margin-top: 0.45rem;
+    color: var(--muted-foreground);
+    font-size: 0.84rem;
+    line-height: 1.5;
+  }
+}
+
+.guest-confirmation-tour-step {
+  color: var(--muted-foreground);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.guest-confirmation-tour-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+}
+
+.guest-confirmation-tour-primary,
+.guest-confirmation-tour-secondary {
+  min-height: 2.55rem;
+  padding: 0 0.9rem;
+  border-radius: 0.65rem;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.guest-confirmation-tour-primary {
+  flex: 1;
+  border: 1px solid var(--primary);
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.guest-confirmation-tour-secondary {
+  border: 1px solid var(--hairline-strong);
+  background: transparent;
+  color: var(--foreground);
+}
+
+@keyframes guest-confirmation-tour-in {
+  from { opacity: 0; transform: translateY(0.75rem) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 .rsvp-launcher {
   position: fixed;
   right: 1.25rem;
@@ -1225,6 +1325,24 @@
   }
 }
 
+.rsvp-launcher-tour {
+  z-index: 83;
+  border-color: color-mix(in srgb, var(--primary-foreground) 45%, transparent);
+  animation: rsvp-launcher-spotlight 1.5s var(--ease-out) infinite;
+}
+
+@keyframes rsvp-launcher-spotlight {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary-foreground) 38%, transparent), 0 12px 34px rgba(20, 18, 17, 0.28); }
+  50% { box-shadow: 0 0 0 0.65rem color-mix(in srgb, var(--primary-foreground) 0%, transparent), 0 14px 38px rgba(20, 18, 17, 0.34); }
+}
+
 @media (max-width: 639px) {
   .rsvp-launcher { right: 1rem; bottom: calc(1rem + env(safe-area-inset-bottom)); }
+  .guest-confirmation-tour { right: 0.75rem; bottom: calc(5.1rem + env(safe-area-inset-bottom)); left: 0.75rem; width: auto; }
+  .guest-confirmation-tour::after { right: 1.45rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guest-confirmation-tour,
+  .rsvp-launcher-tour { animation: none; }
 }

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewChecked, Component, ElementRef, HostListener, InputSignal, OnDestroy, OutputEmitterRef, ViewChild, input, output } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, HostListener, OnDestroy, OutputEmitterRef, ViewChild, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, takeUntil } from 'rxjs';
 import { GuestConfirmationStep } from '../../enums/guest-confirmation-step.enum';
@@ -20,15 +20,16 @@ interface GuestSearchRequest {
 })
 export class GuestConfirmationModalComponent implements AfterViewChecked, OnDestroy {
   public readonly GuestConfirmationStep: typeof GuestConfirmationStep = GuestConfirmationStep;
-  public readonly highlightEntrance: InputSignal<boolean> = input<boolean>(false);
   public readonly closed: OutputEmitterRef<void> = output<void>();
   public step: GuestConfirmationStep = GuestConfirmationStep.Choice;
   public guests: GuestDraft[] = [this.newGuestDraft()];
 
   @ViewChild('submitterInput') public submitterInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('primaryAction') public primaryAction?: ElementRef<HTMLButtonElement>;
 
   private readonly destroy$: Subject<void> = new Subject<void>();
   private readonly search$: Subject<GuestSearchRequest> = new Subject<GuestSearchRequest>();
+  private focusPrimaryActionPending: boolean = true;
   private focusSubmitterPending: boolean = false;
 
   public constructor(public readonly guestConfirmationService: GuestConfirmationService) {
@@ -37,6 +38,11 @@ export class GuestConfirmationModalComponent implements AfterViewChecked, OnDest
   }
 
   public ngAfterViewChecked(): void {
+    if (this.focusPrimaryActionPending && this.primaryAction) {
+      this.primaryAction.nativeElement.focus();
+      this.focusPrimaryActionPending = false;
+    }
+
     if (!this.focusSubmitterPending || !this.submitterInput)
       return;
 
@@ -75,6 +81,7 @@ export class GuestConfirmationModalComponent implements AfterViewChecked, OnDest
 
   public backToChoice(): void {
     this.step = GuestConfirmationStep.Choice;
+    this.focusPrimaryActionPending = true;
     this.guestConfirmationService.patchState({ error: '' });
   }
 
