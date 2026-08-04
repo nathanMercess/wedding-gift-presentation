@@ -49,6 +49,7 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   public showGiftDetailsModal: boolean = false;
   public filterSheetOpen: boolean = false;
   public showGuestConfirmation: boolean = true;
+  public highlightGuestConfirmation: boolean = true;
 
   public readonly carouselIndex: WritableSignal<number> = signal(0);
   public readonly carouselReady: WritableSignal<boolean> = signal(false);
@@ -176,7 +177,9 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   private sharedGiftId: string = '';
 
   public constructor(public readonly giftService: GiftService, public readonly coupleService: CoupleService, public readonly paymentResumeService: PaymentResumeService, public readonly route: ActivatedRoute, public readonly router: Router, public readonly toast: ToastService, public readonly coupleDraft: CoupleDraftService) {
-    this.showGuestConfirmation = localStorage.getItem(this.guestConfirmationDismissedStorageKey) !== 'true';
+    const guestConfirmationDismissed: boolean = localStorage.getItem(this.guestConfirmationDismissedStorageKey) === 'true';
+    this.showGuestConfirmation = !guestConfirmationDismissed;
+    this.highlightGuestConfirmation = !guestConfirmationDismissed;
 
     effect((): void => {
       const stateCouple: Couple = this.coupleService.state().couple;
@@ -460,11 +463,13 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   public openGuestConfirmation(): void {
     localStorage.removeItem(this.guestConfirmationDismissedStorageKey);
+    this.highlightGuestConfirmation = false;
     this.showGuestConfirmation = true;
   }
 
   public closeGuestConfirmation(): void {
     localStorage.setItem(this.guestConfirmationDismissedStorageKey, 'true');
+    this.highlightGuestConfirmation = false;
     this.showGuestConfirmation = false;
     this.focusRsvpLauncherPending = true;
   }

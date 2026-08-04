@@ -38,6 +38,7 @@ describe('GuestConfirmationModalComponent', () => {
     expect(component.step).toBe(GuestConfirmationStep.Choice);
     expect(text).toContain('Confirmar presença');
     expect(text).toContain('Já confirmei');
+    expect(text).not.toContain('RSVP');
     expect(text).not.toContain('Texto livre');
     expect(text).not.toContain('Da lista');
     expect(text).not.toContain('Na lista');

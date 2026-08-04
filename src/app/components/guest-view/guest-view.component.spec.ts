@@ -50,6 +50,7 @@ describe('GuestViewComponent — controle de skeleton (anti-flicker)', () => {
     const component: GuestViewComponent = createComponent();
 
     expect(component.showGuestConfirmation).toBe(true);
+    expect(component.highlightGuestConfirmation).toBe(true);
   });
 
   it('mantém a confirmação minimizada após recarregar a página', (): void => {
@@ -58,6 +59,7 @@ describe('GuestViewComponent — controle de skeleton (anti-flicker)', () => {
     const component: GuestViewComponent = createComponent();
 
     expect(component.showGuestConfirmation).toBe(false);
+    expect(component.highlightGuestConfirmation).toBe(false);
   });
 
   it('atualiza o cache ao minimizar e reabrir a confirmação', (): void => {
@@ -68,6 +70,7 @@ describe('GuestViewComponent — controle de skeleton (anti-flicker)', () => {
 
     component.openGuestConfirmation();
     expect(localStorage.getItem('guest-confirmation-dismissed')).toBeNull();
+    expect(component.highlightGuestConfirmation).toBe(false);
   });
 
   it('NÃO mostra o skeleton em refresh — já há presentes carregados', () => {

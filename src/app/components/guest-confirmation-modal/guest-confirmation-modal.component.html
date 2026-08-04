@@ -1,12 +1,9 @@
-<section class="guest-widget" role="dialog" aria-labelledby="guest-widget-title">
+<section class="guest-widget" [class.guest-widget-highlight]="highlightEntrance()" role="dialog" aria-labelledby="guest-widget-title">
   <header class="guest-widget-header">
     <button *ngIf="step === GuestConfirmationStep.Form && !confirmation" type="button" class="guest-widget-back" aria-label="Voltar" (click)="backToChoice()">&lsaquo;</button>
     <div class="guest-widget-heading">
       <span class="guest-widget-mark" aria-hidden="true">M&amp;D</span>
-      <div>
-        <p>RSVP</p>
-        <h2 id="guest-widget-title">{{ panelTitle }}</h2>
-      </div>
+      <h2 id="guest-widget-title">{{ panelTitle }}</h2>
     </div>
     <button type="button" class="guest-widget-close" aria-label="Minimizar confirmação de presença" (click)="close()">&times;</button>
   </header>
