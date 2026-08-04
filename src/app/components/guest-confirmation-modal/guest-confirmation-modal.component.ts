@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OutputEmitterRef, ViewChild, output } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, HostListener, OnDestroy, OutputEmitterRef, ViewChild, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, takeUntil } from 'rxjs';
-import { GuestSource } from '../../enums/guest-source.enum';
+import { GuestConfirmationStep } from '../../enums/guest-confirmation-step.enum';
 import { GuestConfirmation, GuestConfirmationGuestRequest, GuestConfirmationRequest, GuestDraft, GuestSuggestion } from '../../models/guest.model';
 import { GuestConfirmationService } from '../../services/guest-confirmation.service';
 
@@ -18,29 +18,32 @@ interface GuestSearchRequest {
   styleUrl: './guest-confirmation-modal.component.scss',
   imports: [CommonModule, FormsModule],
 })
-export class GuestConfirmationModalComponent implements AfterViewInit, OnDestroy {
-  public readonly GuestSource: typeof GuestSource = GuestSource;
+export class GuestConfirmationModalComponent implements AfterViewChecked, OnDestroy {
+  public readonly GuestConfirmationStep: typeof GuestConfirmationStep = GuestConfirmationStep;
   public readonly closed: OutputEmitterRef<void> = output<void>();
+  public step: GuestConfirmationStep = GuestConfirmationStep.Choice;
   public guests: GuestDraft[] = [this.newGuestDraft()];
 
   @ViewChild('submitterInput') public submitterInput?: ElementRef<HTMLInputElement>;
-  @ViewChild('guestDialog') public guestDialog?: ElementRef<HTMLElement>;
 
   private readonly destroy$: Subject<void> = new Subject<void>();
   private readonly search$: Subject<GuestSearchRequest> = new Subject<GuestSearchRequest>();
+  private focusSubmitterPending: boolean = false;
 
   public constructor(public readonly guestConfirmationService: GuestConfirmationService) {
     this.guestConfirmationService.reset();
-    document.body.classList.add('modal-open');
     this.search$.pipe(debounceTime(300), takeUntil(this.destroy$)).subscribe((request: GuestSearchRequest): void => this.loadSuggestions(request));
   }
 
-  public ngAfterViewInit(): void {
-    this.submitterInput?.nativeElement.focus();
+  public ngAfterViewChecked(): void {
+    if (!this.focusSubmitterPending || !this.submitterInput)
+      return;
+
+    this.submitterInput.nativeElement.focus();
+    this.focusSubmitterPending = false;
   }
 
   public ngOnDestroy(): void {
-    document.body.classList.remove('modal-open');
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -52,6 +55,30 @@ export class GuestConfirmationModalComponent implements AfterViewInit, OnDestroy
   public get submitLabel(): string {
     const count: number = this.guests.length;
     return `Confirmar ${count} presença${count === 1 ? '' : 's'}`;
+  }
+
+  public get panelTitle(): string {
+    if (this.confirmation)
+      return 'Presença confirmada';
+
+    if (this.step === GuestConfirmationStep.Form)
+      return 'Confirmar presença';
+
+    return 'Vamos celebrar juntos?';
+  }
+
+  public startConfirmation(): void {
+    this.step = GuestConfirmationStep.Form;
+    this.focusSubmitterPending = true;
+  }
+
+  public backToChoice(): void {
+    this.step = GuestConfirmationStep.Choice;
+    this.guestConfirmationService.patchState({ error: '' });
+  }
+
+  public alreadyConfirmed(): void {
+    this.close();
   }
 
   public addCompanion(): void {
@@ -145,21 +172,8 @@ export class GuestConfirmationModalComponent implements AfterViewInit, OnDestroy
     this.guestConfirmationService.confirm(request);
   }
 
-  public sourceLabel(guest: GuestDraft): string {
-    return guest.guestInvitationId ? 'Da lista' : 'Texto livre';
-  }
-
-  public confirmedSourceLabel(source: GuestSource): string {
-    return source === GuestSource.RegisteredList ? 'Da lista' : 'Texto livre';
-  }
-
   public close(): void {
     this.closed.emit();
-  }
-
-  public onBackdropClick(event: MouseEvent): void {
-    if ((event.target as HTMLElement).classList.contains('guest-modal-backdrop'))
-      this.close();
   }
 
   @HostListener('document:keydown.escape')
@@ -172,34 +186,6 @@ export class GuestConfirmationModalComponent implements AfterViewInit, OnDestroy
     }
 
     this.close();
-  }
-
-  @HostListener('document:keydown.tab', ['$event'])
-  public keepFocusInside(event: KeyboardEvent): void {
-    const dialog: HTMLElement | undefined = this.guestDialog?.nativeElement;
-
-    if (!dialog)
-      return;
-
-    const focusable: HTMLElement[] = Array.from(dialog.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), select:not(:disabled), [tabindex]:not([tabindex="-1"])'));
-
-    if (focusable.length === 0)
-      return;
-
-    const first: HTMLElement = focusable[0];
-    const last: HTMLElement = focusable[focusable.length - 1];
-
-    if (event.shiftKey && document.activeElement === first) {
-      event.preventDefault();
-      last.focus();
-      return;
-    }
-
-    if (event.shiftKey || document.activeElement !== last)
-      return;
-
-    event.preventDefault();
-    first.focus();
   }
 
   public trackByGuest(_: number, guest: GuestDraft): GuestDraft {

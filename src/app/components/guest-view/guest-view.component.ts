@@ -48,7 +48,7 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   public selectedResumePayment: PendingPayment | null = null;
   public showGiftDetailsModal: boolean = false;
   public filterSheetOpen: boolean = false;
-  public showGuestConfirmation: boolean = false;
+  public showGuestConfirmation: boolean = true;
 
   public readonly carouselIndex: WritableSignal<number> = signal(0);
   public readonly carouselReady: WritableSignal<boolean> = signal(false);
@@ -56,10 +56,12 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   private touchStartX: number = 0;
 
   @ViewChild('carouselTrack') public carouselTrack?: ElementRef<HTMLDivElement>;
-  @ViewChild('rsvpButton') public rsvpButton?: ElementRef<HTMLButtonElement>;
+  @ViewChild('rsvpLauncher') public rsvpLauncher?: ElementRef<HTMLButtonElement>;
 
   private loopCenteringSettled: boolean = false;
   private wrapPending: boolean = false;
+  private focusRsvpLauncherPending: boolean = false;
+  private readonly guestConfirmationDismissedStorageKey: string = 'guest-confirmation-dismissed';
 
   private readonly defaultCaptions: Array<{ tag: string; title: string }> = [
     { tag: 'Momentos', title: 'Memórias que ficam para sempre' },
@@ -144,6 +146,11 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   public ngAfterViewChecked(): void {
+    if (this.focusRsvpLauncherPending && this.rsvpLauncher) {
+      this.rsvpLauncher.nativeElement.focus();
+      this.focusRsvpLauncherPending = false;
+    }
+
     if (this.loopCenteringSettled || this.carouselPhotos.length <= 1)
       return;
 
@@ -169,6 +176,8 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   private sharedGiftId: string = '';
 
   public constructor(public readonly giftService: GiftService, public readonly coupleService: CoupleService, public readonly paymentResumeService: PaymentResumeService, public readonly route: ActivatedRoute, public readonly router: Router, public readonly toast: ToastService, public readonly coupleDraft: CoupleDraftService) {
+    this.showGuestConfirmation = localStorage.getItem(this.guestConfirmationDismissedStorageKey) !== 'true';
+
     effect((): void => {
       const stateCouple: Couple = this.coupleService.state().couple;
       const nextSignature: string = `${stateCouple.names}|${stateCouple.weddingDate}|${stateCouple.photoUrl}|${stateCouple.message}|${stateCouple.eventLocation}|${stateCouple.primaryColor}|${stateCouple.secondaryColor}|${stateCouple.giftDisplayMode}`;
@@ -450,12 +459,14 @@ export class GuestViewComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   public openGuestConfirmation(): void {
+    localStorage.removeItem(this.guestConfirmationDismissedStorageKey);
     this.showGuestConfirmation = true;
   }
 
   public closeGuestConfirmation(): void {
+    localStorage.setItem(this.guestConfirmationDismissedStorageKey, 'true');
     this.showGuestConfirmation = false;
-    this.rsvpButton?.nativeElement.focus();
+    this.focusRsvpLauncherPending = true;
   }
 
   public async shareGift(gift: Gift): Promise<void> {

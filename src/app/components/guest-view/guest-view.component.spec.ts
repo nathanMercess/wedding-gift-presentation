@@ -18,6 +18,8 @@ describe('GuestViewComponent — controle de skeleton (anti-flicker)', () => {
   let guestState: WritableSignal<any>;
   let coupleState: WritableSignal<any>;
 
+  beforeEach((): void => localStorage.clear());
+
   function createComponent(): GuestViewComponent {
     guestState = signal<any>({ gifts: [], loading: false });
     coupleState = signal<any>({ loading: false, couple: emptyCouple });
@@ -42,6 +44,30 @@ describe('GuestViewComponent — controle de skeleton (anti-flicker)', () => {
     const c = createComponent();
     guestState.set({ gifts: [], loading: true });
     expect(c.isInitialLoading).toBe(true);
+  });
+
+  it('abre a confirmação de presença ao entrar no site', (): void => {
+    const component: GuestViewComponent = createComponent();
+
+    expect(component.showGuestConfirmation).toBe(true);
+  });
+
+  it('mantém a confirmação minimizada após recarregar a página', (): void => {
+    localStorage.setItem('guest-confirmation-dismissed', 'true');
+
+    const component: GuestViewComponent = createComponent();
+
+    expect(component.showGuestConfirmation).toBe(false);
+  });
+
+  it('atualiza o cache ao minimizar e reabrir a confirmação', (): void => {
+    const component: GuestViewComponent = createComponent();
+
+    component.closeGuestConfirmation();
+    expect(localStorage.getItem('guest-confirmation-dismissed')).toBe('true');
+
+    component.openGuestConfirmation();
+    expect(localStorage.getItem('guest-confirmation-dismissed')).toBeNull();
   });
 
   it('NÃO mostra o skeleton em refresh — já há presentes carregados', () => {

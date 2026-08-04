@@ -1,16 +1,29 @@
-<div class="guest-modal-backdrop" (mousedown)="onBackdropClick($event)">
-  <section #guestDialog class="guest-modal" role="dialog" aria-modal="true" aria-labelledby="guest-modal-title">
-    <div class="guest-modal-handle" aria-hidden="true"></div>
-    <header class="guest-modal-header">
+<section class="guest-widget" role="dialog" aria-labelledby="guest-widget-title">
+  <header class="guest-widget-header">
+    <button *ngIf="step === GuestConfirmationStep.Form && !confirmation" type="button" class="guest-widget-back" aria-label="Voltar" (click)="backToChoice()">&lsaquo;</button>
+    <div class="guest-widget-heading">
+      <span class="guest-widget-mark" aria-hidden="true">M&amp;D</span>
       <div>
-        <p class="guest-modal-eyebrow">RSVP</p>
-        <h2 id="guest-modal-title">{{ confirmation ? 'Presença confirmada' : 'Confirmar presença' }}</h2>
+        <p>RSVP</p>
+        <h2 id="guest-widget-title">{{ panelTitle }}</h2>
       </div>
-      <button type="button" class="guest-modal-close" aria-label="Fechar" (click)="close()">&times;</button>
-    </header>
+    </div>
+    <button type="button" class="guest-widget-close" aria-label="Minimizar confirmação de presença" (click)="close()">&times;</button>
+  </header>
 
-    <ng-container *ngIf="!confirmation">
-      <p class="guest-modal-intro">Informe seu nome e inclua as pessoas que irão com você.</p>
+  <div class="guest-widget-content">
+    <div *ngIf="step === GuestConfirmationStep.Choice && !confirmation" class="guest-choice">
+      <div class="guest-choice-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M7 3v3M17 3v3M4.5 9h15M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/><path d="m8.5 14 2 2 5-5"/></svg>
+      </div>
+      <h3>Você vem comemorar com a gente?</h3>
+      <p>Leva menos de um minuto para confirmar você e seus acompanhantes.</p>
+      <button type="button" class="guest-primary-action" (click)="startConfirmation()">Confirmar presença</button>
+      <button type="button" class="guest-secondary-action" (click)="alreadyConfirmed()">Já confirmei</button>
+    </div>
+
+    <ng-container *ngIf="step === GuestConfirmationStep.Form && !confirmation">
+      <p class="guest-widget-intro">Informe seu nome e inclua as pessoas que irão com você.</p>
 
       <div class="guest-fields">
         <div *ngFor="let guest of guests; let i = index; trackBy: trackByGuest" class="guest-field-card">
@@ -29,17 +42,16 @@
               <li *ngFor="let suggestion of guest.suggestions; let suggestionIndex = index; trackBy: trackBySuggestion" role="option"
                 [class.active]="suggestionIndex === guest.activeSuggestionIndex" [attr.aria-selected]="suggestionIndex === guest.activeSuggestionIndex"
                 (mousedown)="$event.preventDefault(); selectSuggestion(i, suggestion)">
-                <span>{{ suggestion.name }}</span><small>Na lista</small>
+                {{ suggestion.name }}
               </li>
             </ul>
           </div>
-          <span *ngIf="guest.name.trim()" class="guest-source" [class.registered]="guest.guestInvitationId">{{ sourceLabel(guest) }}</span>
         </div>
       </div>
 
       <button type="button" class="guest-add" [disabled]="guests.length >= 20" (click)="addCompanion()">+ Adicionar acompanhante</button>
       <p *ngIf="guestConfirmationService.state().error" class="guest-error" role="alert">{{ guestConfirmationService.state().error }}</p>
-      <button type="button" class="guest-submit" [disabled]="guestConfirmationService.state().submitting" (click)="submit()">
+      <button type="button" class="guest-primary-action guest-submit" [disabled]="guestConfirmationService.state().submitting" (click)="submit()">
         {{ guestConfirmationService.state().submitting ? 'Confirmando...' : submitLabel }}
       </button>
     </ng-container>
@@ -50,11 +62,11 @@
       <p>{{ confirmation.partySize }} presença{{ confirmation.partySize === 1 ? '' : 's' }} confirmada{{ confirmation.partySize === 1 ? '' : 's' }} em {{ confirmation.confirmedAtUtc | date:'dd/MM/yyyy \'às\' HH:mm' }}.</p>
       <ul>
         <li *ngFor="let guest of confirmation.guests">
-          <span>{{ guest.name }} <strong *ngIf="guest.isSubmitter">Responsável</strong></span>
-          <small>{{ confirmedSourceLabel(guest.source) }}</small>
+          <span>{{ guest.name }}</span>
+          <strong *ngIf="guest.isSubmitter">Responsável</strong>
         </li>
       </ul>
-      <button type="button" class="guest-submit" (click)="close()">Concluir</button>
+      <button type="button" class="guest-primary-action" (click)="close()">Concluir</button>
     </div>
-  </section>
-</div>
+  </div>
+</section>
