@@ -1145,7 +1145,7 @@
   }
 
   .hero-location {
-    align-items: flex-start;
+    align-items: center;
     gap: 0.55rem;
     width: min(100%, 21rem);
   }
@@ -1164,9 +1164,9 @@
   }
 
   .hero-location-text {
-    flex: 1;
+    flex: 0 1 auto;
     padding-top: 0.14rem;
-    text-align: left;
+    text-align: center;
   }
 
   .resume-payment-content {
